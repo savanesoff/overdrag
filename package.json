@@ -1,0 +1,57 @@
+{
+  "name": "overdrag",
+  "private": false,
+  "version": "0.1.0",
+  "description": "A simple drag and resize element library, with control points",
+  "type": "module",
+  "license": "MIT",
+  "keywords": [
+    "drag",
+    "resize",
+    "control points",
+    "overdrag"
+  ],
+  "author": "sam.avanesoff@gmail.com",
+  "types": "./lib/cjs/types/index.d.ts",
+  "main": "./lib/cjs/index.js",
+  "scripts": {
+    "prepublish": "yarn run build",
+    "clean": "rm -rf ./lib",
+    "build": "yarn run clean && yarn run build:esm && yarn run build:cjs",
+    "build:esm": "tsc -p ./tsconfig.esm.json && mv ./lib/esm/index.js ./lib/esm/index.mjs",
+    "build:cjs": "tsc -p ./tsconfig.cjs.json",
+    "prepack": "yarn run build"
+  },
+  "devDependencies": {
+    "@types/events": "^3.0.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.0.2"
+  },
+  "engines": {
+    "node": ">=12.0.0"
+  },
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./lib/esm/types/index.d.ts",
+        "default": "./lib/esm/index.mjs"
+      },
+      "require": {
+        "types": "./lib/cjs/types/index.d.ts",
+        "default": "./lib/cjs/index.js"
+      }
+    }
+  },
+  "files": [
+    "lib/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/savanesoff/overdrag.git",
+    "directory": "lib"
+  },
+  "dependencies": {
+    "events": "^3.3.0"
+  },
+  "packageManager": "^yarn@1.22.19"
+}

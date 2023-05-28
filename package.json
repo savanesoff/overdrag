@@ -3,7 +3,6 @@
   "private": false,
   "version": "0.1.0",
   "description": "A simple drag and resize element library, with control points",
-  "type": "module",
   "license": "MIT",
   "keywords": [
     "drag",
@@ -20,11 +19,14 @@
     "build": "yarn run clean && yarn run build:esm && yarn run build:cjs",
     "build:esm": "tsc -p ./tsconfig.esm.json && mv ./lib/esm/index.js ./lib/esm/index.mjs",
     "build:cjs": "tsc -p ./tsconfig.cjs.json",
-    "prepack": "yarn run build"
+    "prepack": "yarn run build",
+    "test": "jest --config jestconfig.json"
   },
   "devDependencies": {
     "@types/events": "^3.0.0",
-    "ts-node": "^10.9.1",
+    "@types/jest": "^29.5.1",
+    "jest": "^29.5.0",
+    "ts-jest": "^29.1.0",
     "typescript": "^5.0.2"
   },
   "engines": {
@@ -53,5 +55,13 @@
   "dependencies": {
     "events": "^3.3.0"
   },
-  "packageManager": "^yarn@1.22.19"
+  "packageManager": "^yarn@1.22.19",
+  "release": {
+    "branches": [
+      "main"
+    ]
+  },
+  "publishConfig": {
+    "access": "public"
+  }
 }

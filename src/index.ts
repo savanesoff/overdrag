@@ -1,3 +1,3 @@
-import Controls from "./controls.js";
+import Controls from "./controls";
 
 export default Controls;

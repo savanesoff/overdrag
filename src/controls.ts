@@ -1,5 +1,5 @@
 import { EventEmitter } from "events";
-import StateMouse from "./state-mouse.js";
+import StateMouse from "./state-mouse";
 
 export default class Controls extends EventEmitter {
   mouse: StateMouse;

@@ -1,11 +1,15 @@
 {
   "compilerOptions": {
+    "lib": ["ES2022", "DOM"],
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "outDir": "./dist",
+    "declarationDir": "./dist/types",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true,
-    "checkJs": true,
-    "allowJs": true,
     "declaration": true,
     "declarationMap": true,
     "allowSyntheticDefaultImports": true

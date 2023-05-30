@@ -10,15 +10,15 @@
     "control points",
     "overdrag"
   ],
+  "type": "module",
   "author": "sam.avanesoff@gmail.com",
-  "types": "./lib/cjs/types/index.d.ts",
-  "main": "./lib/cjs/index.js",
+  "types": "./dist/types/index.d.ts",
+  "main": "./dist/index.js",
   "scripts": {
     "prepublish": "yarn run build",
     "clean": "rm -rf ./lib",
-    "build": "yarn run clean && yarn run build:esm && yarn run build:cjs",
-    "build:esm": "tsc -p ./tsconfig.esm.json && mv ./lib/esm/index.js ./lib/esm/index.mjs",
-    "build:cjs": "tsc -p ./tsconfig.cjs.json",
+    "build": "yarn run clean && yarn run build:esm",
+    "build:esm": "tsc -p ./tsconfig.json",
     "prepack": "yarn run build",
     "test": "jest --config jestconfig.json"
   },
@@ -37,15 +37,11 @@
       "import": {
         "types": "./lib/esm/types/index.d.ts",
         "default": "./lib/esm/index.mjs"
-      },
-      "require": {
-        "types": "./lib/cjs/types/index.d.ts",
-        "default": "./lib/cjs/index.js"
       }
     }
   },
   "files": [
-    "lib/**/*"
+    "dist/**/*"
   ],
   "repository": {
     "type": "git",

@@ -1,25 +1,43 @@
-import { EventEmitter } from "events";
+import EventEmitter from "events";
 import StateMouse from "./state-mouse";
 
-export default class Controls extends EventEmitter {
-  mouse: StateMouse;
+interface ControlProps {
+  /** min height of DOM element in PX. This will prevent resizing smaller than the value. */
+  minHeight?: number;
+  /** min width of DOM element in PX. This will prevent resizing smaller than the value. */
+  minWidth?: number;
+  /** Distance to the edge of relative parent element (top, left, bottom, right) when the element should snap to it. */
+  snapThreshold?: number;
+  /** Distance to the edge of element (top, left, bottom, right) when the element should show resize cursor and activate control points */
+  controlsThreshold?: number;
+  /** DOM element to control */
   element: HTMLElement;
-  snapThreshold = 20;
-  window: Window = window;
-  border = {
-    color: "#f00",
-    width: 3,
-    spread: 0,
-    blur: 0,
-  };
-  minHeight = 50;
-  minWidth = 150;
+}
 
-  constructor(element: HTMLElement) {
+export default class Controls extends EventEmitter {
+  readonly mouse: StateMouse;
+  readonly element: HTMLElement;
+  readonly snapThreshold: number;
+  readonly controlsThreshold: number;
+  readonly window: Window = window;
+  readonly minHeight: number;
+  readonly minWidth: number;
+
+  constructor({
+    element,
+    minHeight = 50,
+    minWidth = 150,
+    snapThreshold = 20,
+    controlsThreshold = 10,
+  }: ControlProps) {
     super();
+    this.minHeight = minHeight;
+    this.minWidth = minWidth;
+    this.snapThreshold = snapThreshold;
+    this.controlsThreshold = controlsThreshold;
     this.element = element;
     this.window = element.ownerDocument?.defaultView || window;
-    this.mouse = new StateMouse(element);
+    this.mouse = new StateMouse({ element, tolerance: controlsThreshold });
     this.mouse.on("update", this.onStateUpdate.bind(this));
   }
 
@@ -29,7 +47,6 @@ export default class Controls extends EventEmitter {
    * performs drag and resize
    */
   onStateUpdate() {
-    this.updateCursorStyle();
     if (this.mouse.dragging) {
       this.drag();
     } else if (this.mouse.down) {
@@ -70,7 +87,7 @@ export default class Controls extends EventEmitter {
         this.mouse.pageX -
           this.mouse.startRect.left +
           this.mouse.startRect.width -
-          this.mouse.offsetX,
+          this.mouse.downOffsetX,
         this.window.innerWidth - this.mouse.startRect.left
       )
     );
@@ -81,7 +98,7 @@ export default class Controls extends EventEmitter {
     const left = Math.max(
       0,
       Math.min(
-        this.mouse.pageX - this.mouse.offsetX,
+        this.mouse.pageX - this.mouse.downOffsetX,
         this.mouse.startRect.right - this.minWidth
       )
     );
@@ -97,7 +114,7 @@ export default class Controls extends EventEmitter {
         this.mouse.pageY -
           this.mouse.startRect.top +
           this.mouse.startRect.height -
-          this.mouse.offsetY,
+          this.mouse.downOffsetY,
         this.window.innerHeight - this.mouse.startRect.top
       )
     );
@@ -108,7 +125,7 @@ export default class Controls extends EventEmitter {
     const top = Math.max(
       0,
       Math.min(
-        this.mouse.pageY - this.mouse.offsetY,
+        this.mouse.pageY - this.mouse.downOffsetY,
         this.mouse.startRect.bottom - this.minHeight
       )
     );
@@ -118,37 +135,9 @@ export default class Controls extends EventEmitter {
     this.setSize({ height, top });
   }
 
-  private updateCursorStyle() {
-    if (
-      (this.mouse.controlPoints.left && this.mouse.controlPoints.top) ||
-      (this.mouse.controlPoints.right && this.mouse.controlPoints.bottom)
-    ) {
-      this.window.document.body.style.cursor = "nwse-resize";
-    } else if (
-      (this.mouse.controlPoints.left && this.mouse.controlPoints.bottom) ||
-      (this.mouse.controlPoints.right && this.mouse.controlPoints.top)
-    ) {
-      this.window.document.body.style.cursor = "nesw-resize";
-    } else if (
-      this.mouse.controlPoints.top ||
-      this.mouse.controlPoints.bottom
-    ) {
-      this.window.document.body.style.cursor = "ns-resize";
-    } else if (
-      this.mouse.controlPoints.left ||
-      this.mouse.controlPoints.right
-    ) {
-      this.window.document.body.style.cursor = "ew-resize";
-    } else if (this.mouse.over) {
-      this.window.document.body.style.cursor = "pointer";
-    } else {
-      this.window.document.body.style.cursor = "default";
-    }
-  }
-
   drag() {
-    const x = this.mouse.pageX - this.mouse.offsetX;
-    const y = this.mouse.pageY - this.mouse.offsetY;
+    const x = this.mouse.pageX - this.mouse.downOffsetX;
+    const y = this.mouse.pageY - this.mouse.downOffsetY;
     // snap to the edges of the window
     const left =
       x < this.snapThreshold

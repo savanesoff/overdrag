@@ -47,9 +47,9 @@ export default class Overdrag extends EventEmitter {
   /** current mouse position relative to window */
   pageY: number = 0;
   /** coordinate at mouse Down event */
-  downPageX: number = 0;
+  offsetX: number = 0;
   /** coordinate at mouse Down event */
-  downPageY: number = 0;
+  offsetY: number = 0;
   /** Element rect on last mouse move event */
   rect: DOMRect;
   /** Element rect on last mouse down event */
@@ -79,15 +79,13 @@ export default class Overdrag extends EventEmitter {
     this.element = element;
     this.clickDetectionThreshold = clickDetectionThreshold;
 
-    if (!this.element.parentElement) {
-      throw new Error("Element must have a parent element");
-    }
-
-    this.parentElement = this.element.parentElement;
-
     if (!this.element.offsetParent) {
-      this.element.parentElement.style.position = "relative";
+      throw new Error(
+        "Element must have an offset parent  with position relative or absolute)"
+      );
     }
+
+    this.parentElement = this.element.offsetParent as HTMLElement;
 
     this.rect = this.downRect = this.element.getBoundingClientRect();
     this.window.addEventListener("mousemove", this.onMove);
@@ -100,6 +98,12 @@ export default class Overdrag extends EventEmitter {
     if (this.down) {
       // update rect only when mouse is down
       this.rect = this.element.getBoundingClientRect();
+
+      if (this.dragging) {
+        this.drag();
+      } else {
+        this.resize();
+      }
     } else {
       this.setEngagedState();
       this.updateControlPointsState();
@@ -118,8 +122,8 @@ export default class Overdrag extends EventEmitter {
     e.preventDefault();
     this.down = true;
     this.downRect = this.rect;
-    this.downPageX = this.pageX;
-    this.downPageY = this.pageY;
+    this.offsetX = e.offsetX;
+    this.offsetY = e.offsetY;
     this.dragging = !this.controlsActive;
     this.element.ownerDocument.addEventListener("mouseup", this.onUp);
     this.element.setAttribute("overdrag-down", "true");
@@ -138,8 +142,8 @@ export default class Overdrag extends EventEmitter {
 
   private isClick() {
     return (
-      Math.abs(this.pageX - this.downPageX) < this.clickDetectionThreshold &&
-      Math.abs(this.pageY - this.downPageY) < this.clickDetectionThreshold
+      Math.abs(this.pageX - this.offsetX) < this.clickDetectionThreshold &&
+      Math.abs(this.pageY - this.offsetY) < this.clickDetectionThreshold
     );
   }
 
@@ -266,7 +270,7 @@ export default class Overdrag extends EventEmitter {
     const width = Math.max(
       this.minWidth,
       Math.min(
-        this.pageX - this.downRect.left + this.downRect.width - this.downPageX,
+        this.pageX - this.downRect.left + this.downRect.width - this.offsetX,
         this.parentElement.offsetWidth - this.downRect.left
       )
     );
@@ -277,7 +281,7 @@ export default class Overdrag extends EventEmitter {
   private movePointLeft() {
     const left = Math.max(
       0,
-      Math.min(this.pageX - this.downPageX, this.downRect.right - this.minWidth)
+      Math.min(this.pageX - this.offsetX, this.downRect.right - this.minWidth)
     );
 
     const width = Math.max(this.minWidth, this.downRect.right - left);
@@ -289,7 +293,7 @@ export default class Overdrag extends EventEmitter {
     const height = Math.max(
       this.minHeight,
       Math.min(
-        this.pageY - this.downRect.top + this.downRect.height - this.downPageY,
+        this.pageY - this.downRect.top + this.downRect.height - this.offsetY,
         this.parentElement.offsetHeight - this.downRect.top
       )
     );
@@ -300,10 +304,7 @@ export default class Overdrag extends EventEmitter {
   private movePointTop() {
     const top = Math.max(
       0,
-      Math.min(
-        this.pageY - this.downPageY,
-        this.downRect.bottom - this.minHeight
-      )
+      Math.min(this.pageY - this.offsetY, this.downRect.bottom - this.minHeight)
     );
 
     const height = Math.max(this.minHeight, this.downRect.bottom - top);
@@ -318,8 +319,8 @@ export default class Overdrag extends EventEmitter {
    * if mouse is close enough to the edge of the parent element (snapThreshold)
    */
   drag() {
-    const x = this.pageX - this.downPageX;
-    const y = this.pageY - this.downPageY;
+    const x = this.pageX - this.offsetX - this.parentElement.offsetLeft;
+    const y = this.pageY - this.offsetY - this.parentElement.offsetTop;
     // snap to the edges of the window
     const left =
       x < this.snapThreshold
@@ -334,7 +335,7 @@ export default class Overdrag extends EventEmitter {
         ? 0
         : y + this.rect.height + this.snapThreshold >
           this.parentElement.offsetHeight
-        ? this.element.offsetHeight - this.rect.height
+        ? this.parentElement.offsetHeight - this.rect.height
         : y;
 
     this.setSize({ left, top });

@@ -21,6 +21,7 @@ type Controls = {
 };
 
 export default class Overdrag extends EventEmitter {
+  static activeInstance: Overdrag | null = null;
   readonly window = window;
   readonly element: HTMLElement;
   readonly parentElement: HTMLElement;
@@ -61,6 +62,7 @@ export default class Overdrag extends EventEmitter {
     top: false,
     bottom: false,
   };
+  events: any;
 
   constructor({
     element,
@@ -92,7 +94,10 @@ export default class Overdrag extends EventEmitter {
     // TODO ensure the min width and height is respected
   }
 
-  private onMove = (e: MouseEvent) => {
+  onMove = (e: MouseEvent) => {
+    if (Overdrag.activeInstance != null && Overdrag.activeInstance != this) {
+      return;
+    }
     this.pageX = e.pageX;
     this.pageY = e.pageY;
     if (this.down) {
@@ -115,11 +120,12 @@ export default class Overdrag extends EventEmitter {
     this.emit("move", this);
   };
 
-  private onDown = (e: MouseEvent) => {
+  onDown = (e: MouseEvent) => {
     if (!this.engaged) {
       return;
     }
     e.preventDefault();
+    Overdrag.activeInstance = this;
     this.down = true;
     this.downRect = this.rect;
     this.offsetX = this.pageX - this.rect.left;
@@ -130,8 +136,9 @@ export default class Overdrag extends EventEmitter {
     this.emit("down", this);
   };
 
-  private onUp = (e: MouseEvent) => {
+  onUp = (e: MouseEvent) => {
     e.preventDefault();
+    Overdrag.activeInstance = null;
     this.click = this.isClick();
     this.down = false;
     this.dragging = false;
@@ -140,14 +147,14 @@ export default class Overdrag extends EventEmitter {
     if (this.click) this.emit("click", this);
   };
 
-  private isClick() {
+  isClick() {
     return (
       Math.abs(this.pageX - this.offsetX) < this.clickDetectionThreshold &&
       Math.abs(this.pageY - this.offsetY) < this.clickDetectionThreshold
     );
   }
 
-  private isControlPointActive() {
+  isControlPointActive() {
     return (
       this.engaged &&
       (this.controls.left ||
@@ -157,7 +164,7 @@ export default class Overdrag extends EventEmitter {
     );
   }
 
-  private setEngagedState() {
+  setEngagedState() {
     this.engaged =
       this.pageX >= this.rect.left - this.controlsThreshold &&
       this.pageX <= this.rect.right + this.controlsThreshold &&
@@ -166,7 +173,7 @@ export default class Overdrag extends EventEmitter {
     this.element.setAttribute("overdrag-engaged", this.engaged.toString());
   }
 
-  private setOverState() {
+  setOverState() {
     this.over =
       this.engaged &&
       this.pageX > this.rect.left + this.controlsThreshold &&
@@ -180,7 +187,7 @@ export default class Overdrag extends EventEmitter {
   /**
    * Sets control points activation status (Edge of element)
    */
-  private updateControlPointsState() {
+  updateControlPointsState() {
     this.controls.left =
       this.engaged &&
       Math.abs(this.pageX - this.rect.left) <= this.controlsThreshold;
@@ -195,7 +202,7 @@ export default class Overdrag extends EventEmitter {
       Math.abs(this.pageY - this.rect.bottom) <= this.controlsThreshold;
   }
 
-  private updateCursorStyle() {
+  updateCursorStyle() {
     let cursor = "default";
     if (
       (this.controls.left && this.controls.top) ||
@@ -241,7 +248,7 @@ export default class Overdrag extends EventEmitter {
     this.emit("resize", this);
   }
 
-  private setSize(rect: Partial<DOMRect>) {
+  setSize(rect: Partial<DOMRect>) {
     const newRect = { ...this.rect, ...rect };
     this.element.style.width = `${newRect.width}px`;
     this.element.style.height = `${newRect.height}px`;
@@ -252,7 +259,7 @@ export default class Overdrag extends EventEmitter {
     this.element.setAttribute("height", `${newRect.height}px`);
   }
 
-  private movePointRight() {
+  movePointRight() {
     // ensure the element never goes outside of the parent
     const maxWidth =
       this.parentElement.offsetWidth - parseInt(this.element.style.left);
@@ -271,7 +278,7 @@ export default class Overdrag extends EventEmitter {
     this.emit("control-right", this);
   }
 
-  private movePointBottom() {
+  movePointBottom() {
     // ensure the element never goes outside of the parent
     const maxHeight =
       this.parentElement.offsetHeight - parseInt(this.element.style.top);
@@ -290,7 +297,7 @@ export default class Overdrag extends EventEmitter {
     this.emit("control-bottom", this);
   }
 
-  private movePointLeft() {
+  movePointLeft() {
     let left = Math.max(
       0,
       Math.min(

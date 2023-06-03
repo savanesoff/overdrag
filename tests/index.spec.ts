@@ -12,6 +12,12 @@ const mockWindow = {
     },
   },
 };
+// const originalWindow = { ...globalThis.window };
+// const spy = jest.spyOn(globalThis, "window", "get");
+// spy.mockImplementation(() => ({
+//   ...originalWindow,
+//   ...(mockWindow as any),
+// }));
 
 // Mock the offset parent element
 const mockOffsetParentElement = {
@@ -68,7 +74,7 @@ jest.mock("events", () => {
   return EventEmitterMock;
 });
 
-function createInstance({ element = mockElement as any }) {
+function createInstance({ element = mockElement as any } = {}) {
   return new Overdrag({
     element,
     minHeight: 50,
@@ -79,24 +85,24 @@ function createInstance({ element = mockElement as any }) {
   });
 }
 
+const windowAddEventListenerSpy = jest.spyOn(
+  globalThis.window,
+  "addEventListener"
+);
+
 describe("Overdrag", () => {
   let overdrag: Overdrag;
 
-  beforeEach(() => {
-    overdrag = new Overdrag({
-      element: mockElement as any,
-      minHeight: 50,
-      minWidth: 50,
-      snapThreshold: 20,
-      controlsThreshold: 10,
-      clickDetectionThreshold: 5,
+  describe.only("constructor", () => {
+    beforeEach(() => {
+      overdrag = createInstance();
     });
 
-    // Reset mock function calls
-    jest.clearAllMocks();
-  });
+    afterEach(() => {
+      // Reset mock function calls
+      jest.clearAllMocks();
+    });
 
-  describe.only("constructor", () => {
     it("should set the properties correctly", () => {
       expect(overdrag.minHeight).toBe(50);
       expect(overdrag.minWidth).toBe(50);
@@ -121,10 +127,15 @@ describe("Overdrag", () => {
     });
 
     it("should add event listeners for 'mousemove' and 'mousedown'", () => {
-      const spy = jest.spyOn(window, "addEventListener").mockImplementation();
-      expect(spy).toHaveBeenCalledTimes(2);
-      expect(spy).toHaveBeenCalledWith("mousemove", expect.any(Function));
-      expect(spy).toHaveBeenCalledWith("mousedown", expect.any(Function));
+      expect(windowAddEventListenerSpy).toHaveBeenCalledTimes(2);
+      expect(windowAddEventListenerSpy).toHaveBeenCalledWith(
+        "mousemove",
+        expect.any(Function)
+      );
+      expect(windowAddEventListenerSpy).toHaveBeenCalledWith(
+        "mousedown",
+        expect.any(Function)
+      );
     });
     // });
 

@@ -4,6 +4,7 @@
   },
   "testRegex": "(/tests/.*|(\\.|/)(test|spec))\\.(jsx?|tsx?)$",
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
+  "testEnvironment": "jsdom",
   "coverageDirectory": "./coverage/",
   "collectCoverage": true
 }

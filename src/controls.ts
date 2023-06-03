@@ -21,7 +21,6 @@ type Controls = {
 };
 
 export default class Overdrag extends EventEmitter {
-  [on: string]: any;
   readonly window = window;
   readonly element: HTMLElement;
   readonly parentElement: HTMLElement;
@@ -66,7 +65,7 @@ export default class Overdrag extends EventEmitter {
   constructor({
     element,
     minHeight = 50,
-    minWidth = 150,
+    minWidth = 50,
     snapThreshold = 20,
     controlsThreshold = 10,
     clickDetectionThreshold = 5,
@@ -90,6 +89,7 @@ export default class Overdrag extends EventEmitter {
     this.rect = this.downRect = this.element.getBoundingClientRect();
     this.window.addEventListener("mousemove", this.onMove);
     this.window.addEventListener("mousedown", this.onDown);
+    // TODO ensure the min width and height is respected
   }
 
   private onMove = (e: MouseEvent) => {
@@ -102,7 +102,7 @@ export default class Overdrag extends EventEmitter {
       if (this.dragging) {
         this.drag();
       } else {
-        this.resize();
+        this.reSize();
       }
     } else {
       this.setEngagedState();
@@ -116,14 +116,14 @@ export default class Overdrag extends EventEmitter {
   };
 
   private onDown = (e: MouseEvent) => {
-    if (!this.over) {
+    if (!this.engaged) {
       return;
     }
     e.preventDefault();
     this.down = true;
     this.downRect = this.rect;
-    this.offsetX = e.offsetX;
-    this.offsetY = e.offsetY;
+    this.offsetX = this.pageX - this.rect.left;
+    this.offsetY = this.pageY - this.rect.top;
     this.dragging = !this.controlsActive;
     this.element.ownerDocument.addEventListener("mouseup", this.onUp);
     this.element.setAttribute("overdrag-down", "true");
@@ -225,20 +225,6 @@ export default class Overdrag extends EventEmitter {
     );
   }
 
-  /**
-   * Update cursor style based on mouse position
-   * and control points state
-   * performs drag and resize
-   */
-  onStateUpdate() {
-    if (this.dragging) {
-      this.drag();
-    } else if (this.down) {
-      this.reSize();
-    }
-    this.emit("update", this);
-  }
-
   reSize() {
     if (this.controls.top) {
       this.movePointTop();
@@ -256,7 +242,7 @@ export default class Overdrag extends EventEmitter {
   }
 
   private setSize(rect: Partial<DOMRect>) {
-    const newRect = { ...this.element.getBoundingClientRect(), ...rect };
+    const newRect = { ...this.rect, ...rect };
     this.element.style.width = `${newRect.width}px`;
     this.element.style.height = `${newRect.height}px`;
     this.element.style.left = `${newRect.left}px`;
@@ -267,50 +253,83 @@ export default class Overdrag extends EventEmitter {
   }
 
   private movePointRight() {
-    const width = Math.max(
+    // ensure the element never goes outside of the parent
+    const maxWidth =
+      this.parentElement.offsetWidth - parseInt(this.element.style.left);
+    // ensure the element never goes below the minimum width
+    let width = Math.max(
       this.minWidth,
       Math.min(
-        this.pageX - this.downRect.left + this.downRect.width - this.offsetX,
-        this.parentElement.offsetWidth - this.downRect.left
+        // track the mouse position and set width accordingly
+        this.pageX - this.downRect.left + (this.downRect.width - this.offsetX),
+        maxWidth
       )
     );
+    // snap to the parent right edge if within the threshold
+    width = width > maxWidth - this.snapThreshold ? maxWidth : width;
     this.setSize({ width });
-    this.emit("point-right", this);
-  }
-
-  private movePointLeft() {
-    const left = Math.max(
-      0,
-      Math.min(this.pageX - this.offsetX, this.downRect.right - this.minWidth)
-    );
-
-    const width = Math.max(this.minWidth, this.downRect.right - left);
-    this.setSize({ width, left });
-    this.emit("point-left", this);
+    this.emit("control-right", this);
   }
 
   private movePointBottom() {
-    const height = Math.max(
+    // ensure the element never goes outside of the parent
+    const maxHeight =
+      this.parentElement.offsetHeight - parseInt(this.element.style.top);
+    // ensure the element never goes below the minimum width
+    let height = Math.max(
       this.minHeight,
       Math.min(
-        this.pageY - this.downRect.top + this.downRect.height - this.offsetY,
-        this.parentElement.offsetHeight - this.downRect.top
+        // track the mouse position and set width accordingly
+        this.pageY - this.downRect.top + (this.downRect.height - this.offsetY),
+        maxHeight
       )
     );
+    // snap to the parent bottom  edge if within the threshold
+    height = height > maxHeight - this.snapThreshold ? maxHeight : height;
     this.setSize({ height });
-    this.emit("point-bottom", this);
+    this.emit("control-bottom", this);
+  }
+
+  private movePointLeft() {
+    let left = Math.max(
+      0,
+      Math.min(
+        // track the mouse position and set left accordingly
+        this.pageX - this.parentElement.offsetLeft - this.offsetX,
+        // max left, otherwise we'll push the element to the right
+        this.downRect.right - this.minWidth - this.parentElement.offsetLeft
+      )
+    );
+    // snap to the parent left edge if within the threshold
+    left = left < this.snapThreshold ? 0 : left;
+    // update width accordingly
+    const width = Math.max(
+      this.minWidth,
+      this.downRect.right - this.parentElement.offsetLeft - left
+    );
+
+    this.setSize({ width, left });
+    this.emit("control-bottom", this);
   }
 
   private movePointTop() {
-    const top = Math.max(
+    let top = Math.max(
       0,
-      Math.min(this.pageY - this.offsetY, this.downRect.bottom - this.minHeight)
+      Math.min(
+        this.pageY - this.parentElement.offsetTop - this.offsetY,
+        this.downRect.bottom - this.minHeight - this.parentElement.offsetTop
+      )
+    );
+    // snap to the parent top edge if within the threshold
+    top = top < this.snapThreshold ? 0 : top;
+    // update height accordingly
+    const height = Math.max(
+      this.minHeight,
+      this.downRect.bottom - this.parentElement.offsetTop - top
     );
 
-    const height = Math.max(this.minHeight, this.downRect.bottom - top);
-
     this.setSize({ height, top });
-    this.emit("point-top", this);
+    this.emit("control-top", this);
   }
 
   /**

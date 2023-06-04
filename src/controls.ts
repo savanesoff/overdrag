@@ -21,6 +21,23 @@ type Controls = {
 };
 
 export default class Overdrag extends EventEmitter {
+  static readonly ERROR = {
+    NO_PARENT:
+      "Element must have an offset parent with position relative or absolute)",
+  };
+  static readonly DEFAULTS = {
+    snapThreshold: 20,
+    controlsThreshold: 10,
+    minHeight: 50,
+    minWidth: 50,
+    clickDetectionThreshold: 5,
+  };
+  static readonly ATTRIBUTES = {
+    CONTROLS: "data-overdrag-controls",
+    ENGAGED: "data-overdrag-engaged",
+    OVER: "data-overdrag-over",
+    DOWN: "data-overdrag-down",
+  };
   static activeInstance: Overdrag | null = null;
   readonly window = window;
   readonly element: HTMLElement;
@@ -66,11 +83,11 @@ export default class Overdrag extends EventEmitter {
 
   constructor({
     element,
-    minHeight = 50,
-    minWidth = 50,
-    snapThreshold = 20,
-    controlsThreshold = 10,
-    clickDetectionThreshold = 5,
+    minHeight = Overdrag.DEFAULTS.minHeight,
+    minWidth = Overdrag.DEFAULTS.minWidth,
+    snapThreshold = Overdrag.DEFAULTS.snapThreshold,
+    controlsThreshold = Overdrag.DEFAULTS.controlsThreshold,
+    clickDetectionThreshold = Overdrag.DEFAULTS.clickDetectionThreshold,
   }: ControlProps) {
     super();
     this.minHeight = minHeight;
@@ -81,9 +98,7 @@ export default class Overdrag extends EventEmitter {
     this.clickDetectionThreshold = clickDetectionThreshold;
 
     if (!this.element.offsetParent) {
-      throw new Error(
-        "Element must have an offset parent  with position relative or absolute)"
-      );
+      throw new Error(Overdrag.ERROR.NO_PARENT);
     }
 
     this.parentElement = this.element.offsetParent as HTMLElement;
@@ -170,7 +185,10 @@ export default class Overdrag extends EventEmitter {
       this.pageX <= this.rect.right + this.controlsThreshold &&
       this.pageY >= this.rect.top - this.controlsThreshold &&
       this.pageY <= this.rect.bottom + this.controlsThreshold;
-    this.element.setAttribute("overdrag-engaged", this.engaged.toString());
+    this.element.setAttribute(
+      Overdrag.ATTRIBUTES.ENGAGED,
+      this.engaged.toString()
+    );
   }
 
   setOverState() {

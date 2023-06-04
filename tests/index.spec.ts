@@ -12,13 +12,6 @@ const mockWindow = {
     },
   },
 };
-// const originalWindow = { ...globalThis.window };
-// const spy = jest.spyOn(globalThis, "window", "get");
-// spy.mockImplementation(() => ({
-//   ...originalWindow,
-//   ...(mockWindow as any),
-// }));
-
 // Mock the offset parent element
 const mockOffsetParentElement = {
   offsetParent: {
@@ -35,6 +28,15 @@ const mockEvent = {
   pageY: 50,
   preventDefault: jest.fn(),
 };
+
+const mockBounds = {
+  left: 0,
+  top: 0,
+  right: 100,
+  bottom: 100,
+  width: 100,
+  height: 100,
+};
 // Mock the element object
 const mockElement = {
   style: {
@@ -45,23 +47,11 @@ const mockElement = {
   },
   setAttribute: jest.fn(),
   removeAttribute: jest.fn(),
-  getBoundingClientRect: jest.fn().mockReturnValue({
-    left: 0,
-    top: 0,
-    right: 100,
-    bottom: 100,
-    width: 100,
-    height: 100,
-  }),
+  getBoundingClientRect: jest.fn().mockReturnValue(mockBounds),
   ownerDocument: {
     addEventListener: jest.fn(),
     removeEventListener: jest.fn(),
   },
-  offsetParent: mockOffsetParentElement.offsetParent,
-};
-
-const mockElementWithOffsetParent = {
-  ...mockElement,
   offsetParent: mockOffsetParentElement.offsetParent,
 };
 
@@ -74,15 +64,22 @@ jest.mock("events", () => {
   return EventEmitterMock;
 });
 
-function createInstance({ element = mockElement as any } = {}) {
-  return new Overdrag({
-    element,
-    minHeight: 50,
-    minWidth: 50,
-    snapThreshold: 20,
-    controlsThreshold: 10,
-    clickDetectionThreshold: 5,
-  });
+const defaultProps = {
+  element: mockElement as any,
+  minHeight: 50 + Math.random() * 100,
+  minWidth: 50 + Math.random() * 100,
+  snapThreshold: 10 + Math.random() * 40,
+  controlsThreshold: 10 + Math.random() * 40,
+  clickDetectionThreshold: 10 + Math.random() * 40,
+};
+
+function createInstance(props = defaultProps) {
+  const mergedProps = {
+    ...defaultProps,
+    ...props,
+  };
+
+  return new Overdrag(mergedProps);
 }
 
 const windowAddEventListenerSpy = jest.spyOn(
@@ -91,42 +88,74 @@ const windowAddEventListenerSpy = jest.spyOn(
 );
 
 describe("Overdrag", () => {
-  let overdrag: Overdrag;
-
-  describe.only("constructor", () => {
-    beforeEach(() => {
-      overdrag = createInstance();
-    });
-
+  describe("constructor", () => {
     afterEach(() => {
       // Reset mock function calls
       jest.clearAllMocks();
     });
 
-    it("should set the properties correctly", () => {
-      expect(overdrag.minHeight).toBe(50);
-      expect(overdrag.minWidth).toBe(50);
-      expect(overdrag.snapThreshold).toBe(20);
-      expect(overdrag.controlsThreshold).toBe(10);
-      expect(overdrag.clickDetectionThreshold).toBe(5);
+    it(`should throw "${Overdrag.ERROR.NO_PARENT}" if the element has no offset parent`, () => {
+      expect(() =>
+        createInstance({
+          ...defaultProps,
+          element: { ...mockElement, offsetParent: null },
+        })
+      ).toThrow(Overdrag.ERROR.NO_PARENT);
+    });
+
+    it(`should not throw if the element has an offset parent`, () => {
+      expect(() => createInstance()).not.toThrow();
+    });
+
+    it("should set DEFAULTS if no props are provided", () => {
+      const overdrag = createInstance({
+        ...defaultProps,
+        minHeight: undefined as any,
+        minWidth: undefined as any,
+        snapThreshold: undefined as any,
+        controlsThreshold: undefined as any,
+        clickDetectionThreshold: undefined as any,
+      });
+      expect(overdrag.minHeight).toBe(Overdrag.DEFAULTS.minHeight);
+      expect(overdrag.minWidth).toBe(Overdrag.DEFAULTS.minWidth);
+      expect(overdrag.snapThreshold).toBe(Overdrag.DEFAULTS.snapThreshold);
+      expect(overdrag.controlsThreshold).toBe(
+        Overdrag.DEFAULTS.controlsThreshold
+      );
+      expect(overdrag.clickDetectionThreshold).toBe(
+        Overdrag.DEFAULTS.clickDetectionThreshold
+      );
+    });
+
+    it(`should set "element" to "props.element"`, () => {
+      const overdrag = createInstance();
       expect(overdrag.element).toBe(mockElement);
+    });
+
+    it(`should set "parentElement" to "props.element.offsetParent"`, () => {
+      const overdrag = createInstance();
       expect(overdrag.parentElement).toBe(
         mockOffsetParentElement.offsetParent as HTMLElement
       );
     });
 
-    it("should throw an error if the element has no offset parent", () => {
-      // @ts-ignore
-      mockElement.offsetParent = null;
-      expect(() => {
-        new Overdrag({
-          element: mockElement as any,
-        });
-      }).toThrow("Element must have an offset parent");
-      mockElement.offsetParent = mockOffsetParentElement.offsetParent;
+    it("should set props correctly", () => {
+      const overdrag = createInstance(defaultProps);
+      expect(overdrag.minHeight).toBe(defaultProps.minHeight);
+      expect(overdrag.minWidth).toBe(defaultProps.minWidth);
+      expect(overdrag.snapThreshold).toBe(defaultProps.snapThreshold);
+      expect(overdrag.controlsThreshold).toBe(defaultProps.controlsThreshold);
+      expect(overdrag.clickDetectionThreshold).toBe(
+        defaultProps.clickDetectionThreshold
+      );
+      expect(overdrag.element).toBe(defaultProps.element);
+      expect(overdrag.parentElement).toBe(
+        mockOffsetParentElement.offsetParent as HTMLElement
+      );
     });
 
     it("should add event listeners for 'mousemove' and 'mousedown'", () => {
+      createInstance();
       expect(windowAddEventListenerSpy).toHaveBeenCalledTimes(2);
       expect(windowAddEventListenerSpy).toHaveBeenCalledWith(
         "mousemove",
@@ -137,33 +166,95 @@ describe("Overdrag", () => {
         expect.any(Function)
       );
     });
-    // });
 
-    // describe("onMove", () => {
-    //   beforeEach(() => {
-    //     overdrag.onMove(mockEvent as any);
-    //   });
+    it("should have expected defaults", () => {
+      const overdrag = createInstance();
+      expect(overdrag.engaged).toBe(false);
+      expect(overdrag.pageX).toBe(0);
+      expect(overdrag.pageY).toBe(0);
+      expect(overdrag.controlsActive).toBe(false);
+      expect(overdrag.click).toBe(false);
+      expect(overdrag.dragging).toBe(false);
+      expect(overdrag.offsetX).toBe(0);
+      expect(overdrag.offsetY).toBe(0);
+      expect(overdrag.rect).toBe(mockBounds);
+      expect(overdrag.downRect).toBe(mockBounds);
+    });
 
-    //   it("should update the 'pageX' and 'pageY' properties", () => {
-    //     expect(overdrag.pageX).toBe(50);
-    //     expect(overdrag.pageY).toBe(50);
-    //   });
+    describe("onmousemove", () => {
+      afterEach(() => {
+        // Reset mock function calls
+        jest.clearAllMocks();
+      });
 
-    //   it("should call 'setEngagedState'", () => {
-    //     expect(overdrag.setEngagedState).toHaveBeenCalled();
-    //   });
+      function move({ x, y }: { x: number; y: number }) {
+        const overdrag = createInstance();
+        const coord = {
+          pageX: x,
+          pageY: y,
+        };
+        overdrag.onMove({
+          ...mockEvent,
+          ...coord,
+        } as any);
+        return overdrag;
+      }
 
-    //   it("should call 'updateControlPointsState'", () => {
-    //     expect(overdrag.updateControlPointsState).toHaveBeenCalled();
-    //   });
+      it("should set new pageX/Y ", () => {
+        const coord = {
+          x: Math.random(),
+          y: Math.random(),
+        };
+        const overdrag = move(coord);
 
-    //   it("should emit the 'move' event", () => {
-    //     expect(overdrag.events.emit).toHaveBeenCalledWith("move", {
-    //       pageX: 50,
-    //       pageY: 50,
-    //     });
-    //   });
-    // });
+        expect(overdrag.pageX).toBe(coord.x);
+        expect(overdrag.pageY).toBe(coord.y);
+      });
+
+      it(`should set .engaged to "true" if .rect.# - controlsThreshold values intersect PageX/Y `, () => {
+        let overdrag = move({
+          x: mockBounds.left - defaultProps.controlsThreshold,
+          y: mockBounds.top - defaultProps.controlsThreshold,
+        });
+
+        expect(overdrag.engaged).toBe(true);
+
+        overdrag = move({
+          x: mockBounds.right + defaultProps.controlsThreshold,
+          y: mockBounds.bottom + defaultProps.controlsThreshold,
+        });
+
+        expect(overdrag.engaged).toBe(true);
+      });
+
+      it(`should set .engaged to "false" if .rect.# - controlThreshold values do not intersect PageX/Y`, () => {
+        let overdrag = move({
+          x: mockBounds.left - defaultProps.controlsThreshold - 1,
+          y: mockBounds.top - defaultProps.controlsThreshold - 1,
+        });
+
+        expect(overdrag.engaged).toBe(false);
+
+        overdrag = move({
+          x: mockBounds.right + defaultProps.controlsThreshold + 1,
+          y: mockBounds.bottom + defaultProps.controlsThreshold + 1,
+        });
+
+        expect(overdrag.engaged).toBe(false);
+      });
+
+      it("should set element attribute 'engaged' to 'true' if engaged", () => {
+        const overdrag = move({
+          x: mockBounds.left - defaultProps.controlsThreshold,
+          y: mockBounds.top - defaultProps.controlsThreshold,
+        });
+
+        expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+          Overdrag.ATTRIBUTES.ENGAGED,
+          "true"
+        );
+      });
+    });
 
     // describe("onDown", () => {
     //   beforeEach(() => {

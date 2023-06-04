@@ -272,6 +272,39 @@ describe("Overdrag", () => {
             "false"
           );
         });
+
+        it(`should emit "${Overdrag.EVENTS.ENGAGED}" event if engaged`, () => {
+          const overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold,
+            y: mockBounds.top - defaultProps.controlsThreshold,
+          });
+
+          const spy = jest.spyOn(overdrag, "emit");
+
+          expect(spy).toHaveBeenCalledWith(Overdrag.EVENTS.ENGAGED, overdrag);
+        });
+
+        it(`should emit "${Overdrag.EVENTS.DISENGAGED}" event if disengaged`, () => {
+          const overdrag = move({
+            x: mockBounds.left,
+            y: mockBounds.top,
+          });
+
+          const spy = jest.spyOn(overdrag, "emit");
+
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.right + defaultProps.controlsThreshold + 1,
+              pageY: mockBounds.bottom + defaultProps.controlsThreshold + 1,
+            },
+          } as any);
+
+          expect(spy).toHaveBeenCalledWith(
+            Overdrag.EVENTS.DISENGAGED,
+            overdrag
+          );
+        });
       });
 
       describe(".controlsActive property", () => {
@@ -522,6 +555,38 @@ describe("Overdrag", () => {
             ""
           );
         });
+
+        it(`should emit "${Overdrag.EVENTS.CONTROLS_ACTIVE}" event if control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold,
+            y: mockBounds.top - defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.emit).toHaveBeenCalledWith(
+            Overdrag.EVENTS.CONTROLS_ACTIVE,
+            expect.any(Object)
+          );
+        });
+
+        it(`should emit "${Overdrag.EVENTS.CONTROLS_INACTIVE}" event if no control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.left,
+            y: mockBounds.top,
+          });
+
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.left - defaultProps.controlsThreshold - 1,
+              pageY: mockBounds.top + mockBounds.height / 2,
+            },
+          } as any);
+
+          expect(overdrag.emit).toHaveBeenCalledWith(
+            Overdrag.EVENTS.CONTROLS_INACTIVE,
+            expect.any(Object)
+          );
+        });
       });
 
       describe(".over property", () => {
@@ -620,6 +685,55 @@ describe("Overdrag", () => {
             Overdrag.ATTRIBUTES.OVER,
             "false"
           );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.OVER}" to 'false' if the mouse leaves the element`, () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.left - defaultProps.controlsThreshold - 1,
+              pageY: mockBounds.top + mockBounds.height / 2,
+            },
+          } as any);
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.OVER,
+            "false"
+          );
+        });
+
+        it(`should emit "${Overdrag.EVENTS.OVER}" event if the mouse enters the element`, () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          const spy = jest.spyOn(overdrag, "emit");
+
+          expect(spy).toHaveBeenCalledWith(Overdrag.EVENTS.OVER, overdrag);
+        });
+
+        it(`should emit "${Overdrag.EVENTS.OUT}" event if the mouse leaves the element`, () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          const spy = jest.spyOn(overdrag, "emit");
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.left - defaultProps.controlsThreshold - 1,
+              pageY: mockBounds.top + mockBounds.height / 2,
+            },
+          } as any);
+
+          expect(spy).toHaveBeenCalledWith(Overdrag.EVENTS.OUT, overdrag);
         });
       });
 

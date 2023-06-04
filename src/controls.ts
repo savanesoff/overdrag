@@ -38,7 +38,6 @@ export default class Overdrag extends EventEmitter {
     OVER: "data-overdrag-over",
     DOWN: "data-overdrag-down",
   };
-
   static readonly CURSOR = {
     LEFT: "w-resize",
     RIGHT: "e-resize",
@@ -50,6 +49,17 @@ export default class Overdrag extends EventEmitter {
     BOTTOM_RIGHT: "se-resize",
     OVER: "move",
     DEFAULT: "default",
+  };
+  static readonly EVENTS = {
+    DOWN: "down",
+    UP: "up",
+    DRAG: "drag",
+    OVER: "over",
+    OUT: "out",
+    ENGAGED: "engaged",
+    DISENGAGED: "disengaged",
+    CONTROLS_ACTIVE: "controls-active",
+    CONTROLS_INACTIVE: "controls-inactive",
   };
   static activeInstance: Overdrag | null = null;
   readonly window = window;
@@ -140,11 +150,13 @@ export default class Overdrag extends EventEmitter {
         this.reSize();
       }
     } else {
+      const engaged = this.engaged;
       this.setEngagedState();
-      this.updateControlPointsState();
-      this.setOverState();
-      this.updateCursorStyle();
-      this.controlsActive = this.isControlPointActive();
+      if (engaged != this.engaged) {
+        this.updateControlPointsState();
+        this.setOverState();
+        this.updateCursorStyle();
+      }
     }
   };
 
@@ -206,7 +218,8 @@ export default class Overdrag extends EventEmitter {
     );
 
     if (current != this.engaged) {
-      this.emit("engaged", this);
+      if (this.engaged) this.emit(Overdrag.EVENTS.ENGAGED, this);
+      else this.emit(Overdrag.EVENTS.DISENGAGED, this);
     }
   }
 
@@ -222,7 +235,8 @@ export default class Overdrag extends EventEmitter {
     this.element.setAttribute(Overdrag.ATTRIBUTES.OVER, this.over.toString());
 
     if (current != this.over) {
-      this.emit("over", this);
+      if (this.over) this.emit(Overdrag.EVENTS.OVER, this);
+      else this.emit(Overdrag.EVENTS.OUT, this);
     }
   }
 
@@ -248,6 +262,8 @@ export default class Overdrag extends EventEmitter {
         Math.abs(this.pageY - this.rect.bottom) <= this.controlsThreshold;
     }
 
+    this.controlsActive = this.isControlPointActive();
+
     this.element.setAttribute(
       Overdrag.ATTRIBUTES.CONTROLS,
       Object.keys(this.controls)
@@ -256,7 +272,8 @@ export default class Overdrag extends EventEmitter {
     );
 
     if (current != JSON.stringify(this.controls)) {
-      this.emit("controls", this);
+      if (this.controlsActive) this.emit(Overdrag.EVENTS.CONTROLS_ACTIVE, this);
+      else this.emit(Overdrag.EVENTS.CONTROLS_INACTIVE, this);
     }
   }
 

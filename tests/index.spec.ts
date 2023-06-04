@@ -523,6 +523,105 @@ describe("Overdrag", () => {
           );
         });
       });
+
+      describe(".over property", () => {
+        afterEach(() => {
+          jest.clearAllMocks();
+        });
+
+        it("should be true if the mouse is over the element", () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.over).toBe(true);
+        });
+
+        it("should be false if the mouse is over controls", () => {
+          const overdrag = move({
+            x: mockBounds.left + defaultProps.controlsThreshold,
+            y: mockBounds.top + defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.over).toBe(false);
+        });
+
+        it("should be false if the mouse is not over the element", () => {
+          const overdrag = move({
+            x: mockBounds.left,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.over).toBe(false);
+        });
+
+        it("should set the 'over' property to false if the mouse leaves the element", () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.left - defaultProps.controlsThreshold - 1,
+              pageY: mockBounds.top + mockBounds.height / 2,
+            },
+          } as any);
+
+          expect(overdrag.over).toBe(false);
+        });
+
+        it("should set the 'over' property to true if the mouse re-enters the element", () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.left - defaultProps.controlsThreshold - 1,
+              pageY: mockBounds.top + mockBounds.height / 2,
+            },
+          } as any);
+
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.left + mockBounds.width / 2,
+              pageY: mockBounds.top + mockBounds.height / 2,
+            },
+          } as any);
+
+          expect(overdrag.over).toBe(true);
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.OVER}" to 'true' if the mouse is over the element`, () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.OVER,
+            "true"
+          );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.OVER}" to 'false' if the mouse is not over the element`, () => {
+          const overdrag = move({
+            x: mockBounds.left,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.OVER,
+            "false"
+          );
+        });
+      });
     });
 
     // describe("onDown", () => {

@@ -198,7 +198,7 @@ export default class Overdrag extends EventEmitter {
       this.pageY > this.rect.top + this.controlsThreshold &&
       this.pageY < this.rect.bottom - this.controlsThreshold;
 
-    this.element.setAttribute("overdrag-over", this.over.toString());
+    this.element.setAttribute(Overdrag.ATTRIBUTES.OVER, this.over.toString());
   }
 
   /**

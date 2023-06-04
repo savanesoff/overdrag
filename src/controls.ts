@@ -38,6 +38,19 @@ export default class Overdrag extends EventEmitter {
     OVER: "data-overdrag-over",
     DOWN: "data-overdrag-down",
   };
+
+  static readonly CURSOR = {
+    LEFT: "w-resize",
+    RIGHT: "e-resize",
+    TOP: "n-resize",
+    BOTTOM: "s-resize",
+    TOP_LEFT: "nw-resize",
+    TOP_RIGHT: "ne-resize",
+    BOTTOM_LEFT: "sw-resize",
+    BOTTOM_RIGHT: "se-resize",
+    OVER: "move",
+    DEFAULT: "default",
+  };
   static activeInstance: Overdrag | null = null;
   readonly window = window;
   readonly element: HTMLElement;
@@ -72,6 +85,7 @@ export default class Overdrag extends EventEmitter {
   /** Element rect on last mouse down event */
   downRect: DOMRect;
 
+  cursorSet = false;
   /** Control points activation status (Edge of element) */
   readonly controls: Controls = {
     left: false,
@@ -111,6 +125,7 @@ export default class Overdrag extends EventEmitter {
 
   onMove = (e: MouseEvent) => {
     if (Overdrag.activeInstance != null && Overdrag.activeInstance != this) {
+      // another instance is active, ignore this event
       return;
     }
     this.pageX = e.pageX;
@@ -128,10 +143,9 @@ export default class Overdrag extends EventEmitter {
       this.setEngagedState();
       this.updateControlPointsState();
       this.setOverState();
+      this.updateCursorStyle();
       this.controlsActive = this.isControlPointActive();
     }
-
-    this.emit("move", this);
   };
 
   onDown = (e: MouseEvent) => {
@@ -179,18 +193,25 @@ export default class Overdrag extends EventEmitter {
   }
 
   setEngagedState() {
+    const current = this.engaged;
     this.engaged =
       this.pageX >= this.rect.left - this.controlsThreshold &&
       this.pageX <= this.rect.right + this.controlsThreshold &&
       this.pageY >= this.rect.top - this.controlsThreshold &&
       this.pageY <= this.rect.bottom + this.controlsThreshold;
+
     this.element.setAttribute(
       Overdrag.ATTRIBUTES.ENGAGED,
       this.engaged.toString()
     );
+
+    if (current != this.engaged) {
+      this.emit("engaged", this);
+    }
   }
 
   setOverState() {
+    const current = this.over;
     this.over =
       this.engaged &&
       this.pageX > this.rect.left + this.controlsThreshold &&
@@ -199,24 +220,33 @@ export default class Overdrag extends EventEmitter {
       this.pageY < this.rect.bottom - this.controlsThreshold;
 
     this.element.setAttribute(Overdrag.ATTRIBUTES.OVER, this.over.toString());
+
+    if (current != this.over) {
+      this.emit("over", this);
+    }
   }
 
   /**
    * Sets control points activation status (Edge of element)
    */
   updateControlPointsState() {
-    this.controls.left =
-      this.engaged &&
-      Math.abs(this.pageX - this.rect.left) <= this.controlsThreshold;
-    this.controls.right =
-      this.engaged &&
-      Math.abs(this.pageX - this.rect.right) <= this.controlsThreshold;
-    this.controls.top =
-      this.engaged &&
-      Math.abs(this.pageY - this.rect.top) <= this.controlsThreshold;
-    this.controls.bottom =
-      this.engaged &&
-      Math.abs(this.pageY - this.rect.bottom) <= this.controlsThreshold;
+    const current = JSON.stringify(this.controls);
+    if (!this.engaged) {
+      this.controls.left =
+        this.controls.right =
+        this.controls.top =
+        this.controls.bottom =
+          false;
+    } else {
+      this.controls.left =
+        Math.abs(this.pageX - this.rect.left) <= this.controlsThreshold;
+      this.controls.right =
+        Math.abs(this.pageX - this.rect.right) <= this.controlsThreshold;
+      this.controls.top =
+        Math.abs(this.pageY - this.rect.top) <= this.controlsThreshold;
+      this.controls.bottom =
+        Math.abs(this.pageY - this.rect.bottom) <= this.controlsThreshold;
+    }
 
     this.element.setAttribute(
       Overdrag.ATTRIBUTES.CONTROLS,
@@ -225,31 +255,45 @@ export default class Overdrag extends EventEmitter {
         .join("-")
     );
 
-    this.updateCursorStyle();
+    if (current != JSON.stringify(this.controls)) {
+      this.emit("controls", this);
+    }
   }
 
   updateCursorStyle() {
-    let cursor = "default";
-    if (
-      (this.controls.left && this.controls.top) ||
-      (this.controls.right && this.controls.bottom)
-    ) {
-      cursor = "nwse-resize";
-    } else if (
-      (this.controls.left && this.controls.bottom) ||
-      (this.controls.right && this.controls.top)
-    ) {
-      cursor = "nesw-resize";
-    } else if (this.controls.top || this.controls.bottom) {
-      cursor = "ns-resize";
-    } else if (this.controls.left || this.controls.right) {
-      cursor = "ew-resize";
-    } else if (this.over) {
-      cursor = "pointer";
-    } else {
-      cursor = "default";
+    let cursor = null;
+    if (!this.engaged && this.cursorSet) {
+      // reset cursor
+      this.window.document.body.style.setProperty(
+        "cursor",
+        Overdrag.CURSOR.DEFAULT
+      );
+      this.cursorSet = false;
+      return;
     }
-    this.window.document.body.style.cursor = cursor;
+
+    if (this.over) {
+      cursor = Overdrag.CURSOR.OVER;
+    } else if (this.controls.top && this.controls.left) {
+      cursor = Overdrag.CURSOR.TOP_LEFT;
+    } else if (this.controls.bottom && this.controls.right) {
+      cursor = Overdrag.CURSOR.BOTTOM_RIGHT;
+    } else if (this.controls.bottom && this.controls.left) {
+      cursor = Overdrag.CURSOR.BOTTOM_LEFT;
+    } else if (this.controls.top && this.controls.right) {
+      cursor = Overdrag.CURSOR.TOP_RIGHT;
+    } else if (this.controls.top) {
+      cursor = Overdrag.CURSOR.TOP;
+    } else if (this.controls.bottom) {
+      cursor = Overdrag.CURSOR.BOTTOM;
+    } else if (this.controls.left) {
+      cursor = Overdrag.CURSOR.LEFT;
+    } else if (this.controls.right) {
+      cursor = Overdrag.CURSOR.RIGHT;
+    }
+
+    this.window.document.body.style.setProperty("cursor", cursor);
+    this.cursorSet = true;
   }
 
   reSize() {

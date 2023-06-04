@@ -622,6 +622,109 @@ describe("Overdrag", () => {
           );
         });
       });
+
+      describe("element cursor", () => {
+        afterEach(() => {
+          jest.clearAllMocks();
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.OVER}' if the mouse is over the element`, () => {
+          move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.OVER);
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.TOP}' if the mouse is over TOP controls`, () => {
+          move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top,
+          });
+
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.TOP);
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.BOTTOM}' if the mouse is over BOTTOM controls`, () => {
+          move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height,
+          });
+
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.BOTTOM);
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.LEFT}' if the mouse is over LEFT controls`, () => {
+          move({
+            x: mockBounds.left,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.LEFT);
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.RIGHT}' if the mouse is over RIGHT controls`, () => {
+          move({
+            x: mockBounds.left + mockBounds.width,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.RIGHT);
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.TOP_LEFT}' if the mouse is over TOP LEFT controls`, () => {
+          move({
+            x: mockBounds.left,
+            y: mockBounds.top,
+          });
+
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.TOP_LEFT);
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.TOP_RIGHT}' if the mouse is over TOP RIGHT controls`, () => {
+          move({
+            x: mockBounds.left + mockBounds.width,
+            y: mockBounds.top,
+          });
+
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.TOP_RIGHT);
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.BOTTOM_LEFT}' if the mouse is over BOTTOM LEFT controls`, () => {
+          move({
+            x: mockBounds.left,
+            y: mockBounds.top + mockBounds.height,
+          });
+
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.BOTTOM_LEFT);
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.BOTTOM_RIGHT}' if the mouse is over BOTTOM RIGHT controls`, () => {
+          move({
+            x: mockBounds.left + mockBounds.width,
+            y: mockBounds.top + mockBounds.height,
+          });
+
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.BOTTOM_RIGHT);
+        });
+
+        it(`should set body cursor to '${Overdrag.CURSOR.DEFAULT}' if the mouse leaves the element`, () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.left - defaultProps.controlsThreshold - 1,
+              pageY: mockBounds.top + mockBounds.height / 2,
+            },
+          } as any);
+          expect(document.body.style.cursor).toBe(Overdrag.CURSOR.DEFAULT);
+        });
+      });
     });
 
     // describe("onDown", () => {

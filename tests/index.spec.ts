@@ -900,8 +900,6 @@ describe("Overdrag", () => {
         });
       });
     });
-
-    // describe("onDown", () => {
     //   beforeEach(() => {
     //     overdrag.onDown(mockEvent as any);
     //   });

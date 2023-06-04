@@ -47,7 +47,7 @@ export default class Overdrag extends EventEmitter {
     TOP_RIGHT: "ne-resize",
     BOTTOM_LEFT: "sw-resize",
     BOTTOM_RIGHT: "se-resize",
-    OVER: "move",
+    OVER: "grab",
     DEFAULT: "default",
   };
   static readonly EVENTS = {
@@ -152,11 +152,11 @@ export default class Overdrag extends EventEmitter {
     } else {
       const engaged = this.engaged;
       this.setEngagedState();
-      if (engaged != this.engaged) {
-        this.updateControlPointsState();
-        this.setOverState();
-        this.updateCursorStyle();
-      }
+      // if (engaged != this.engaged) {
+      this.updateControlPointsState();
+      this.setOverState();
+      this.updateCursorStyle();
+      // }
     }
   };
 
@@ -288,6 +288,8 @@ export default class Overdrag extends EventEmitter {
       this.cursorSet = false;
       return;
     }
+
+    if (!this.engaged) return;
 
     if (this.over) {
       cursor = Overdrag.CURSOR.OVER;

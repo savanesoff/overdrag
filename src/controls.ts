@@ -127,7 +127,6 @@ export default class Overdrag extends EventEmitter {
     } else {
       this.setEngagedState();
       this.updateControlPointsState();
-      this.updateCursorStyle();
       this.setOverState();
       this.controlsActive = this.isControlPointActive();
     }
@@ -218,6 +217,15 @@ export default class Overdrag extends EventEmitter {
     this.controls.bottom =
       this.engaged &&
       Math.abs(this.pageY - this.rect.bottom) <= this.controlsThreshold;
+
+    this.element.setAttribute(
+      Overdrag.ATTRIBUTES.CONTROLS,
+      Object.keys(this.controls)
+        .filter((key) => this.controls[key as keyof Controls])
+        .join("-")
+    );
+
+    this.updateCursorStyle();
   }
 
   updateCursorStyle() {
@@ -242,12 +250,6 @@ export default class Overdrag extends EventEmitter {
       cursor = "default";
     }
     this.window.document.body.style.cursor = cursor;
-    this.element.setAttribute(
-      "overdrag-controls",
-      Object.keys(this.controls)
-        .filter((key) => this.controls[key as keyof Controls])
-        .join("-")
-    );
   }
 
   reSize() {

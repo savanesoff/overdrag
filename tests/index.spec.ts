@@ -66,11 +66,11 @@ jest.mock("events", () => {
 
 const defaultProps = {
   element: mockElement as any,
-  minHeight: 50 + Math.random() * 100,
-  minWidth: 50 + Math.random() * 100,
-  snapThreshold: 10 + Math.random() * 40,
-  controlsThreshold: 10 + Math.random() * 40,
-  clickDetectionThreshold: 10 + Math.random() * 40,
+  minHeight: 50 + Math.round(Math.random() * 100),
+  minWidth: 50 + Math.round(Math.random() * 100),
+  snapThreshold: 10 + Math.round(Math.random() * 40),
+  controlsThreshold: 10 + Math.round(Math.random() * 40),
+  clickDetectionThreshold: 10 + Math.round(Math.random() * 40),
 };
 
 function createInstance(props = defaultProps) {
@@ -181,7 +181,7 @@ describe("Overdrag", () => {
       expect(overdrag.downRect).toBe(mockBounds);
     });
 
-    describe("onmousemove", () => {
+    describe("onmousemove logic", () => {
       afterEach(() => {
         // Reset mock function calls
         jest.clearAllMocks();
@@ -200,59 +200,328 @@ describe("Overdrag", () => {
         return overdrag;
       }
 
-      it("should set new pageX/Y ", () => {
-        const coord = {
-          x: Math.random(),
-          y: Math.random(),
-        };
-        const overdrag = move(coord);
+      describe(".engaged property", () => {
+        afterEach(() => {
+          // Reset mock function calls
+          jest.clearAllMocks();
+        });
+        it("should set new pageX/Y ", () => {
+          const coord = {
+            x: Math.random(),
+            y: Math.random(),
+          };
+          const overdrag = move(coord);
 
-        expect(overdrag.pageX).toBe(coord.x);
-        expect(overdrag.pageY).toBe(coord.y);
+          expect(overdrag.pageX).toBe(coord.x);
+          expect(overdrag.pageY).toBe(coord.y);
+        });
+
+        it(`should set .engaged to "true" if .rect.# - controlsThreshold values intersect PageX/Y `, () => {
+          let overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold,
+            y: mockBounds.top - defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.engaged).toBe(true);
+
+          overdrag = move({
+            x: mockBounds.right + defaultProps.controlsThreshold,
+            y: mockBounds.bottom + defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.engaged).toBe(true);
+        });
+
+        it(`should set .engaged to "false" if .rect.# - controlThreshold values do not intersect PageX/Y`, () => {
+          let overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold - 1,
+            y: mockBounds.top - defaultProps.controlsThreshold - 1,
+          });
+
+          expect(overdrag.engaged).toBe(false);
+
+          overdrag = move({
+            x: mockBounds.right + defaultProps.controlsThreshold + 1,
+            y: mockBounds.bottom + defaultProps.controlsThreshold + 1,
+          });
+
+          expect(overdrag.engaged).toBe(false);
+        });
+
+        it("should set element attribute 'engaged' to 'true' if engaged", () => {
+          const overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold,
+            y: mockBounds.top - defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.ENGAGED,
+            "true"
+          );
+
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.right + defaultProps.controlsThreshold + 1,
+              pageY: mockBounds.bottom + defaultProps.controlsThreshold + 1,
+            },
+          } as any);
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.ENGAGED,
+            "false"
+          );
+        });
       });
 
-      it(`should set .engaged to "true" if .rect.# - controlsThreshold values intersect PageX/Y `, () => {
-        let overdrag = move({
-          x: mockBounds.left - defaultProps.controlsThreshold,
-          y: mockBounds.top - defaultProps.controlsThreshold,
+      describe(".controlsActive property", () => {
+        afterEach(() => {
+          // Reset mock function calls
+          jest.clearAllMocks();
         });
 
-        expect(overdrag.engaged).toBe(true);
+        it(`should set .controlsActive to "true" if mouse intersects left control point `, () => {
+          let overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
 
-        overdrag = move({
-          x: mockBounds.right + defaultProps.controlsThreshold,
-          y: mockBounds.bottom + defaultProps.controlsThreshold,
+          expect(overdrag.controlsActive).toBe(true);
+
+          overdrag = move({
+            x: mockBounds.left + defaultProps.controlsThreshold,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.controlsActive).toBe(true);
+
+          overdrag = move({
+            x: mockBounds.left,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.controlsActive).toBe(true);
         });
 
-        expect(overdrag.engaged).toBe(true);
-      });
+        it(`should set .controlsActive to "true" if mouse intersects right control point `, () => {
+          let overdrag = move({
+            x: mockBounds.right + defaultProps.controlsThreshold,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
 
-      it(`should set .engaged to "false" if .rect.# - controlThreshold values do not intersect PageX/Y`, () => {
-        let overdrag = move({
-          x: mockBounds.left - defaultProps.controlsThreshold - 1,
-          y: mockBounds.top - defaultProps.controlsThreshold - 1,
+          expect(overdrag.controlsActive).toBe(true);
+
+          overdrag = move({
+            x: mockBounds.right - defaultProps.controlsThreshold,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.controlsActive).toBe(true);
+
+          overdrag = move({
+            x: mockBounds.right,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.controlsActive).toBe(true);
         });
 
-        expect(overdrag.engaged).toBe(false);
+        it(`should set .controlsActive to "true" if mouse intersects top control point `, () => {
+          let overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top - defaultProps.controlsThreshold,
+          });
 
-        overdrag = move({
-          x: mockBounds.right + defaultProps.controlsThreshold + 1,
-          y: mockBounds.bottom + defaultProps.controlsThreshold + 1,
+          expect(overdrag.controlsActive).toBe(true);
+
+          overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.controlsActive).toBe(true);
+
+          overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top,
+          });
+
+          expect(overdrag.controlsActive).toBe(true);
         });
 
-        expect(overdrag.engaged).toBe(false);
-      });
+        it(`should set .controlsActive to "true" if mouse intersects bottom control point `, () => {
+          let overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.bottom + defaultProps.controlsThreshold,
+          });
 
-      it("should set element attribute 'engaged' to 'true' if engaged", () => {
-        const overdrag = move({
-          x: mockBounds.left - defaultProps.controlsThreshold,
-          y: mockBounds.top - defaultProps.controlsThreshold,
+          expect(overdrag.controlsActive).toBe(true);
+
+          overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.bottom - defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.controlsActive).toBe(true);
+
+          overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.bottom,
+          });
+
+          expect(overdrag.controlsActive).toBe(true);
         });
 
-        expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
-          Overdrag.ATTRIBUTES.ENGAGED,
-          "true"
-        );
+        it(`should set .controlsActive to "false" if mouse does not intersect control points`, () => {
+          let overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold - 1,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.controlsActive).toBe(false);
+
+          overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top - defaultProps.controlsThreshold - 1,
+          });
+
+          expect(overdrag.controlsActive).toBe(false);
+
+          overdrag = move({
+            x: mockBounds.right + defaultProps.controlsThreshold + 1,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.controlsActive).toBe(false);
+
+          overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.bottom + defaultProps.controlsThreshold + 1,
+          });
+
+          expect(overdrag.controlsActive).toBe(false);
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.CONTROLS}" to 'top' if top control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top - defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            "top"
+          );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.CONTROLS}" to 'bottom' if bottom control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.bottom + defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            "bottom"
+          );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.CONTROLS}" to 'left' if left control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            "left"
+          );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.CONTROLS}" to 'right' if right control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.right + defaultProps.controlsThreshold,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            "right"
+          );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.CONTROLS}" to 'left-top' if top-left control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold,
+            y: mockBounds.top - defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            "left-top"
+          );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.CONTROLS}" to 'right-top' if top-right control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.right + defaultProps.controlsThreshold,
+            y: mockBounds.top - defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            "right-top"
+          );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.CONTROLS}" to 'left-bottom' if bottom-left control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.left - defaultProps.controlsThreshold,
+            y: mockBounds.bottom + defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            "left-bottom"
+          );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.CONTROLS}" to 'right-bottom' if bottom-right control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.right + defaultProps.controlsThreshold,
+            y: mockBounds.bottom + defaultProps.controlsThreshold,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            "right-bottom"
+          );
+        });
+
+        it(`should set element attribute "${Overdrag.ATTRIBUTES.CONTROLS}" to '' if no control point is active`, () => {
+          const overdrag = move({
+            x: mockBounds.left + mockBounds.width / 2,
+            y: mockBounds.top + mockBounds.height / 2,
+          });
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            ""
+          );
+
+          overdrag.onMove({
+            ...mockEvent,
+            ...{
+              pageX: mockBounds.left - defaultProps.controlsThreshold - 1,
+              pageY: mockBounds.top + mockBounds.height / 2,
+            },
+          } as any);
+
+          expect(overdrag.element.setAttribute).toHaveBeenCalledWith(
+            Overdrag.ATTRIBUTES.CONTROLS,
+            ""
+          );
+        });
       });
     });
 

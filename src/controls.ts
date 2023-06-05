@@ -15,6 +15,17 @@ interface ControlProps {
   clickDetectionThreshold?: number;
 }
 
+type BoundingBoxRect = {
+  top: number;
+  right: number;
+  bottom: number;
+  left: number;
+  width: number;
+  height: number;
+  x: number;
+  y: number;
+};
+
 type ControlPoints = "left" | "right" | "top" | "bottom";
 type Controls = {
   [key in ControlPoints]: boolean;
@@ -37,6 +48,7 @@ export default class Overdrag extends EventEmitter {
     ENGAGED: "data-overdrag-engaged",
     OVER: "data-overdrag-over",
     DOWN: "data-overdrag-down",
+    DRAG: "data-overdrag-drag",
   };
   static readonly CURSOR = {
     LEFT: "w-resize",
@@ -91,9 +103,9 @@ export default class Overdrag extends EventEmitter {
   /** coordinate at mouse Down event */
   offsetY: number = 0;
   /** Element rect on last mouse move event */
-  rect: DOMRect;
+  rect: BoundingBoxRect;
   /** Element rect on last mouse down event */
-  downRect: DOMRect;
+  downRect: BoundingBoxRect;
 
   cursorSet = false;
   /** Control points activation status (Edge of element) */
@@ -127,10 +139,17 @@ export default class Overdrag extends EventEmitter {
 
     this.parentElement = this.element.offsetParent as HTMLElement;
 
-    this.rect = this.downRect = this.element.getBoundingClientRect();
+    this.rect = this.downRect = this.getBoundingClientRect();
     this.window.addEventListener("mousemove", this.onMove);
     this.window.addEventListener("mousedown", this.onDown);
     // TODO ensure the min width and height is respected
+  }
+
+  getBoundingClientRect(): BoundingBoxRect {
+    const { top, right, bottom, left, width, height, x, y } =
+      this.element.getBoundingClientRect();
+    //getComputedStyle(this.element)
+    return { top, right, bottom, left, width, height, x, y };
   }
 
   onMove = (e: MouseEvent) => {
@@ -142,7 +161,7 @@ export default class Overdrag extends EventEmitter {
     this.pageY = e.pageY;
     if (this.down) {
       // update rect only when mouse is down
-      this.rect = this.element.getBoundingClientRect();
+      this.rect = this.getBoundingClientRect();
 
       if (this.dragging) {
         this.drag();
@@ -150,13 +169,13 @@ export default class Overdrag extends EventEmitter {
         this.reSize();
       }
     } else {
-      const engaged = this.engaged;
-      this.setEngagedState();
-      // if (engaged != this.engaged) {
-      this.updateControlPointsState();
-      this.setOverState();
-      this.updateCursorStyle();
-      // }
+      const engaged = this.isEngaged();
+      if (engaged || this.engaged) {
+        this.setEngagedState(engaged);
+        this.updateControlPointsState();
+        this.setOverState(this.isOver());
+        this.updateCursorStyle();
+      }
     }
   };
 
@@ -172,7 +191,7 @@ export default class Overdrag extends EventEmitter {
     this.offsetY = this.pageY - this.rect.top;
     this.dragging = !this.controlsActive;
     this.element.ownerDocument.addEventListener("mouseup", this.onUp);
-    this.element.setAttribute("overdrag-down", "true");
+    this.element.setAttribute(Overdrag.ATTRIBUTES.DOWN, "");
     this.emit("down", this);
   };
 
@@ -183,7 +202,9 @@ export default class Overdrag extends EventEmitter {
     this.down = false;
     this.dragging = false;
     this.element.ownerDocument.removeEventListener("mouseup", this.onUp);
-    this.element.removeAttribute("overdrag-down");
+    this.element.removeAttribute(Overdrag.ATTRIBUTES.DOWN);
+    this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
+    this.emit("up", this);
     if (this.click) this.emit("click", this);
   };
 
@@ -204,39 +225,44 @@ export default class Overdrag extends EventEmitter {
     );
   }
 
-  setEngagedState() {
-    const current = this.engaged;
-    this.engaged =
+  isEngaged() {
+    return (
       this.pageX >= this.rect.left - this.controlsThreshold &&
       this.pageX <= this.rect.right + this.controlsThreshold &&
       this.pageY >= this.rect.top - this.controlsThreshold &&
-      this.pageY <= this.rect.bottom + this.controlsThreshold;
-
-    this.element.setAttribute(
-      Overdrag.ATTRIBUTES.ENGAGED,
-      this.engaged.toString()
+      this.pageY <= this.rect.bottom + this.controlsThreshold
     );
-
-    if (current != this.engaged) {
-      if (this.engaged) this.emit(Overdrag.EVENTS.ENGAGED, this);
-      else this.emit(Overdrag.EVENTS.DISENGAGED, this);
-    }
   }
 
-  setOverState() {
-    const current = this.over;
-    this.over =
+  isOver() {
+    return (
       this.engaged &&
       this.pageX > this.rect.left + this.controlsThreshold &&
       this.pageX < this.rect.right - this.controlsThreshold &&
       this.pageY > this.rect.top + this.controlsThreshold &&
-      this.pageY < this.rect.bottom - this.controlsThreshold;
+      this.pageY < this.rect.bottom - this.controlsThreshold
+    );
+  }
 
-    this.element.setAttribute(Overdrag.ATTRIBUTES.OVER, this.over.toString());
+  setEngagedState(engaged: boolean) {
+    this.engaged = engaged;
+    if (engaged) {
+      this.element.setAttribute(Overdrag.ATTRIBUTES.ENGAGED, "");
+      this.emit(Overdrag.EVENTS.ENGAGED, this);
+    } else {
+      this.element.removeAttribute(Overdrag.ATTRIBUTES.ENGAGED);
+      this.emit(Overdrag.EVENTS.DISENGAGED, this);
+    }
+  }
 
-    if (current != this.over) {
-      if (this.over) this.emit(Overdrag.EVENTS.OVER, this);
-      else this.emit(Overdrag.EVENTS.OUT, this);
+  setOverState(over: boolean) {
+    this.over = over;
+    if (over) {
+      this.element.setAttribute(Overdrag.ATTRIBUTES.OVER, "");
+      this.emit(Overdrag.EVENTS.OVER, this);
+    } else {
+      this.element.removeAttribute(Overdrag.ATTRIBUTES.OVER);
+      this.emit(Overdrag.EVENTS.OUT, this);
     }
   }
 
@@ -264,12 +290,16 @@ export default class Overdrag extends EventEmitter {
 
     this.controlsActive = this.isControlPointActive();
 
-    this.element.setAttribute(
-      Overdrag.ATTRIBUTES.CONTROLS,
-      Object.keys(this.controls)
-        .filter((key) => this.controls[key as keyof Controls])
-        .join("-")
-    );
+    if (this.controlsActive) {
+      this.element.setAttribute(
+        Overdrag.ATTRIBUTES.CONTROLS,
+        Object.keys(this.controls)
+          .filter((key) => this.controls[key as keyof Controls])
+          .join("-")
+      );
+    } else {
+      this.element.removeAttribute(Overdrag.ATTRIBUTES.CONTROLS);
+    }
 
     if (current != JSON.stringify(this.controls)) {
       if (this.controlsActive) this.emit(Overdrag.EVENTS.CONTROLS_ACTIVE, this);
@@ -331,15 +361,15 @@ export default class Overdrag extends EventEmitter {
     this.emit("resize", this);
   }
 
-  setSize(rect: Partial<DOMRect>) {
-    const newRect = { ...this.rect, ...rect };
-    this.element.style.width = `${newRect.width}px`;
-    this.element.style.height = `${newRect.height}px`;
-    this.element.style.left = `${newRect.left}px`;
-    this.element.style.top = `${newRect.top}px`;
+  setSize(rect: Partial<BoundingBoxRect>) {
+    this.rect = { ...this.rect, ...rect };
+    this.element.style.width = `${this.rect.width}px`;
+    this.element.style.height = `${this.rect.height}px`;
+    this.element.style.left = `${this.rect.left}px`;
+    this.element.style.top = `${this.rect.top}px`;
     // for iframe, images and canvas
-    this.element.setAttribute("width", `${newRect.width}px`);
-    this.element.setAttribute("height", `${newRect.height}px`);
+    this.element.setAttribute("width", `${this.rect.width}px`);
+    this.element.setAttribute("height", `${this.rect.height}px`);
   }
 
   movePointRight() {
@@ -447,7 +477,15 @@ export default class Overdrag extends EventEmitter {
         ? this.parentElement.offsetHeight - this.rect.height
         : y;
 
+    if (
+      this.element.style.left === `${left}px` &&
+      this.element.style.top === `${top}px`
+    ) {
+      this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
+      return;
+    }
     this.setSize({ left, top });
+    this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
     this.emit("drag", this);
   }
 }

@@ -283,9 +283,9 @@ export default class Overdrag extends EventEmitter {
     };
     // distance from edge of margin to the mouse position
     this.offsetX =
-      this.parentMouseX - this.position.rect.left - this.position.margins.left;
+      this.parentMouseX - this.position.rect.left + this.position.margins.left;
     this.offsetY =
-      this.parentMouseY - this.position.rect.top - this.position.margins.top;
+      this.parentMouseY - this.position.rect.top + this.position.margins.top;
     this.dragging = !this.controlsActive;
     this.element.ownerDocument.addEventListener("mouseup", this.onUp);
     this.element.setAttribute(Overdrag.ATTRIBUTES.DOWN, "");

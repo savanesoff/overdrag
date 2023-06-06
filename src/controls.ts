@@ -82,6 +82,7 @@ export default class Overdrag extends EventEmitter {
   static readonly EVENTS = {
     DOWN: "down",
     UP: "up",
+    CLICK: "click",
     DRAG: "drag",
     OVER: "over",
     OUT: "out",
@@ -136,7 +137,9 @@ export default class Overdrag extends EventEmitter {
     top: false,
     bottom: false,
   };
-  events: any;
+
+  downMouseX: number = 0;
+  downMouseY: number = 0;
 
   constructor({
     element,
@@ -280,6 +283,9 @@ export default class Overdrag extends EventEmitter {
     // distance from edge of margin to the mouse position
     this.offsetX = this.parentMouseX - this.position.rect.left;
     this.offsetY = this.parentMouseY - this.position.rect.top;
+
+    this.downMouseX = this.parentMouseX;
+    this.downMouseY = this.parentMouseY;
     this.dragging = !this.controlsActive;
     this.element.ownerDocument.addEventListener("mouseup", this.onUp);
     this.element.setAttribute(Overdrag.ATTRIBUTES.DOWN, "");
@@ -289,21 +295,22 @@ export default class Overdrag extends EventEmitter {
   onUp = (e: MouseEvent) => {
     e.preventDefault();
     Overdrag.activeInstance = null;
-    this.click = this.isClick();
     this.down = false;
     this.dragging = false;
     this.element.ownerDocument.removeEventListener("mouseup", this.onUp);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DOWN);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
-    this.emit("up", this);
-    if (this.click) this.emit("click", this);
+    if (this.isClick()) {
+      this.emit(Overdrag.EVENTS.CLICK, this);
+    }
   };
 
   isClick() {
     return (
-      Math.abs(this.parentMouseX - this.offsetX) <
+      Math.abs(this.parentMouseX - this.downMouseX) <
         this.clickDetectionThreshold &&
-      Math.abs(this.parentMouseY - this.offsetY) < this.clickDetectionThreshold
+      Math.abs(this.parentMouseY - this.downMouseY) <
+        this.clickDetectionThreshold
     );
   }
 

@@ -94,6 +94,8 @@ export default class Overdrag extends EventEmitter {
     CONTROL_LEFT_UPDATE: "control-left-update",
     CONTROL_TOP_UPDATE: "control-top-update",
     CONTROL_BOTTOM_UPDATE: "control-bottom-update",
+    RESIZE: "resize",
+    UPDATE: "update",
   };
   static activeInstance: Overdrag | null = null;
   readonly window = window;
@@ -110,8 +112,6 @@ export default class Overdrag extends EventEmitter {
   controlsActive = false;
   /** Mouse over element status */
   over = false;
-  /** Mouse click status */
-  click = false;
   /** Drag mode status */
   dragging = false;
   /** Mouse Down status */
@@ -171,6 +171,11 @@ export default class Overdrag extends EventEmitter {
 
   private _getInt(value: string | null): number {
     return parseInt(value || "0");
+  }
+
+  emit(eventName: string | symbol, ...args: any[]): boolean {
+    super.emit.apply(this, [Overdrag.EVENTS.UPDATE, this]);
+    return super.emit.apply(this, [eventName, ...args]);
   }
 
   getComputedPosition(): ComputedPosition {
@@ -261,7 +266,6 @@ export default class Overdrag extends EventEmitter {
         this.updateCursorStyle();
       }
     }
-    this.emit("update", this);
   };
 
   onDown = (e: MouseEvent) => {
@@ -672,8 +676,8 @@ export default class Overdrag extends EventEmitter {
     }
 
     if (this.position.rect.left !== left || this.position.rect.top !== top) {
-    this.assignPosition({ left, top });
-    this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
+      this.assignPosition({ left, top });
+      this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
       this.emit(Overdrag.EVENTS.DRAG, this);
     } else {
       this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);

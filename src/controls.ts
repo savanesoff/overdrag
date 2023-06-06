@@ -479,7 +479,7 @@ export default class Overdrag extends EventEmitter {
     this.emit("resize", this);
   }
 
-  setPosition(position: Partial<Position>) {
+  assignPosition(position: Partial<Position>) {
     const current = {
       top: this.position.rect.top,
       left: this.position.rect.left,
@@ -533,7 +533,7 @@ export default class Overdrag extends EventEmitter {
     // actual width of the element
     width = width - boxDiff;
     if (width !== this.position.box.width) {
-      this.setPosition({ width });
+      this.assignPosition({ width });
       this.emit(Overdrag.EVENTS.CONTROL_RIGHT_UPDATE, this);
     }
   }
@@ -564,7 +564,7 @@ export default class Overdrag extends EventEmitter {
     // actual height of the element
     height = height - boxDiff;
     if (height !== this.position.box.height) {
-      this.setPosition({ height });
+      this.assignPosition({ height });
       this.emit(Overdrag.EVENTS.CONTROL_BOTTOM_UPDATE, this);
     }
   }
@@ -589,7 +589,7 @@ export default class Overdrag extends EventEmitter {
       this.downPosition.right - this.parentElement.offsetLeft - left
     );
 
-    this.setPosition({ width, left });
+    this.assignPosition({ width, left });
     this.emit("control-bottom", this);
   }
 
@@ -611,7 +611,7 @@ export default class Overdrag extends EventEmitter {
       this.downPosition.bottom - this.parentElement.offsetTop - top
     );
 
-    this.setPosition({ height, top });
+    this.assignPosition({ height, top });
     this.emit("control-top", this);
   }
 
@@ -648,7 +648,7 @@ export default class Overdrag extends EventEmitter {
       this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
       return;
     }
-    this.setPosition({ left, top });
+    this.assignPosition({ left, top });
     this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
     this.emit("drag", this);
   }

@@ -148,8 +148,24 @@ export default class Overdrag extends EventEmitter {
   getBoundingClientRect(): BoundingBoxRect {
     const { top, right, bottom, left, width, height, x, y } =
       this.element.getBoundingClientRect();
-    //getComputedStyle(this.element)
-    return { top, right, bottom, left, width, height, x, y };
+    const computed = getComputedStyle(this.element);
+
+    return {
+      top: top - this.parentElement.offsetTop,
+      right: right - this.parentElement.offsetLeft,
+      bottom: bottom - this.parentElement.offsetTop,
+      left: left - this.parentElement.offsetLeft,
+      width:
+        width +
+        parseInt(computed.marginLeft || "0") +
+        parseInt(computed.marginRight || "0"),
+      height:
+        height +
+        parseInt(computed.marginTop || "0") +
+        parseInt(computed.marginBottom || "0"),
+      x,
+      y,
+    };
   }
 
   onMove = (e: MouseEvent) => {
@@ -157,8 +173,14 @@ export default class Overdrag extends EventEmitter {
       // another instance is active, ignore this event
       return;
     }
-    this.pageX = e.pageX;
-    this.pageY = e.pageY;
+    this.pageX = e.pageX - this.parentElement.offsetLeft;
+    this.pageY = e.pageY - this.parentElement.offsetTop;
+    if (
+      parseFloat(e.pageX.toString()) !== e.pageX ||
+      parseFloat(e.pageY.toString()) !== e.pageY
+    ) {
+      debugger;
+    }
     if (this.down) {
       // update rect only when mouse is down
       this.rect = this.getBoundingClientRect();
@@ -177,6 +199,7 @@ export default class Overdrag extends EventEmitter {
         this.updateCursorStyle();
       }
     }
+    this.emit("update", this);
   };
 
   onDown = (e: MouseEvent) => {
@@ -363,8 +386,8 @@ export default class Overdrag extends EventEmitter {
 
   setSize(rect: Partial<BoundingBoxRect>) {
     this.rect = { ...this.rect, ...rect };
-    this.element.style.width = `${this.rect.width}px`;
-    this.element.style.height = `${this.rect.height}px`;
+    // this.element.style.width = `${this.rect.width}px`;
+    // this.element.style.height = `${this.rect.height}px`;
     this.element.style.left = `${this.rect.left}px`;
     this.element.style.top = `${this.rect.top}px`;
     // for iframe, images and canvas
@@ -458,8 +481,8 @@ export default class Overdrag extends EventEmitter {
    * if mouse is close enough to the edge of the parent element (snapThreshold)
    */
   drag() {
-    const x = this.pageX - this.offsetX - this.parentElement.offsetLeft;
-    const y = this.pageY - this.offsetY - this.parentElement.offsetTop;
+    const x = this.pageX - this.offsetX;
+    const y = this.pageY - this.offsetY;
     // snap to the edges of the window
     const left =
       x < this.snapThreshold

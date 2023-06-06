@@ -471,6 +471,16 @@ export default class Overdrag extends EventEmitter {
       height: this.position.box.height,
       ...position,
     };
+    // enable precision to avoid deviation when resizing or dragging
+    this.position = {
+      ...this.position,
+      rect: { ...this.position.rect, top: current.top, left: current.left },
+      box: {
+        ...this.position.box,
+        width: current.width,
+        height: current.height,
+      },
+    };
 
     this.element.style.left = `${current.left}px`;
     this.element.style.top = `${current.top}px`;

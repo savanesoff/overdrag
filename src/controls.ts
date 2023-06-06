@@ -471,19 +471,23 @@ export default class Overdrag extends EventEmitter {
   }
 
   reSize() {
+    let changed = false;
     if (this.controls.top) {
-      this.movePointTop();
+      changed = this.movePointTop() || changed;
     }
     if (this.controls.bottom) {
-      this.movePointBottom();
+      changed = this.movePointBottom() || changed;
     }
     if (this.controls.left) {
-      this.movePointLeft();
+      changed = this.movePointLeft() || changed;
     }
     if (this.controls.right) {
-      this.movePointRight();
+      changed = this.movePointRight() || changed;
     }
-    this.emit("resize", this);
+
+    if (changed) {
+      this.emit(Overdrag.EVENTS.RESIZE, this);
+    }
   }
 
   assignPosition(position: Partial<Position>) {
@@ -542,7 +546,9 @@ export default class Overdrag extends EventEmitter {
     if (width !== this.position.box.width) {
       this.assignPosition({ width });
       this.emit(Overdrag.EVENTS.CONTROL_RIGHT_UPDATE, this);
+      return true;
     }
+    return false;
   }
 
   movePointBottom() {
@@ -573,7 +579,9 @@ export default class Overdrag extends EventEmitter {
     if (height !== this.position.box.height) {
       this.assignPosition({ height });
       this.emit(Overdrag.EVENTS.CONTROL_BOTTOM_UPDATE, this);
+      return true;
     }
+    return false;
   }
 
   movePointLeft() {
@@ -597,7 +605,9 @@ export default class Overdrag extends EventEmitter {
     if (left !== this.position.rect.left) {
       this.assignPosition({ width, left });
       this.emit(Overdrag.EVENTS.CONTROL_LEFT_UPDATE, this);
+      return true;
     }
+    return false;
   }
 
   private movePointTop() {
@@ -621,7 +631,9 @@ export default class Overdrag extends EventEmitter {
     if (top !== this.position.rect.top) {
       this.assignPosition({ height, top });
       this.emit(Overdrag.EVENTS.CONTROL_TOP_UPDATE, this);
+      return true;
     }
+    return false;
   }
 
   /**

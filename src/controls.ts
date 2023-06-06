@@ -657,8 +657,13 @@ export default class Overdrag extends EventEmitter {
       this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
       return;
     }
+
+    if (this.position.rect.left !== left || this.position.rect.top !== top) {
     this.assignPosition({ left, top });
     this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
-    this.emit("drag", this);
+      this.emit(Overdrag.EVENTS.DRAG, this);
+    } else {
+      this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
+    }
   }
 }

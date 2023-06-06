@@ -15,15 +15,32 @@ interface ControlProps {
   clickDetectionThreshold?: number;
 }
 
-type BoundingBoxRect = {
+type Box = {
+  width: number;
+  height: number;
+};
+
+type Position = {
+  top: number;
+  left: number;
+  width: number;
+  height: number;
+};
+
+type Rect = {
   top: number;
   right: number;
   bottom: number;
   left: number;
-  width: number;
-  height: number;
-  x: number;
-  y: number;
+};
+
+type ComputedPosition = {
+  rect: Rect;
+  box: Box;
+  fullBox: Box;
+  margins: Rect;
+  borders: Rect;
+  paddings: Rect;
 };
 
 type ControlPoints = "left" | "right" | "top" | "bottom";
@@ -94,18 +111,18 @@ export default class Overdrag extends EventEmitter {
   dragging = false;
   /** Mouse Down status */
   down = false;
-  /** current mouse position relative to window */
-  pageX: number = 0;
-  /** current mouse position relative to window */
-  pageY: number = 0;
+  /** current mouse position relative to parent */
+  parentMouseX: number = 0;
+  /** current mouse position relative to parent */
+  parentMouseY: number = 0;
   /** coordinate at mouse Down event */
   offsetX: number = 0;
   /** coordinate at mouse Down event */
   offsetY: number = 0;
   /** Element rect on last mouse move event */
-  rect: BoundingBoxRect;
+  position: ComputedPosition;
   /** Element rect on last mouse down event */
-  downRect: BoundingBoxRect;
+  downPosition: ComputedPosition;
 
   cursorSet = false;
   /** Control points activation status (Edge of element) */
@@ -139,32 +156,83 @@ export default class Overdrag extends EventEmitter {
 
     this.parentElement = this.element.offsetParent as HTMLElement;
 
-    this.rect = this.downRect = this.getBoundingClientRect();
+    this.position = this.downPosition = this.getComputedPosition();
     this.window.addEventListener("mousemove", this.onMove);
     this.window.addEventListener("mousedown", this.onDown);
     // TODO ensure the min width and height is respected
   }
 
-  getBoundingClientRect(): BoundingBoxRect {
-    const { top, right, bottom, left, width, height, x, y } =
-      this.element.getBoundingClientRect();
+  private _getInt(value: string | null): number {
+    return parseInt(value || "0");
+  }
+
+  getComputedPosition(): ComputedPosition {
     const computed = getComputedStyle(this.element);
 
+    const margins = {
+      top: this._getInt(computed.marginTop),
+      right: this._getInt(computed.marginRight),
+      bottom: this._getInt(computed.marginBottom),
+      left: this._getInt(computed.marginLeft),
+    };
+    const borders = {
+      top: this._getInt(computed.borderTopWidth),
+      right: this._getInt(computed.borderRightWidth),
+      bottom: this._getInt(computed.borderBottomWidth),
+      left: this._getInt(computed.borderLeftWidth),
+    };
+    const paddings = {
+      top: this._getInt(computed.paddingTop),
+      right: this._getInt(computed.paddingRight),
+      bottom: this._getInt(computed.paddingBottom),
+      left: this._getInt(computed.paddingLeft),
+    };
+    const top = this._getInt(computed.top) + margins.top; // exclude margins
+    const left = this._getInt(computed.left) + margins.left; // exclude margins
+    const width = this._getInt(computed.width);
+    const height = this._getInt(computed.height);
     return {
-      top: top - this.parentElement.offsetTop,
-      right: right - this.parentElement.offsetLeft,
-      bottom: bottom - this.parentElement.offsetTop,
-      left: left - this.parentElement.offsetLeft,
-      width:
-        width +
-        parseInt(computed.marginLeft || "0") +
-        parseInt(computed.marginRight || "0"),
-      height:
-        height +
-        parseInt(computed.marginTop || "0") +
-        parseInt(computed.marginBottom || "0"),
-      x,
-      y,
+      rect: {
+        // visual bounds, which exclude margins
+        top,
+        left,
+        right:
+          left +
+          width +
+          borders.right +
+          borders.left +
+          paddings.right +
+          paddings.left,
+        bottom:
+          top +
+          height +
+          borders.top +
+          borders.bottom +
+          paddings.top +
+          paddings.bottom,
+      },
+      box: { width, height },
+      fullBox: {
+        width:
+          width +
+          borders.right +
+          borders.left +
+          paddings.right +
+          paddings.left +
+          margins.right +
+          margins.left,
+        height:
+          height +
+          borders.top +
+          borders.bottom +
+          paddings.top +
+          paddings.bottom +
+          margins.top +
+          margins.bottom,
+      },
+      margins,
+      borders,
+      paddings,
     };
   }
 
@@ -173,17 +241,12 @@ export default class Overdrag extends EventEmitter {
       // another instance is active, ignore this event
       return;
     }
-    this.pageX = e.pageX - this.parentElement.offsetLeft;
-    this.pageY = e.pageY - this.parentElement.offsetTop;
-    if (
-      parseFloat(e.pageX.toString()) !== e.pageX ||
-      parseFloat(e.pageY.toString()) !== e.pageY
-    ) {
-      debugger;
-    }
+    this.parentMouseX = e.pageX - this.parentElement.offsetLeft;
+    this.parentMouseY = e.pageY - this.parentElement.offsetTop;
+
     if (this.down) {
       // update rect only when mouse is down
-      this.rect = this.getBoundingClientRect();
+      this.position = this.getComputedPosition();
 
       if (this.dragging) {
         this.drag();
@@ -209,9 +272,20 @@ export default class Overdrag extends EventEmitter {
     e.preventDefault();
     Overdrag.activeInstance = this;
     this.down = true;
-    this.downRect = this.rect;
-    this.offsetX = this.pageX - this.rect.left;
-    this.offsetY = this.pageY - this.rect.top;
+    // deep copy
+    this.downPosition = {
+      box: { ...this.position.box },
+      fullBox: { ...this.position.fullBox },
+      rect: { ...this.position.rect },
+      borders: { ...this.position.borders },
+      margins: { ...this.position.margins },
+      paddings: { ...this.position.paddings },
+    };
+    // distance from edge of margin to the mouse position
+    this.offsetX =
+      this.parentMouseX - this.position.rect.left - this.position.margins.left;
+    this.offsetY =
+      this.parentMouseY - this.position.rect.top - this.position.margins.top;
     this.dragging = !this.controlsActive;
     this.element.ownerDocument.addEventListener("mouseup", this.onUp);
     this.element.setAttribute(Overdrag.ATTRIBUTES.DOWN, "");
@@ -233,8 +307,9 @@ export default class Overdrag extends EventEmitter {
 
   isClick() {
     return (
-      Math.abs(this.pageX - this.offsetX) < this.clickDetectionThreshold &&
-      Math.abs(this.pageY - this.offsetY) < this.clickDetectionThreshold
+      Math.abs(this.parentMouseX - this.offsetX) <
+        this.clickDetectionThreshold &&
+      Math.abs(this.parentMouseY - this.offsetY) < this.clickDetectionThreshold
     );
   }
 
@@ -250,20 +325,20 @@ export default class Overdrag extends EventEmitter {
 
   isEngaged() {
     return (
-      this.pageX >= this.rect.left - this.controlsThreshold &&
-      this.pageX <= this.rect.right + this.controlsThreshold &&
-      this.pageY >= this.rect.top - this.controlsThreshold &&
-      this.pageY <= this.rect.bottom + this.controlsThreshold
+      this.parentMouseX >= this.position.rect.left - this.controlsThreshold &&
+      this.parentMouseX <= this.position.rect.right + this.controlsThreshold &&
+      this.parentMouseY >= this.position.rect.top - this.controlsThreshold &&
+      this.parentMouseY <= this.position.rect.bottom + this.controlsThreshold
     );
   }
 
   isOver() {
     return (
       this.engaged &&
-      this.pageX > this.rect.left + this.controlsThreshold &&
-      this.pageX < this.rect.right - this.controlsThreshold &&
-      this.pageY > this.rect.top + this.controlsThreshold &&
-      this.pageY < this.rect.bottom - this.controlsThreshold
+      this.parentMouseX > this.position.rect.left + this.controlsThreshold &&
+      this.parentMouseX < this.position.rect.right - this.controlsThreshold &&
+      this.parentMouseY > this.position.rect.top + this.controlsThreshold &&
+      this.parentMouseY < this.position.rect.bottom - this.controlsThreshold
     );
   }
 
@@ -302,13 +377,17 @@ export default class Overdrag extends EventEmitter {
           false;
     } else {
       this.controls.left =
-        Math.abs(this.pageX - this.rect.left) <= this.controlsThreshold;
+        Math.abs(this.parentMouseX - this.position.rect.left) <=
+        this.controlsThreshold;
       this.controls.right =
-        Math.abs(this.pageX - this.rect.right) <= this.controlsThreshold;
+        Math.abs(this.parentMouseX - this.position.rect.right) <=
+        this.controlsThreshold;
       this.controls.top =
-        Math.abs(this.pageY - this.rect.top) <= this.controlsThreshold;
+        Math.abs(this.parentMouseY - this.position.rect.top) <=
+        this.controlsThreshold;
       this.controls.bottom =
-        Math.abs(this.pageY - this.rect.bottom) <= this.controlsThreshold;
+        Math.abs(this.parentMouseY - this.position.rect.bottom) <=
+        this.controlsThreshold;
     }
 
     this.controlsActive = this.isControlPointActive();
@@ -384,33 +463,39 @@ export default class Overdrag extends EventEmitter {
     this.emit("resize", this);
   }
 
-  setSize(rect: Partial<BoundingBoxRect>) {
-    this.rect = { ...this.rect, ...rect };
-    // this.element.style.width = `${this.rect.width}px`;
-    // this.element.style.height = `${this.rect.height}px`;
-    this.element.style.left = `${this.rect.left}px`;
-    this.element.style.top = `${this.rect.top}px`;
+  setPosition(position: Partial<Position>) {
+    const current = {
+      top: this.position.rect.top,
+      left: this.position.rect.left,
+      width: this.position.box.width,
+      height: this.position.box.height,
+      ...position,
+    };
+
+    this.element.style.left = `${current.left}px`;
+    this.element.style.top = `${current.top}px`;
     // for iframe, images and canvas
-    this.element.setAttribute("width", `${this.rect.width}px`);
-    this.element.setAttribute("height", `${this.rect.height}px`);
+    this.element.setAttribute("width", `${current.width}px`);
+    this.element.setAttribute("height", `${current.height}px`);
   }
 
   movePointRight() {
     // ensure the element never goes outside of the parent
-    const maxWidth =
-      this.parentElement.offsetWidth - parseInt(this.element.style.left);
+    const maxWidth = this.parentElement.offsetWidth - this.position.left;
     // ensure the element never goes below the minimum width
     let width = Math.max(
       this.minWidth,
       Math.min(
         // track the mouse position and set width accordingly
-        this.pageX - this.downRect.left + (this.downRect.width - this.offsetX),
+        this.parentMouseX -
+          this.downPosition.left +
+          (this.downPosition.width - this.offsetX),
         maxWidth
       )
     );
     // snap to the parent right edge if within the threshold
     width = width > maxWidth - this.snapThreshold ? maxWidth : width;
-    this.setSize({ width });
+    this.setPosition({ width });
     this.emit("control-right", this);
   }
 
@@ -423,13 +508,15 @@ export default class Overdrag extends EventEmitter {
       this.minHeight,
       Math.min(
         // track the mouse position and set width accordingly
-        this.pageY - this.downRect.top + (this.downRect.height - this.offsetY),
+        this.parentMouseY -
+          this.downPosition.top +
+          (this.downPosition.height - this.offsetY),
         maxHeight
       )
     );
     // snap to the parent bottom  edge if within the threshold
     height = height > maxHeight - this.snapThreshold ? maxHeight : height;
-    this.setSize({ height });
+    this.setPosition({ height });
     this.emit("control-bottom", this);
   }
 
@@ -438,9 +525,9 @@ export default class Overdrag extends EventEmitter {
       0,
       Math.min(
         // track the mouse position and set left accordingly
-        this.pageX - this.parentElement.offsetLeft - this.offsetX,
+        this.parentMouseX - this.parentElement.offsetLeft - this.offsetX,
         // max left, otherwise we'll push the element to the right
-        this.downRect.right - this.minWidth - this.parentElement.offsetLeft
+        this.downPosition.right - this.minWidth - this.parentElement.offsetLeft
       )
     );
     // snap to the parent left edge if within the threshold
@@ -448,10 +535,10 @@ export default class Overdrag extends EventEmitter {
     // update width accordingly
     const width = Math.max(
       this.minWidth,
-      this.downRect.right - this.parentElement.offsetLeft - left
+      this.downPosition.right - this.parentElement.offsetLeft - left
     );
 
-    this.setSize({ width, left });
+    this.setPosition({ width, left });
     this.emit("control-bottom", this);
   }
 
@@ -459,8 +546,8 @@ export default class Overdrag extends EventEmitter {
     let top = Math.max(
       0,
       Math.min(
-        this.pageY - this.parentElement.offsetTop - this.offsetY,
-        this.downRect.bottom - this.minHeight - this.parentElement.offsetTop
+        this.parentMouseY - this.parentElement.offsetTop - this.offsetY,
+        this.downPosition.bottom - this.minHeight - this.parentElement.offsetTop
       )
     );
     // snap to the parent top edge if within the threshold
@@ -468,10 +555,10 @@ export default class Overdrag extends EventEmitter {
     // update height accordingly
     const height = Math.max(
       this.minHeight,
-      this.downRect.bottom - this.parentElement.offsetTop - top
+      this.downPosition.bottom - this.parentElement.offsetTop - top
     );
 
-    this.setSize({ height, top });
+    this.setPosition({ height, top });
     this.emit("control-top", this);
   }
 
@@ -481,23 +568,24 @@ export default class Overdrag extends EventEmitter {
    * if mouse is close enough to the edge of the parent element (snapThreshold)
    */
   drag() {
-    const x = this.pageX - this.offsetX;
-    const y = this.pageY - this.offsetY;
+    // edge of element relative to parent according to current mouse position (includes margins)
+    const x = this.parentMouseX - this.offsetX;
+    const y = this.parentMouseY - this.offsetY;
     // snap to the edges of the window
     const left =
       x < this.snapThreshold
         ? 0
-        : x + this.rect.width + this.snapThreshold >
+        : x + this.position.fullBox.width + this.snapThreshold >=
           this.parentElement.offsetWidth
-        ? this.parentElement.offsetWidth - this.rect.width
+        ? this.parentElement.offsetWidth - this.position.fullBox.width
         : x;
     // snap to the edges of the window
     const top =
       y < this.snapThreshold
         ? 0
-        : y + this.rect.height + this.snapThreshold >
+        : y + this.position.fullBox.height + this.snapThreshold >
           this.parentElement.offsetHeight
-        ? this.parentElement.offsetHeight - this.rect.height
+        ? this.parentElement.offsetHeight - this.position.fullBox.height
         : y;
 
     if (
@@ -507,7 +595,7 @@ export default class Overdrag extends EventEmitter {
       this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
       return;
     }
-    this.setSize({ left, top });
+    this.setPosition({ left, top });
     this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
     this.emit("drag", this);
   }

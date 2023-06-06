@@ -570,49 +570,51 @@ export default class Overdrag extends EventEmitter {
   }
 
   movePointLeft() {
+    const boxDiff = this.position.fullBox.width - this.position.box.width;
+    const minWidth = this.minContentWidth + boxDiff;
     let left = Math.max(
       0,
       Math.min(
         // track the mouse position and set left accordingly
-        this.parentMouseX - this.parentElement.offsetLeft - this.offsetX,
+        this.parentMouseX - this.offsetX,
         // max left, otherwise we'll push the element to the right
-        this.downPosition.right -
-          this.minContentWidth -
-          this.parentElement.offsetLeft
+        this.downPosition.rect.right - minWidth
       )
     );
     // snap to the parent left edge if within the threshold
     left = left < this.snapThreshold ? 0 : left;
     // update width accordingly
-    const width = Math.max(
-      this.minContentWidth,
-      this.downPosition.right - this.parentElement.offsetLeft - left
-    );
+    const width =
+      Math.max(minWidth, this.downPosition.rect.right - left) - boxDiff;
 
-    this.assignPosition({ width, left });
-    this.emit("control-bottom", this);
+    if (left !== this.position.rect.left) {
+      this.assignPosition({ width, left });
+      this.emit(Overdrag.EVENTS.CONTROL_LEFT_UPDATE, this);
+    }
   }
 
   private movePointTop() {
+    const boxDiff = this.position.fullBox.height - this.position.box.height;
+    const minHeight = this.minContentHeight + boxDiff;
     let top = Math.max(
       0,
       Math.min(
-        this.parentMouseY - this.parentElement.offsetTop - this.offsetY,
-        this.downPosition.bottom -
-          this.minContentHeight -
-          this.parentElement.offsetTop
+        // track the mouse position and set top accordingly
+        this.parentMouseY - this.offsetY,
+        // max top, otherwise we'll push the element to the right
+        this.downPosition.rect.bottom - minHeight
       )
     );
     // snap to the parent top edge if within the threshold
     top = top < this.snapThreshold ? 0 : top;
     // update height accordingly
-    const height = Math.max(
-      this.minContentHeight,
-      this.downPosition.bottom - this.parentElement.offsetTop - top
-    );
+    const height =
+      Math.max(minHeight, this.downPosition.rect.bottom - top) - boxDiff;
 
-    this.assignPosition({ height, top });
-    this.emit("control-top", this);
+    if (top !== this.position.rect.top) {
+      this.assignPosition({ height, top });
+      this.emit(Overdrag.EVENTS.CONTROL_TOP_UPDATE, this);
+    }
   }
 
   /**

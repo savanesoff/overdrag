@@ -289,7 +289,7 @@ export default class Overdrag extends EventEmitter {
     this.dragging = !this.controlsActive;
     this.window.addEventListener("mouseup", this.onUp);
     this.element.setAttribute(Overdrag.ATTRIBUTES.DOWN, "");
-    this.emit("down", this);
+    this.emit(Overdrag.EVENTS.DOWN, this);
   };
 
   onUp = (e: MouseEvent) => {
@@ -300,6 +300,7 @@ export default class Overdrag extends EventEmitter {
     this.window.removeEventListener("mouseup", this.onUp);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DOWN);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
+    this.emit(Overdrag.EVENTS.UP, this);
     if (this.isClick()) {
       this.emit(Overdrag.EVENTS.CLICK, this);
     }

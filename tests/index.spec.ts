@@ -40,8 +40,8 @@ const mockBounds = {
 };
 
 const elementMinBox = {
-  width: 150 + Math.round(Math.random() * 100),
-  height: 150 + Math.round(Math.random() * 100),
+  width: 50 + Math.round(Math.random() * 100),
+  height: 50 + Math.round(Math.random() * 100),
 };
 
 function getMockedOffsetParentElement() {
@@ -793,13 +793,132 @@ describe("Overdrag", () => {
         const top = overdrag.position.rect.top;
         const left = overdrag.position.rect.left;
         move(overdrag, {
-          x: overdrag.controlsThreshold + 11,
-          y: overdrag.controlsThreshold + 11,
+          x: overdrag.controlsThreshold + 5,
+          y: overdrag.controlsThreshold + 5,
         });
 
         expect(overdrag.position.rect.top).not.toBe(top);
         expect(overdrag.position.rect.left).not.toBe(left);
 
+        expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.DRAG, overdrag);
+        expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DRAG, "");
+      });
+
+      it("should snap to top of parent", () => {
+        const overdrag = createInstance();
+
+        const emitSpy = jest.spyOn(overdrag, "emit");
+        const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+
+        down(overdrag, {
+          x: overdrag.controlsThreshold + 1,
+          y: overdrag.controlsThreshold + 1,
+        });
+        move(overdrag, {
+          y: -10000,
+        });
+
+        expect(overdrag.position.rect.top).toBe(0);
+
+        move(overdrag, {
+          y: overdrag.snapThreshold - 1,
+        });
+
+        expect(overdrag.position.rect.top).toBe(0);
+        expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.DRAG, overdrag);
+        expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DRAG, "");
+      });
+
+      it("should snap to bottom of parent", () => {
+        const overdrag = createInstance();
+
+        const emitSpy = jest.spyOn(overdrag, "emit");
+        const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+
+        down(overdrag, {
+          x: overdrag.controlsThreshold + 1,
+          y: overdrag.controlsThreshold + 1,
+        });
+
+        move(overdrag, {
+          y: 10000,
+        });
+
+        expect(overdrag.position.rect.top).toBe(
+          overdrag.parentElement.offsetHeight - overdrag.position.fullBox.height
+        );
+
+        move(overdrag, {
+          y:
+            overdrag.parentElement.offsetHeight -
+            overdrag.position.fullBox.height -
+            overdrag.snapThreshold +
+            1,
+        });
+
+        expect(overdrag.position.rect.top).toBe(
+          overdrag.parentElement.offsetHeight - overdrag.position.fullBox.height
+        );
+        expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.DRAG, overdrag);
+        expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DRAG, "");
+      });
+
+      it("should snap to left of parent", () => {
+        const overdrag = createInstance();
+
+        const emitSpy = jest.spyOn(overdrag, "emit");
+        const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+
+        down(overdrag, {
+          x: overdrag.controlsThreshold + 1,
+          y: overdrag.controlsThreshold + 1,
+        });
+
+        move(overdrag, {
+          x: -10000,
+        });
+
+        expect(overdrag.position.rect.left).toBe(0);
+
+        move(overdrag, {
+          x: overdrag.snapThreshold - 1,
+        });
+
+        expect(overdrag.position.rect.left).toBe(0);
+        expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.DRAG, overdrag);
+        expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DRAG, "");
+      });
+
+      it("should snap to right of parent", () => {
+        const overdrag = createInstance();
+
+        const emitSpy = jest.spyOn(overdrag, "emit");
+        const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+
+        down(overdrag, {
+          x: overdrag.controlsThreshold + 1,
+          y: overdrag.controlsThreshold + 1,
+        });
+
+        move(overdrag, {
+          x: 10000,
+        });
+
+        expect(overdrag.position.rect.left).toBe(
+          overdrag.parentElement.offsetWidth - overdrag.position.fullBox.width
+        );
+
+        move(overdrag, {
+          x:
+            overdrag.parentElement.offsetWidth -
+            overdrag.position.fullBox.width -
+            overdrag.snapThreshold +
+            1,
+        });
+
+        expect(overdrag.position.rect.left).toBe(
+          overdrag.parentElement.offsetWidth - overdrag.position.fullBox.width
+        );
         expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.DRAG, overdrag);
         expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DRAG, "");
       });

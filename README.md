@@ -39,7 +39,7 @@ The Overdrag class constructor accepts an object with the following properties:
 - `controlsThreshold` (optional, default: `Overdrag.DEFAULTS.controlsThreshold`): The distance to the edge of the element (top, left, bottom, right) when the element should show resize cursor and activate control points.
 - `clickDetectionThreshold` (optional, default: `Overdrag.DEFAULTS.clickDetectionThreshold`): The threshold distance to detect a click event. If you've started dragging the element, mouse up event will not trigger `click` event.
 
-(see complete list of defaults as [Overdrag.DEFAULTS](https://github.com/savanesoff/overdrag/blob/9353da709c8480720ae94befe8dac3bdd1f1297b/src/controls.ts#L56-L62))
+(see complete list of defaults as [Overdrag.DEFAULTS](https://github.com/savanesoff/overdrag/blob/9353da709c8480720ae94befe8dac3bdd1f1297b/src/index.ts#L56-L62))
 
 ### Example
 
@@ -116,7 +116,7 @@ The available events are:
 - `resize`: Triggered during resizing on every mouse move (if size change detected).
 - `update`: Triggered on any update to the element.
 
-(see complete list of events listed at [Overdrag.EVENTS](https://github.com/savanesoff/overdrag/blob/03703d44dfccedab57d67463aa49bd733902b832/src/controls.ts#L99-L132))
+(see complete list of events listed at [Overdrag.EVENTS](https://github.com/savanesoff/overdrag/blob/03703d44dfccedab57d67463aa49bd733902b832/src/index.ts#L99-L132))
 
 ## Element Action Attributes ⚙️
 
@@ -142,7 +142,7 @@ Say you want your element to change background color while its engaged, here is 
 - `data-overdrag-drag`: Set while element is dragged.
 - `data-overdrag-resize`: Set while element is being resized with a value of side used to resize element. (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-resize="right"`
 
-(see complete list of action attributes listed at [Overdrag.ATTRIBUTES](https://github.com/savanesoff/overdrag/blob/03703d44dfccedab57d67463aa49bd733902b832/src/controls.ts#L63-L76))
+(see complete list of action attributes listed at [Overdrag.ATTRIBUTES](https://github.com/savanesoff/overdrag/blob/03703d44dfccedab57d67463aa49bd733902b832/src/index.ts#L63-L76))
 
 ## Cursor 👆
 
@@ -162,7 +162,7 @@ At every point of interaction with a controlled element, mouse cursor will be se
 - `grab`: 👆 Set while mouse is over the element pass the control sensors.
 - `default`: ⬆️ Set while no interactions are detected.
 
-(see complete list of cursor values listed at [Overdrag.CURSOR](https://github.com/savanesoff/overdrag/blob/03703d44dfccedab57d67463aa49bd733902b832/src/controls.ts#L77-L98))
+(see complete list of cursor values listed at [Overdrag.CURSOR](https://github.com/savanesoff/overdrag/blob/03703d44dfccedab57d67463aa49bd733902b832/src/index.ts#L77-L98))
 
 # PS
 

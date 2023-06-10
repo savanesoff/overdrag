@@ -1,4 +1,4 @@
-import EventEmitter from "events";
+import EventEmitter from "eventemitter3";
 
 export interface ControlProps {
   /** min height of DOM element in PX. This will prevent resizing smaller than the value. */

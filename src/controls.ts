@@ -487,7 +487,7 @@ export default class Overdrag extends EventEmitter {
   }
 
   updateCursorStyle() {
-    let cursor = null;
+    let cursor: null | string = null;
     if (!this.engaged && this.cursorSet) {
       // reset cursor
       this.window.document.body.style.setProperty(

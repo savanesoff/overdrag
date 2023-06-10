@@ -329,12 +329,27 @@ export default class Overdrag extends EventEmitter {
     );
   }
 
+  /**
+   * Whether the mouse is over the element
+   */
   isEngaged() {
     return (
-      this.parentMouseX >= this.position.rect.left - this.controlsThreshold &&
-      this.parentMouseX <= this.position.rect.right + this.controlsThreshold &&
-      this.parentMouseY >= this.position.rect.top - this.controlsThreshold &&
-      this.parentMouseY <= this.position.rect.bottom + this.controlsThreshold
+      this.parentMouseX >=
+        this.position.rect.left +
+          this.position.margins.left -
+          this.controlsThreshold &&
+      this.parentMouseX <=
+        this.position.rect.right -
+          this.position.margins.right +
+          this.controlsThreshold &&
+      this.parentMouseY >=
+        this.position.rect.top +
+          this.position.margins.top -
+          this.controlsThreshold &&
+      this.parentMouseY <=
+        this.position.rect.bottom -
+          this.position.margins.bottom +
+          this.controlsThreshold
     );
   }
 

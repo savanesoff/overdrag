@@ -12,7 +12,7 @@
     "skipLibCheck": false,
     "declaration": true,
     "declarationMap": true,
-    "allowSyntheticDefaultImports": false
+    "allowSyntheticDefaultImports": true
   },
   "files": ["./src/index.ts"]
 }

@@ -130,7 +130,7 @@ Say you want your element to change background color while its engaged, here is 
 
 ```CSS
 #element-id[data-overdrag-engaged]{
-    // change style while element is engaged
+    /* change style while element is engaged */
     background-color: red;
 }
 ```
@@ -144,7 +144,7 @@ Say you want your element to change background color while its engaged, here is 
 - `data-overdrag-drag`: Set while element is dragged.
 - `data-overdrag-resize`: Set while element is being resized with a value of side used to resize element. (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-resize="right"`
 
-(see complete list of action attributes listed at `Overdrag.ATTRIBUTES`)
+(see complete list of action attributes listed at [Overdrag.ATTRIBUTES](https://github.com/savanesoff/overdrag/blob/cc996dc60e193e8810175e7d055603ede9017b1f/src/controls.ts#L63)
 
 ## Cursor 👆
 

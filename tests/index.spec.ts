@@ -48,8 +48,8 @@ function getMockedOffsetParentElement() {
   return {
     offsetLeft: Math.round(Math.random() * 100),
     offsetTop: Math.round(Math.random() * 100),
-    offsetWidth: elementMinBox.width * 2 + Math.round(Math.random() * 1000),
-    offsetHeight: elementMinBox.height * 2 + Math.round(Math.random() * 1000),
+    offsetWidth: elementMinBox.width * 10 + Math.round(Math.random() * 1000),
+    offsetHeight: elementMinBox.height * 10 + Math.round(Math.random() * 1000),
   };
 }
 
@@ -923,5 +923,83 @@ describe("Overdrag", () => {
         expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DRAG, "");
       });
     });
+  });
+
+  describe("resize", () => {
+    afterEach(() => {
+      Overdrag.activeInstance = null;
+      jest.clearAllMocks();
+    });
+
+    function down(overdrag: Overdrag, { x = 0, y = 0 }) {
+      const coord = {
+        pageX: overdrag.parentElement.offsetLeft + x,
+        pageY: overdrag.parentElement.offsetTop + y,
+      };
+
+      overdrag.onMove(coord as MouseEvent);
+      overdrag.onDown({ preventDefault: () => {} } as MouseEvent);
+    }
+
+    function move(overdrag: Overdrag, { x = 0, y = 0 }) {
+      const coord = {
+        pageX: overdrag.parentElement.offsetLeft + x,
+        pageY: overdrag.parentElement.offsetTop + y,
+      };
+
+      overdrag.onMove(coord as MouseEvent);
+    }
+
+    it("should resize when right control point moved", () => {
+      const overdrag = createInstance();
+
+      const emitSpy = jest.spyOn(overdrag, "emit");
+      const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+
+      down(overdrag, {
+        x: overdrag.position.rect.right - overdrag.position.margins.right,
+        y: overdrag.position.rect.top + overdrag.position.fullBox.height / 2,
+      });
+
+      const right = overdrag.position.rect.right;
+
+      expect(overdrag.controls.right).toBe(true);
+
+      move(overdrag, {
+        x: overdrag.position.rect.right,
+        y: overdrag.position.rect.top + overdrag.position.fullBox.height / 2,
+      });
+
+      expect(overdrag.position.rect.right).toBe(right);
+
+      expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.RESIZE, overdrag);
+      expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.RESIZE, "right");
+    });
+
+    // it("should resize when left control point moved", () => {
+    //   const overdrag = createInstance();
+
+    //   const emitSpy = jest.spyOn(overdrag, "emit");
+    //   const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+
+    //   down(overdrag, {
+    //     x: overdrag.position.rect.left + overdrag.position.margins.left,
+    //     y: overdrag.position.rect.top + overdrag.position.fullBox.height / 2,
+    //   });
+
+    //   const left = overdrag.position.rect.left;
+
+    //   expect(overdrag.controls.left).toBe(true);
+
+    //   move(overdrag, {
+    //     x: overdrag.position.rect.left,
+    //     y: overdrag.position.rect.top + overdrag.position.fullBox.height / 2,
+    //   });
+
+    //   expect(overdrag.position.rect.left).toBe(overdrag.position.margins.left);
+
+    //   expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.RESIZE, overdrag);
+    //   expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.RESIZE, "left");
+    // });
   });
 });

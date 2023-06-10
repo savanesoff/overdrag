@@ -1,6 +1,5 @@
 // @ts-ignore-file
-import Overdrag from "../src";
-import { ControlProps } from "../src/controls";
+import Overdrag, { ControlProps } from "../src";
 
 // Mock the window object
 const mockWindow = {

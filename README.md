@@ -39,7 +39,7 @@ The Overdrag class constructor accepts an object with the following properties:
 - `controlsThreshold` (optional, default: `Overdrag.DEFAULTS.controlsThreshold`): The distance to the edge of the element (top, left, bottom, right) when the element should show resize cursor and activate control points.
 - `clickDetectionThreshold` (optional, default: `Overdrag.DEFAULTS.clickDetectionThreshold`): The threshold distance to detect a click event. If you've started dragging the element, mouse up event will not trigger `click` event.
 
-(see complete list of defaults as `Overdrag.DEFAULTS`)
+(see complete list of defaults as [Overdrag.DEFAULTS](https://github.com/savanesoff/overdrag/blob/9353da709c8480720ae94befe8dac3bdd1f1297b/src/controls.ts#L56-L62))
 
 ### Example
 

@@ -66,6 +66,7 @@ export default class Overdrag extends EventEmitter {
     OVER: "data-overdrag-over",
     DOWN: "data-overdrag-down",
     DRAG: "data-overdrag-drag",
+    RESIZE: "data-overdrag-resize",
   };
   static readonly CURSOR = {
     LEFT: "w-resize",
@@ -304,6 +305,7 @@ export default class Overdrag extends EventEmitter {
     this.window.removeEventListener("mouseup", this.onUp);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DOWN);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
+    this.element.removeAttribute(Overdrag.ATTRIBUTES.RESIZE);
     this.emit(Overdrag.EVENTS.UP, this);
     if (this.isClick()) {
       this.emit(Overdrag.EVENTS.CLICK, this);
@@ -507,6 +509,12 @@ export default class Overdrag extends EventEmitter {
 
     if (changed) {
       this.emit(Overdrag.EVENTS.RESIZE, this);
+      this.element.setAttribute(
+        Overdrag.ATTRIBUTES.RESIZE,
+        Object.keys(this.controls)
+          .filter((key) => this.controls[key as keyof Controls])
+          .join("-")
+      );
     }
   }
 

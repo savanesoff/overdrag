@@ -2,7 +2,7 @@
   "name": "overdrag",
   "private": false,
   "version": "0.1.0",
-  "description": "A simple drag and resize element library, with control points",
+  "description": "A simple drag and resize element library, with control points, events and more...",
   "license": "MIT",
   "keywords": [
     "drag",

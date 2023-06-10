@@ -63,9 +63,8 @@ Controlled element is bound by its parent bounds and requires parent element to 
 
 While hovering near and/or over the edge of controlled element (left, right, top, bottom), that includes border sizes a corresponding control point will be activated. Pressing mouse down and initiating a drag will move corresponding size of the element, thereby resizing element.
 
-```(NOTE)
-Two control points can be activated at once, ex: top-right, in which case dragging mouse around will resize both: width and height of controlled element.
-```
+> **_NOTE_**
+> Two control points can be activated at once, ex: top-right, in which case dragging mouse around will resize both: width and height of controlled element.
 
 Maximum size is determined by the size of the offset parent, however, a margin values of controlled element are respected, so if controlled element has a right-margin value of `10` the max width of the element will be no larger than `offsetParent.width - 10px`
 
@@ -81,9 +80,8 @@ In both cases, `drag` and `resize` the edge of controlled element will snap to t
 
 Sensitivity of control points is determined by the `controlsThreshold` value, where control point is activated if mouse cursor distance to the control point of element is equal to of less than `controlsThreshold` value.
 
-```NOTE
-This allows for a better control precision of when control points become active, preventing edge hunting to activate controls
-```
+> **_NOTE_**
+> This allows for a better control precision of when control points become active, preventing edge hunting to activate controls
 
 ## Events 📻
 
@@ -118,7 +116,7 @@ The available events are:
 - `resize`: Triggered during resizing on every mouse move (if size change detected).
 - `update`: Triggered on any update to the element.
 
-(see complete list of events listed at `Overdrag.EVENTS`)
+(see complete list of events listed at [Overdrag.EVENTS](https://github.com/savanesoff/overdrag/blob/03703d44dfccedab57d67463aa49bd733902b832/src/controls.ts#L99-L132))
 
 ## Element Action Attributes ⚙️
 
@@ -144,15 +142,14 @@ Say you want your element to change background color while its engaged, here is 
 - `data-overdrag-drag`: Set while element is dragged.
 - `data-overdrag-resize`: Set while element is being resized with a value of side used to resize element. (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-resize="right"`
 
-(see complete list of action attributes listed at [Overdrag.ATTRIBUTES](https://github.com/savanesoff/overdrag/blob/cc996dc60e193e8810175e7d055603ede9017b1f/src/controls.ts#L63)
+(see complete list of action attributes listed at [Overdrag.ATTRIBUTES](https://github.com/savanesoff/overdrag/blob/03703d44dfccedab57d67463aa49bd733902b832/src/controls.ts#L63-L76))
 
 ## Cursor 👆
 
 At every point of interaction with a controlled element, mouse cursor will be set according to the mouse position relative to element control points and being over the content area.
 
-```NOTE
-Mouse cursor is set globally on a `document.body`, which may interfere with elements inside or outside controlled element
-```
+> **_NOTE_**
+> Mouse cursor is set globally on a `document.body`, which may interfere with elements inside or outside controlled element
 
 - `w-resize`: ↔️ Set while LEFT control sensor is activated (including sensitivity area)
 - `e-resize`: ↔️ Set while RIGHT control sensor is activated (including sensitivity area).
@@ -165,7 +162,7 @@ Mouse cursor is set globally on a `document.body`, which may interfere with elem
 - `grab`: 👆 Set while mouse is over the element pass the control sensors.
 - `default`: ⬆️ Set while no interactions are detected.
 
-(see complete list of cursor values listed at `Overdrag.CURSOR`)
+(see complete list of cursor values listed at [Overdrag.CURSOR](https://github.com/savanesoff/overdrag/blob/03703d44dfccedab57d67463aa49bd733902b832/src/controls.ts#L77-L98))
 
 # PS
 

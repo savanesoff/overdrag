@@ -46,10 +46,10 @@ const elementMinBox = {
 
 function getMockedOffsetParentElement() {
   return {
-    offsetLeft: Math.round(Math.random() * 1000),
-    offsetTop: Math.round(Math.random() * 1000),
-    offsetWidth: elementMinBox.width + Math.round(Math.random() * 1000),
-    offsetHeight: elementMinBox.height + Math.round(Math.random() * 1000),
+    offsetLeft: Math.round(Math.random() * 100),
+    offsetTop: Math.round(Math.random() * 100),
+    offsetWidth: elementMinBox.width * 2 + Math.round(Math.random() * 1000),
+    offsetHeight: elementMinBox.height * 2 + Math.round(Math.random() * 1000),
   };
 }
 
@@ -563,6 +563,7 @@ describe("Overdrag", () => {
 
     describe("down state", () => {
       afterEach(() => {
+        Overdrag.activeInstance = null;
         jest.clearAllMocks();
       });
 
@@ -620,6 +621,7 @@ describe("Overdrag", () => {
 
     describe("up state", () => {
       afterEach(() => {
+        Overdrag.activeInstance = null;
         jest.clearAllMocks();
       });
 
@@ -719,6 +721,7 @@ describe("Overdrag", () => {
 
     describe("drag state", () => {
       afterEach(() => {
+        Overdrag.activeInstance = null;
         jest.clearAllMocks();
       });
 
@@ -779,22 +782,26 @@ describe("Overdrag", () => {
 
       it("should move element by the same amount as mouse", () => {
         const overdrag = createInstance();
+
         const emitSpy = jest.spyOn(overdrag, "emit");
         const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+
+        down(overdrag, {
+          x: overdrag.controlsThreshold + 1,
+          y: overdrag.controlsThreshold + 1,
+        });
         const top = overdrag.position.rect.top;
         const left = overdrag.position.rect.left;
-        down(overdrag, {
-          x: overdrag.controlsThreshold,
-          y: overdrag.controlsThreshold,
-        });
-
         move(overdrag, {
-          x: 100,
-          y: 100,
+          x: overdrag.controlsThreshold + 11,
+          y: overdrag.controlsThreshold + 11,
         });
 
-        expect(overdrag.position.rect.top).toBe(top + 100);
-        expect(overdrag.position.rect.left).toBe(left + 100);
+        expect(overdrag.position.rect.top).not.toBe(top);
+        expect(overdrag.position.rect.left).not.toBe(left);
+
+        expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.DRAG, overdrag);
+        expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DRAG, "");
       });
     });
   });

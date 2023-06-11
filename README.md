@@ -1,8 +1,9 @@
 # Overdrag
 
-[![npm version](https://badge.fury.io/js/package-name.svg)](https://badge.fury.io/js/package-name)
-[![Build Status](https://github.com/savanesoff/overdrag/actions/workflows/test.yaml/badge.svg)](https://github.com/savanesoff/overdrag/actions/workflows/test.yaml)
+[![npm version](https://badge.fury.io/js/overdrag.svg)](https://badge.fury.io/js/overdrag)
+[![Build Status](https://github.com/savanesoff/overdrag/actions/workflows/test.yaml/badge.svg?branch=main&event=push)](https://github.com/savanesoff/overdrag/actions/workflows/test.yaml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![HitCount](https://hits.dwyl.com/savanesov/overdrag.svg)](https://hits.dwyl.com/{username}/{project-name})
 
 Overdrag is a library for adding draggable and resizable behavior to DOM elements.
 
@@ -19,6 +20,10 @@ or
 ```shell
 yarn add overdrag
 ```
+
+or
+
+[![NPM](https://nodei.co/npm/overdrag.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/overdrag/)
 
 ## Usage
 

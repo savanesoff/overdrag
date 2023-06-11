@@ -1,7 +1,7 @@
 # Overdrag
 
 [![npm version](https://badge.fury.io/js/package-name.svg)](https://badge.fury.io/js/package-name)
-[![Build Status](https://travis-ci.org/username/package-name.svg?branch=master)](https://travis-ci.org/username/package-name)
+[![Build Status](https://github.com/savanesoff/overdrag/actions/workflows/test.yaml/badge.svg)](https://github.com/savanesoff/overdrag/actions/workflows/test.yaml)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 
 Overdrag is a library for adding draggable and resizable behavior to DOM elements.

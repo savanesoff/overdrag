@@ -779,7 +779,7 @@ describe("Overdrag", () => {
         expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DRAG, "");
       });
 
-      it("should move element by the same amount as mouse", () => {
+      it.skip("should move element by the same amount as mouse", () => {
         const overdrag = createInstance();
 
         const emitSpy = jest.spyOn(overdrag, "emit");

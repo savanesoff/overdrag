@@ -49,6 +49,7 @@ type Controls = {
 };
 
 export default class Overdrag extends EventEmitter {
+  static readonly __ENGAGED_STACK__: Overdrag[] = [];
   static readonly ERROR = {
     NO_PARENT:
       "Element must have an offset parent with position relative or absolute)",
@@ -291,7 +292,29 @@ export default class Overdrag extends EventEmitter {
         this.reSize();
       }
     } else {
-      const engaged = this.isEngaged();
+      let engaged = this.isEngaged();
+      // ensure recursive engagements excludes multiple instance of overdrag being engaged at the same time
+      // if engaged for the first time, add to the array
+      if (
+        engaged &&
+        !this.engaged &&
+        Overdrag.__ENGAGED_STACK__.indexOf(this) < 0
+      ) {
+        Overdrag.__ENGAGED_STACK__.push(this);
+      }
+      // if engaged and not the last engaged, disengage
+      else if (
+        engaged &&
+        Overdrag.__ENGAGED_STACK__.length > 0 &&
+        Overdrag.__ENGAGED_STACK__.at(-1) != this
+      ) {
+        engaged = false;
+      }
+      // if not engaged and last engaged is this instance remove it from the array
+      else if (!engaged && Overdrag.__ENGAGED_STACK__.at(-1) === this) {
+        Overdrag.__ENGAGED_STACK__.pop();
+      }
+
       if (engaged || this.engaged) {
         this.setEngagedState(engaged);
         this.updateControlPointsState();

@@ -170,6 +170,7 @@ export default class Overdrag extends EventEmitter {
   /** Element rect on last mouse down event */
   downPosition: ComputedPosition;
   parentPosition: ParentPosition;
+  computed = false;
 
   cursorSet = false;
   /** Control points activation status (Edge of element) */
@@ -308,12 +309,22 @@ export default class Overdrag extends EventEmitter {
       return;
     }
 
+    if (this.computed) {
+      return;
+    }
+
+    this.computed = true;
+    setTimeout(() => {
+      this.computed = false;
+    }, 50);
+
     this.parentPosition = this.getComputedParentPosition();
     // update rect only when mouse is down
     this.position = this.getComputedElementPosition();
 
     this.parentMouseX = e.pageX - this.parentPosition.offsetLeft;
     this.parentMouseY = e.pageY - this.parentPosition.offsetTop;
+    console.log(e.target);
 
     if (this.down) {
       if (this.dragging) {

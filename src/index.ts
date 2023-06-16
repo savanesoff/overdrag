@@ -11,8 +11,10 @@ export interface ControlProps {
   controlsThreshold?: number;
   /** DOM element to control */
   element: HTMLElement;
-
+  /** max humber of pixels cursor can move between down and up events to be considered a click */
   clickDetectionThreshold?: number;
+  /** if true, "over" state of parent Overdrag will no be canceled while child overdrag is active*/
+  stack?: boolean;
 }
 
 type Box = {
@@ -171,6 +173,7 @@ export default class Overdrag extends EventEmitter {
   downPosition: ComputedPosition;
   parentPosition: ParentPosition;
   computed = false;
+  stack: boolean;
 
   cursorSet = false;
   /** Control points activation status (Edge of element) */
@@ -191,6 +194,7 @@ export default class Overdrag extends EventEmitter {
     snapThreshold = Overdrag.DEFAULTS.snapThreshold,
     controlsThreshold = Overdrag.DEFAULTS.controlsThreshold,
     clickDetectionThreshold = Overdrag.DEFAULTS.clickDetectionThreshold,
+    stack = false,
   }: ControlProps) {
     super();
     this.minContentHeight = minContentHeight;
@@ -198,6 +202,9 @@ export default class Overdrag extends EventEmitter {
     this.snapThreshold = snapThreshold;
     this.controlsThreshold = controlsThreshold;
     this.element = element;
+    this.stack = stack;
+    // @ts-ignore
+    this.element.__overdrag = this;
     this.clickDetectionThreshold = clickDetectionThreshold;
 
     if (!this.element.offsetParent) {
@@ -205,11 +212,12 @@ export default class Overdrag extends EventEmitter {
     }
 
     this.parentElement = this.element.offsetParent as HTMLElement;
-
-    this.position = this.downPosition = this.getComputedElementPosition();
+    this.element.addEventListener("mouseenter", this.onMouseOver);
     this.parentPosition = this.getComputedParentPosition();
-    this.window.addEventListener("mousemove", this.onMove);
-    this.window.addEventListener("mousedown", this.onDown);
+    // update rect only when mouse is down
+    this.position = this.getComputedElementPosition();
+
+    this.downPosition = this.position;
     // TODO ensure the min width and height is respected
   }
 
@@ -303,75 +311,56 @@ export default class Overdrag extends EventEmitter {
     };
   }
 
-  onMove = (e: MouseEvent) => {
-    if (Overdrag.activeInstance != null && Overdrag.activeInstance != this) {
-      // another instance is active, ignore this event
+  onMouseOver = (e: MouseEvent, skipStack = false) => {
+    if (
+      this.over ||
+      (Overdrag.activeInstance && Overdrag.activeInstance !== this)
+    ) {
       return;
     }
 
-    if (this.computed) {
-      return;
+    // perform stack ops at the start of call to preserve order of events
+    if (!this.stack && !skipStack) {
+      Overdrag.__ENGAGED_STACK__.at(-1)?.onMouseOut(e, true);
+      Overdrag.__ENGAGED_STACK__.push(this);
     }
 
-    this.computed = true;
-    setTimeout(() => {
-      this.computed = false;
-    }, 50);
+    this.setOverState(true);
+    // initialize listeners, controls and positions
+    this.element.addEventListener("mouseleave", this.onMouseOut);
+    this.element.addEventListener("mousemove", this.onMouseMove);
+    this.element.addEventListener("mousedown", this.onMouseDown);
+  };
 
-    this.parentPosition = this.getComputedParentPosition();
-    // update rect only when mouse is down
-    this.position = this.getComputedElementPosition();
+  onMouseOut = (e: MouseEvent, skipStack = false) => {
+    if (!this.over) {
+      return;
+    }
+    // remove listeners, controls and positions
+    this.element.removeEventListener("mouseleave", this.onMouseOut);
+    this.element.removeEventListener("mousemove", this.onMouseMove);
+    this.element.removeEventListener("mousedown", this.onMouseDown);
 
-    this.parentMouseX = e.pageX - this.parentPosition.offsetLeft;
-    this.parentMouseY = e.pageY - this.parentPosition.offsetTop;
-    console.log(e.target);
+    this.setOverState(false);
+    this.resetControlPoints();
 
-    if (this.down) {
-      if (this.dragging) {
-        this.drag();
-      } else {
-        this.reSize();
-      }
-    } else {
-      let engaged = this.isEngaged();
-      // ensure recursive engagements excludes multiple instance of overdrag being engaged at the same time
-      // if engaged for the first time, add to the array
-      if (
-        engaged &&
-        !this.engaged &&
-        Overdrag.__ENGAGED_STACK__.indexOf(this) < 0
-      ) {
-        Overdrag.__ENGAGED_STACK__.push(this);
-      }
-      // if engaged and not the last engaged, disengage
-      else if (
-        engaged &&
-        Overdrag.__ENGAGED_STACK__.length > 0 &&
-        Overdrag.__ENGAGED_STACK__.at(-1) != this
-      ) {
-        engaged = false;
-      }
-      // if not engaged and last engaged is this instance remove it from the array
-      else if (!engaged && Overdrag.__ENGAGED_STACK__.at(-1) === this) {
-        Overdrag.__ENGAGED_STACK__.pop();
-      }
-
-      if (engaged || this.engaged) {
-        this.setEngagedState(engaged);
-        this.updateControlPointsState();
-        this.setOverState(this.isOver());
-        this.updateCursorStyle();
-      }
+    // perform stack ops at the end of call to preserve order of events
+    if (!this.stack && !skipStack) {
+      Overdrag.__ENGAGED_STACK__.pop();
+      Overdrag.__ENGAGED_STACK__.at(-1)?.onMouseOver(e, true);
     }
   };
 
-  onDown = (e: MouseEvent) => {
-    if (!this.engaged) {
-      return;
-    }
+  onMouseDown = (e: MouseEvent) => {
     e.preventDefault();
-    Overdrag.activeInstance = this;
+    // remove all listeners,
+    this.element.removeEventListener("mouseleave", this.onMouseOut);
+    this.element.removeEventListener("mousemove", this.onMouseMove);
+    this.element.removeEventListener("mousedown", this.onMouseDown);
+    this.element.removeEventListener("mouseenter", this.onMouseOver);
+
     this.down = true;
+    Overdrag.activeInstance = this;
     // deep copy
     this.downPosition = {
       box: { ...this.position.box },
@@ -387,24 +376,56 @@ export default class Overdrag extends EventEmitter {
 
     this.downMouseX = this.parentMouseX;
     this.downMouseY = this.parentMouseY;
-    this.dragging = this.over;
-    this.window.addEventListener("mouseup", this.onUp);
+    this.dragging = !this.controlsActive;
     this.element.setAttribute(Overdrag.ATTRIBUTES.DOWN, "");
+    if (this.dragging) {
+      this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
+    }
     this.emit(Overdrag.EVENTS.DOWN, this);
+    // add global listeners
+    this.window.addEventListener("mousemove", this.onMouseMove);
+    this.window.addEventListener("mouseup", this.onMouseUp);
   };
 
-  onUp = (e: MouseEvent) => {
+  onMouseUp = (e: MouseEvent) => {
+    // remove up listeners
+    this.window.removeEventListener("mouseup", this.onMouseUp);
+    this.window.removeEventListener("mousemove", this.onMouseMove);
+
+    this.element.addEventListener("mouseleave", this.onMouseOut);
+    this.element.addEventListener("mousemove", this.onMouseMove);
+    this.element.addEventListener("mousedown", this.onMouseDown);
+    this.element.addEventListener("mouseenter", this.onMouseOver);
+
+    this.down = false;
+
     e.preventDefault();
     Overdrag.activeInstance = null;
     this.down = false;
     this.dragging = false;
-    this.window.removeEventListener("mouseup", this.onUp);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DOWN);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.RESIZE);
     this.emit(Overdrag.EVENTS.UP, this);
     if (this.isClick()) {
       this.emit(Overdrag.EVENTS.CLICK, this);
+    }
+  };
+
+  onMouseMove = (e: MouseEvent) => {
+    this.parentPosition = this.getComputedParentPosition();
+    this.position = this.getComputedElementPosition();
+
+    this.parentMouseX = e.pageX - this.parentPosition.offsetLeft;
+    this.parentMouseY = e.pageY - this.parentPosition.offsetTop;
+
+    if (!this.down) {
+      this.updateControlPointsState(e);
+      this.updateCursorStyle();
+    } else if (this.dragging) {
+      this.drag();
+    } else {
+      this.reSize();
     }
   };
 
@@ -419,57 +440,11 @@ export default class Overdrag extends EventEmitter {
 
   isControlPointActive() {
     return (
-      this.engaged &&
+      this.over &&
       (this.controls.left ||
         this.controls.right ||
         this.controls.top ||
         this.controls.bottom)
-    );
-  }
-
-  /**
-   * Whether the mouse is over the element
-   */
-  isEngaged() {
-    return (
-      this.parentMouseX >=
-        this.position.rect.left +
-          this.position.margins.left -
-          this.controlsThreshold &&
-      this.parentMouseX <=
-        this.position.rect.right -
-          this.position.margins.right +
-          this.controlsThreshold &&
-      this.parentMouseY >=
-        this.position.rect.top +
-          this.position.margins.top -
-          this.controlsThreshold &&
-      this.parentMouseY <=
-        this.position.rect.bottom -
-          this.position.margins.bottom +
-          this.controlsThreshold
-    );
-  }
-
-  isOver() {
-    return (
-      this.engaged &&
-      this.parentMouseX >
-        this.position.rect.left +
-          this.position.margins.left +
-          this.controlsThreshold &&
-      this.parentMouseX <
-        this.position.rect.right -
-          this.position.margins.right -
-          this.controlsThreshold &&
-      this.parentMouseY >
-        this.position.rect.top +
-          this.position.margins.top +
-          this.controlsThreshold &&
-      this.parentMouseY <
-        this.position.rect.bottom -
-          this.position.margins.bottom -
-          this.controlsThreshold
     );
   }
 
@@ -495,78 +470,75 @@ export default class Overdrag extends EventEmitter {
     }
   }
 
+  resetControlPoints() {
+    const current = this.controlsActive;
+    this.controlsActive =
+      this.controls.left =
+      this.controls.right =
+      this.controls.top =
+      this.controls.bottom =
+        false;
+
+    if (current !== this.controlsActive) {
+      this.element.removeAttribute(Overdrag.ATTRIBUTES.CONTROLS);
+      this.emit(Overdrag.EVENTS.CONTROLS_INACTIVE, this);
+    }
+  }
+
   /**
    * Sets control points activation status (Edge of element)
    */
-  updateControlPointsState() {
+  updateControlPointsState(e: MouseEvent) {
     const current = JSON.stringify(this.controls);
-    if (!this.engaged) {
-      this.controls.left =
-        this.controls.right =
-        this.controls.top =
-        this.controls.bottom =
-          false;
-    } else {
-      this.controls.left =
-        Math.abs(
-          this.parentMouseX -
-            this.position.rect.left -
-            this.position.margins.left
-        ) <= this.controlsThreshold;
-      this.controls.right =
-        Math.abs(
-          this.parentMouseX -
-            this.position.rect.right +
-            this.position.margins.right
-        ) <= this.controlsThreshold;
-      this.controls.top =
-        Math.abs(
-          this.parentMouseY - this.position.rect.top - this.position.margins.top
-        ) <= this.controlsThreshold;
-      this.controls.bottom =
-        Math.abs(
-          this.parentMouseY -
-            this.position.rect.bottom +
-            this.position.margins.bottom
-        ) <= this.controlsThreshold;
-    }
 
-    this.controlsActive = this.isControlPointActive();
+    this.controls.left =
+      Math.abs(
+        this.parentMouseX - this.position.rect.left - this.position.margins.left
+      ) <= this.controlsThreshold;
+    this.controls.right =
+      Math.abs(
+        this.parentMouseX -
+          this.position.rect.right +
+          this.position.margins.right
+      ) <= this.controlsThreshold;
+    this.controls.top =
+      Math.abs(
+        this.parentMouseY - this.position.rect.top - this.position.margins.top
+      ) <= this.controlsThreshold;
+    this.controls.bottom =
+      Math.abs(
+        this.parentMouseY -
+          this.position.rect.bottom +
+          this.position.margins.bottom
+      ) <= this.controlsThreshold;
 
-    if (this.controlsActive) {
+    const controlsActive =
+      this.controls.left ||
+      this.controls.right ||
+      this.controls.top ||
+      this.controls.bottom;
+
+    if (controlsActive && current !== JSON.stringify(this.controls)) {
       this.element.setAttribute(
         Overdrag.ATTRIBUTES.CONTROLS,
         Object.keys(this.controls)
           .filter((key) => this.controls[key as keyof Controls])
           .join("-")
       );
-    } else {
-      this.element.removeAttribute(Overdrag.ATTRIBUTES.CONTROLS);
     }
 
-    if (current != JSON.stringify(this.controls)) {
-      if (this.controlsActive) this.emit(Overdrag.EVENTS.CONTROLS_ACTIVE, this);
-      else this.emit(Overdrag.EVENTS.CONTROLS_INACTIVE, this);
+    if (controlsActive && !this.controlsActive) {
+      this.controlsActive = true;
+      this.emit(Overdrag.EVENTS.CONTROLS_ACTIVE, this);
+    } else if (!controlsActive) {
+      this.resetControlPoints();
     }
   }
 
   updateCursorStyle() {
     let cursor: null | string = null;
-    if (!this.engaged && this.cursorSet) {
-      // reset cursor
-      this.window.document.body.style.setProperty(
-        "cursor",
-        Overdrag.CURSOR.DEFAULT
-      );
-      this.cursorSet = false;
-      return;
-    }
 
-    if (!this.engaged) return;
-
-    if (this.over) {
-      cursor = Overdrag.CURSOR.OVER;
-    } else if (this.controls.top && this.controls.left) {
+    if (this.controls.top && this.controls.left) {
       cursor = Overdrag.CURSOR.TOP_LEFT;
     } else if (this.controls.bottom && this.controls.right) {
       cursor = Overdrag.CURSOR.BOTTOM_RIGHT;
@@ -582,10 +554,11 @@ export default class Overdrag extends EventEmitter {
       cursor = Overdrag.CURSOR.LEFT;
     } else if (this.controls.right) {
       cursor = Overdrag.CURSOR.RIGHT;
+    } else if (this.over) {
+      cursor = Overdrag.CURSOR.OVER;
     }
 
-    this.window.document.body.style.setProperty("cursor", cursor);
-    this.cursorSet = true;
+    this.element.style.setProperty("cursor", cursor);
   }
 
   reSize() {
@@ -638,8 +611,8 @@ export default class Overdrag extends EventEmitter {
     this.element.style.width = `${current.width}px`;
     this.element.style.height = `${current.height}px`;
     // for iframe, images and canvas
-    this.element.setAttribute("width", `${current.width}px`);
-    this.element.setAttribute("height", `${current.height}px`);
+    this.element.setAttribute("width", `${current.width}`);
+    this.element.setAttribute("height", `${current.height}`);
   }
 
   movePointRight() {
@@ -811,20 +784,10 @@ export default class Overdrag extends EventEmitter {
           this.parentPosition.paddings.bottom
         : y;
 
-    if (
-      this.element.style.left === `${left}px` &&
-      this.element.style.top === `${top}px`
-    ) {
-      this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
-      return;
-    }
-
     if (this.position.rect.left !== left || this.position.rect.top !== top) {
       this.assignPosition({ left, top });
       this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
       this.emit(Overdrag.EVENTS.DRAG, this);
-    } else {
-      this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
     }
   }
 }

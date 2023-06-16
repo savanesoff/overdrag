@@ -46,6 +46,7 @@ type ParentPosition = {
 type ComputedPosition = {
   rect: Rect;
   box: Box;
+  visualBox: Box;
   fullBox: Box;
   margins: Rect;
   borders: Rect;
@@ -301,6 +302,16 @@ export default class Overdrag extends EventEmitter {
         bottom: top + fullHeight,
       },
       box: { width, height },
+      visualBox: {
+        width:
+          width + borders.right + borders.left + paddings.right + paddings.left,
+        height:
+          height +
+          borders.top +
+          borders.bottom +
+          paddings.top +
+          paddings.bottom,
+      },
       fullBox: {
         width: fullWidth,
         height: fullHeight,
@@ -369,6 +380,7 @@ export default class Overdrag extends EventEmitter {
       borders: { ...this.position.borders },
       margins: { ...this.position.margins },
       paddings: { ...this.position.paddings },
+      visualBox: { ...this.position.visualBox },
     };
     // distance from edge of margin to the mouse position
     this.offsetX = this.parentMouseX - this.position.rect.left;
@@ -490,27 +502,14 @@ export default class Overdrag extends EventEmitter {
    */
   updateControlPointsState(e: MouseEvent) {
     const current = JSON.stringify(this.controls);
-
-    this.controls.left =
-      Math.abs(
-        this.parentMouseX - this.position.rect.left - this.position.margins.left
-      ) <= this.controlsThreshold;
+    const x = e.offsetX + this.position.borders.left;
+    const y = e.offsetY + this.position.borders.top;
+    this.controls.left = x <= this.controlsThreshold;
     this.controls.right =
-      Math.abs(
-        this.parentMouseX -
-          this.position.rect.right +
-          this.position.margins.right
-      ) <= this.controlsThreshold;
-    this.controls.top =
-      Math.abs(
-        this.parentMouseY - this.position.rect.top - this.position.margins.top
-      ) <= this.controlsThreshold;
+      this.position.visualBox.width - x <= this.controlsThreshold;
+    this.controls.top = y <= this.controlsThreshold;
     this.controls.bottom =
-      Math.abs(
-        this.parentMouseY -
-          this.position.rect.bottom +
-          this.position.margins.bottom
-      ) <= this.controlsThreshold;
+      this.position.visualBox.height - y <= this.controlsThreshold;
 
     const controlsActive =
       this.controls.left ||

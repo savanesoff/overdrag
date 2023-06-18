@@ -5,7 +5,7 @@
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![HitCount](https://hits.dwyl.com/savanesov/overdrag.svg)](https://hits.dwyl.com/{username}/{project-name})
 
-Overdrag is a library for adding draggable and resizable behavior to DOM elements.
+Overdrag is a library for adding draggable and resizable behavior to DOM elements that respects its parent and is recursive.
 
 ## Installation
 
@@ -43,6 +43,7 @@ The Overdrag class constructor accepts an object with the following properties:
 - `snapThreshold` (optional, default: `Overdrag.DEFAULTS.snapThreshold`): The distance to the edge of the relative parent element (top, left, bottom, right) when the element should snap to it.
 - `controlsThreshold` (optional, default: `Overdrag.DEFAULTS.controlsThreshold`): The distance to the edge of the element (top, left, bottom, right) when the element should show resize cursor and activate control points.
 - `clickDetectionThreshold` (optional, default: `Overdrag.DEFAULTS.clickDetectionThreshold`): The threshold distance to detect a click event. If you've started dragging the element, mouse up event will not trigger `click` event.
+- `stack` (optional, default: `false`): If true, an `Overdrag` parent element that has a recursively embedded `Overdrag` elements as a child will retain `over` state while the child is active. Else, the parent element will be set to `out` state (inactive)
 
 (see complete list of defaults as [Overdrag.DEFAULTS](https://github.com/savanesoff/overdrag/blob/6ab7bfbf515ef2943510344b8891ad3c527801be/src/index.ts#L56-L62))
 
@@ -57,6 +58,7 @@ const overdrag = new Overdrag({
   snapThreshold: 20, // optional
   controlsThreshold: 10, // optional
   clickDetectionThreshold: 5, // optional
+  stack: true, // optional
 });
 ```
 

@@ -74,8 +74,6 @@ export default class Overdrag extends EventEmitter {
   static readonly ATTRIBUTES = {
     /** Set while any control point is active with a value of active control, Ex: `data-overdrag-controls="right-left"` */
     CONTROLS: "data-overdrag-controls",
-    /** Set while element is engaged. */
-    ENGAGED: "data-overdrag-engaged",
     /** Set while mouse is over the element pass the control sensors. */
     OVER: "data-overdrag-over",
     /** Set while mouse is down (preceded by `over` conditions). */
@@ -120,10 +118,6 @@ export default class Overdrag extends EventEmitter {
     OVER: "over",
     /** Triggered when the mouse moves out of the visible box of element excluding control point sensors. */
     OUT: "out",
-    /** Triggered when the element is engaged at visible box including controls sensors sensitivity threshold (active for dragging/resizing). */
-    ENGAGED: "engaged",
-    /** Triggered when the element is disengaged (inactive for dragging/resizing) or mouse is outside control sensitive distance. */
-    DISENGAGED: "disengaged",
     /** Triggered when the control points are activated (edge of element) within control sensor area. */
     CONTROLS_ACTIVE: "controls-active",
     /** Triggered when the control points are deactivated. */
@@ -468,17 +462,6 @@ export default class Overdrag extends EventEmitter {
     );
   }
 
-  setEngagedState(engaged: boolean) {
-    this.engaged = engaged;
-    if (engaged) {
-      this.element.setAttribute(Overdrag.ATTRIBUTES.ENGAGED, "");
-      this.emit(Overdrag.EVENTS.ENGAGED, this);
-    } else {
-      this.element.removeAttribute(Overdrag.ATTRIBUTES.ENGAGED);
-      this.emit(Overdrag.EVENTS.DISENGAGED, this);
-    }
-  }
-
   setOverState(over: boolean) {
     this.over = over;
     if (over) {
@@ -639,7 +622,7 @@ export default class Overdrag extends EventEmitter {
     this.element.setAttribute("height", `${current.height}`);
   }
 
-  movePointRight() {
+  private movePointRight() {
     // ensure the element full box never goes outside of the parent
     const maxWidth =
       this.parentPosition.box.width -
@@ -676,7 +659,7 @@ export default class Overdrag extends EventEmitter {
     return false;
   }
 
-  movePointBottom() {
+  private movePointBottom() {
     // ensure the element never goes outside of the parent
     const maxHeight =
       this.parentPosition.box.height -
@@ -712,7 +695,7 @@ export default class Overdrag extends EventEmitter {
     return false;
   }
 
-  movePointLeft() {
+  private movePointLeft() {
     const boxDiff = this.position.fullBox.width - this.position.box.width;
     const minWidth = this.minContentWidth + boxDiff;
     let left = Math.max(
@@ -775,7 +758,7 @@ export default class Overdrag extends EventEmitter {
    * and snap to the edges of the parent element
    * if mouse is close enough to the edge of the parent element (snapThreshold)
    */
-  drag() {
+  private drag() {
     // edge of element relative to parent according to current mouse position (includes margins, borders and paddings )
     let left = this.parentMouseX - this.offsetX;
     let top = this.parentMouseY - this.offsetY;

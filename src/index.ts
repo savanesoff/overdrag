@@ -434,7 +434,7 @@ export default class Overdrag extends EventEmitter {
     this.parentMouseY = e.pageY - this.parentPosition.offsetTop;
 
     if (!this.down) {
-      this.updateControlPointsState(e);
+      this.updateControlPointsState();
       this.updateCursorStyle();
     } else if (this.dragging) {
       this.drag();
@@ -491,7 +491,7 @@ export default class Overdrag extends EventEmitter {
   /**
    * Sets control points activation status (Edge of element)
    */
-  updateControlPointsState(e: MouseEvent) {
+  updateControlPointsState() {
     const current = JSON.stringify(this.controls);
     this.controls.left =
       Math.abs(

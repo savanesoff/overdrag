@@ -1,3 +1,5 @@
+by `Protosus`
+
 # Overdrag
 
 [![npm version](https://badge.fury.io/js/overdrag.svg)](https://badge.fury.io/js/overdrag)
@@ -6,6 +8,10 @@
 [![HitCount](https://hits.dwyl.com/savanesov/overdrag.svg)](https://hits.dwyl.com/{username}/{project-name})
 
 Overdrag is a library for adding draggable and resizable behavior to DOM elements that respects its parent and is recursive.
+
+## Demo
+
+You can view a live demo [here](https://savanesoff.github.io/overdrag-vanilla-demo/)
 
 ## Installation
 

@@ -15,6 +15,10 @@ You can view a live demo [here](https://savanesoff.github.io/overdrag-vanilla-de
 
 ![Validator](https://savanesoff.github.io/overdrag-vanilla-demo/assets/overdrag-npm-demo-animation-take1-63e16fc8.gif)
 
+## React
+
+Want a `React` component? I got you! You can checkout `React` version of this utility [here](https://www.npmjs.com/package/overdrag-react), and [GH](https://github.com/savanesoff/overdrag-react)
+
 ## Installation
 
 To install Overdrag, use npm or yarn:

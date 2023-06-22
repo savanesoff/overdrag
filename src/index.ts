@@ -1,5 +1,9 @@
 import EventEmitter from "eventemitter3";
 
+type Complete<T> = {
+  [P in keyof T]-?: T[P];
+};
+
 export interface ControlProps {
   /** min height of DOM element in PX. This will prevent resizing smaller than the value. */
   minContentHeight?: number;
@@ -16,6 +20,45 @@ export interface ControlProps {
   /** if true, "over" state of parent Overdrag will no be canceled while child overdrag is active*/
   stack?: boolean;
 }
+
+export type Defaults = Complete<Omit<ControlProps, "element">>;
+// union of all events
+export type Events =
+  | "down"
+  | "up"
+  | "click"
+  | "drag"
+  | "over"
+  | "out"
+  | "controlsActive"
+  | "controlsInactive"
+  | "controlRightUpdate"
+  | "controlLeftUpdate"
+  | "controlTopUpdate"
+  | "controlBottomUpdate"
+  | "resize"
+  | "update";
+
+// union of all cursors
+export type Cursors =
+  | "default"
+  | "grab"
+  | "w-resize"
+  | "e-resize"
+  | "n-resize"
+  | "s-resize"
+  | "nw-resize"
+  | "ne-resize"
+  | "sw-resize"
+  | "se-resize";
+
+// union of all attributes
+export type Attributes =
+  | "data-overdrag-controls"
+  | "data-overdrag-over"
+  | "data-overdrag-down"
+  | "data-overdrag-drag"
+  | "data-overdrag-resize";
 
 type Box = {
   width: number;
@@ -64,14 +107,15 @@ export default class Overdrag extends EventEmitter {
     NO_PARENT:
       "Element must have an offset parent with position relative or absolute)",
   };
-  static readonly DEFAULTS = {
+  static readonly DEFAULTS: Defaults = {
     snapThreshold: 16, // 1rem
     controlsThreshold: 16, //1rem
     minContentHeight: 50,
     minContentWidth: 50,
     clickDetectionThreshold: 5,
+    stack: false,
   };
-  static readonly ATTRIBUTES = {
+  static readonly ATTRIBUTES: { [key: string]: Attributes } = {
     /** Set while any control point is active with a value of active control, Ex: `data-overdrag-controls="right-left"` */
     CONTROLS: "data-overdrag-controls",
     /** Set while mouse is over the element pass the control sensors. */
@@ -83,7 +127,7 @@ export default class Overdrag extends EventEmitter {
     /**  Set while element is being resized with a value of side used to resize element. (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-resize="right"`. */
     RESIZE: "data-overdrag-resize",
   };
-  static readonly CURSOR = {
+  static readonly CURSOR: { [key: string]: Cursors } = {
     /** Set while LEFT control sensor is activated (including sensitivity area). */
     LEFT: "w-resize",
     /** Set while RIGHT control sensor is activated (including sensitivity area). */
@@ -105,7 +149,7 @@ export default class Overdrag extends EventEmitter {
     /** Set while no interactions are detected. */
     DEFAULT: "default",
   };
-  static readonly EVENTS = {
+  static readonly EVENTS: { [key: string]: Events } = {
     /** Triggered when the mouse button is pressed down on the element. */
     DOWN: "down",
     /**  Triggered when the mouse button is released if pressed while element was "engaged". */
@@ -119,17 +163,17 @@ export default class Overdrag extends EventEmitter {
     /** Triggered when the mouse moves out of the visible box of element excluding control point sensors. */
     OUT: "out",
     /** Triggered when the control points are activated (edge of element) within control sensor area. */
-    CONTROLS_ACTIVE: "controls-active",
+    CONTROLS_ACTIVE: "controlsActive",
     /** Triggered when the control points are deactivated. */
-    CONTROLS_INACTIVE: "controls-inactive",
+    CONTROLS_INACTIVE: "controlsInactive",
     /** Triggered when the right control point position is updated. */
-    CONTROL_RIGHT_UPDATE: "control-right-update",
+    CONTROL_RIGHT_UPDATE: "controlRightUpdate",
     /** Triggered when the left control point position is updated. */
-    CONTROL_LEFT_UPDATE: "control-left-update",
+    CONTROL_LEFT_UPDATE: "controlLeftUpdate",
     /** Triggered when the top control point position is updated. */
-    CONTROL_TOP_UPDATE: "control-top-update",
+    CONTROL_TOP_UPDATE: "controlTopUpdate",
     /** Triggered when the bottom control point position is updated. */
-    CONTROL_BOTTOM_UPDATE: "control-bottom-update",
+    CONTROL_BOTTOM_UPDATE: "controlBottomUpdate",
     /**  Triggered during resizing on every mouse move (if size change detected). */
     RESIZE: "resize",
     /** Triggered on any update to the element (any emitted event will be preceded by update event). */
@@ -145,7 +189,6 @@ export default class Overdrag extends EventEmitter {
   readonly minContentWidth: number;
   readonly clickDetectionThreshold: number;
 
-  engaged = false;
   /** Control points activation status (Edge of element) */
   controlsActive = false;
   /** Mouse over element status */
@@ -168,11 +211,10 @@ export default class Overdrag extends EventEmitter {
   position: ComputedPosition;
   /** Element rect on last mouse down event */
   downPosition: ComputedPosition;
+  /** Parent element styles and positions */
   parentPosition: ParentPosition;
-  computed = false;
+  /** Flag to opt in for stacked recursive child nodes to prevent its parent from being inactive */
   stack: boolean;
-
-  cursorSet = false;
   /** Control points activation status (Edge of element) */
   readonly controls: Controls = {
     left: false,
@@ -191,7 +233,7 @@ export default class Overdrag extends EventEmitter {
     snapThreshold = Overdrag.DEFAULTS.snapThreshold,
     controlsThreshold = Overdrag.DEFAULTS.controlsThreshold,
     clickDetectionThreshold = Overdrag.DEFAULTS.clickDetectionThreshold,
-    stack = false,
+    stack = Overdrag.DEFAULTS.stack,
   }: ControlProps) {
     super();
     this.minContentHeight = minContentHeight;
@@ -199,6 +241,8 @@ export default class Overdrag extends EventEmitter {
     this.snapThreshold = snapThreshold;
     this.controlsThreshold = controlsThreshold;
     this.element = element;
+    // ensure element is positioned
+    this.element.style.position = "absolute";
     this.stack = stack;
     // @ts-ignore
     this.element.__overdrag = this;

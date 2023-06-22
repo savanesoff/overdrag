@@ -74,6 +74,9 @@ const overdrag = new Overdrag({
 
 Controlled element is bound by its parent bounds and requires parent element to have `position:relative` CSS property for the controlled element absolute position be relative to its `offsetParent`.
 
+> **_NOTE_**
+> Absolute position of the target element is enforced during construction of class instance, so feel bad if you've forgotten to assign it.
+
 #### Resizing
 
 While hovering near and/or over the edge of controlled element (left, right, top, bottom), that includes border sizes a corresponding control point will be activated. Pressing mouse down and initiating a drag will move corresponding size of the element, thereby resizing element.
@@ -120,8 +123,6 @@ The available events are:
 - `drag`: Triggered during dragging, on every drag motion with a mouse move.
 - `over`: Triggered when the mouse is over the element passed the control point sensors.
 - `out`: Triggered when the mouse moves out of the visible box of element excluding control point sensors.
-- `engaged`: Triggered when the element is engaged at visible box including controls sensors sensitivity threshold (active for dragging/resizing).
-- `disengaged`: Triggered when the element is disengaged (inactive for dragging/resizing) or mouse is outside control sensitive distance.
 - `controls-active`: Triggered when the control points are activated (edge of element) within control sensor area.
 - `controls-inactive`: Triggered when the control points are deactivated.
 - `control-right-update`: Triggered when the right control point position is updated.
@@ -142,7 +143,7 @@ During interaction with element, its attributes are set according to the current
 Say you want your element to change background color while its engaged, here is how you do it:
 
 ```CSS
-#element-id[data-overdrag-engaged]{
+#element-id[data-overdrag-over]{
     /* change style while element is engaged */
     background-color: red;
 }
@@ -151,7 +152,6 @@ Say you want your element to change background color while its engaged, here is 
 ### Available Action attributes
 
 - `data-overdrag-controls`: Set while any control point is active with a value of active control type (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-controls="right-left"`
-- `data-overdrag-engaged`: Set while element is engaged.
 - `data-overdrag-over`: Set while mouse is over the element pass the control sensors.
 - `data-overdrag-down`: Set while mouse is down (preceded by `over` conditions).
 - `data-overdrag-drag`: Set while element is dragged.
@@ -161,10 +161,10 @@ Say you want your element to change background color while its engaged, here is 
 
 ## Cursor 👆
 
-At every point of interaction with a controlled element, mouse cursor will be set according to the mouse position relative to element control points and being over the content area.
+At every point of interaction with a controlled element, mouse cursor style is set according to the mouse position relative to element control points and being over the content area.
 
 > **_NOTE_**
-> Mouse cursor is set globally on a `document.body`, which may interfere with elements inside or outside controlled element
+> Mouse cursor is set as an element pointer style which should not interfere with a global cursor state. Moreover, the child DOM overrides are performed by default.
 
 - `w-resize`: ↔️ Set while LEFT control sensor is activated (including sensitivity area)
 - `e-resize`: ↔️ Set while RIGHT control sensor is activated (including sensitivity area).
@@ -178,6 +178,13 @@ At every point of interaction with a controlled element, mouse cursor will be se
 - `default`: ⬆️ Set while no interactions are detected.
 
 (see complete list of cursor values listed at [Overdrag.CURSOR](https://github.com/savanesoff/overdrag/blob/6ab7bfbf515ef2943510344b8891ad3c527801be/src/index.ts#L77-L98))
+
+## Future plans
+
+1. Add max `width`/`height`
+2. Enable events for activation of individual sensors
+3. Fully test coverage
+4. Create Angular support
 
 # PS
 

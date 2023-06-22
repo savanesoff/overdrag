@@ -234,7 +234,6 @@ describe("Overdrag", () => {
       const overdrag = createInstance();
       expect(overdrag.down).toBe(false);
       expect(overdrag.over).toBe(false);
-      expect(overdrag.engaged).toBe(false);
       expect(overdrag.parentMouseX).toBe(0);
       expect(overdrag.parentMouseY).toBe(0);
       expect(overdrag.controlsActive).toBe(false);

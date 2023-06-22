@@ -1,13 +1,13 @@
 {
   "name": "overdrag",
   "private": false,
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "A simple drag and resize element library, with control points, events and more...",
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/savanesoff/overdrag/issues"
   },
-  "homepage": "https://savanesoff.github.io/overdrag",
+  "homepage": "https://savanesoff.github.io/overdrag-vanilla-demo",
   "keywords": [
     "drag",
     "resize",
@@ -16,7 +16,10 @@
     "motion"
   ],
   "type": "module",
-  "author": "sam.avanesoff@gmail.com",
+  "author": {
+    "name": "Samvel Avanesov",
+    "email": "sam.avanesoff@gmail.com"
+  },
   "types": "./dist/types/index.d.ts",
   "main": "./dist/index.js",
   "scripts": {

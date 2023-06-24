@@ -66,5 +66,10 @@
   },
   "publishConfig": {
     "access": "public"
+  },
+  "jest": {
+    "modulePathIgnorePatterns": [
+      "__mocks__"
+    ]
   }
 }

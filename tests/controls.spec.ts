@@ -194,199 +194,191 @@ describe("controls", () => {
     });
   });
 
-  //   it(`should activate if mouse intersects right control point `, () => {
-  //     const overdrag = createInstance();
-  //     const emitSpy = jest.spyOn(overdrag, "emit");
-  //     const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+  describe("When mouse is over top control sensor", () => {
+    let overdrag: Overdrag;
+    let emitSpy: jest.SpyInstance;
+    let attrSpy: jest.SpyInstance;
+    beforeEach(() => {
+      overdrag = createInstance();
+      emitSpy = jest.spyOn(overdrag, "emit");
+      attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+      overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
+    });
+    beforeEach(() => {
+      // Reset mock function calls
+      jest.clearAllMocks();
+    });
 
-  //     move(overdrag, {
-  //       x:
-  //         overdrag.position.fullBox.width -
-  //         overdrag.position.margins.left -
-  //         overdrag.position.margins.right +
-  //         overdrag.controlsThreshold,
-  //       y: overdrag.controlsThreshold + 1,
-  //     });
+    it(`should activate sensor at edge`, () => {
+      moveElementCursor(overdrag, {
+        x: 0,
+        y: 0,
+      });
 
-  //     expect(overdrag.controlsActive).toBe(true);
-  //     expect(emitSpy).toHaveBeenCalledWith(
-  //       Overdrag.EVENTS.CONTROLS_ACTIVE,
-  //       overdrag
-  //     );
-  //     expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.CONTROLS, "right");
-  //     expect(document.body.style.cursor).toBe(Overdrag.CURSOR.RIGHT);
-  //   });
+      expect(overdrag.controls.top).toBe(true);
+    });
 
-  //   it(`should activate if mouse intersects top control point `, () => {
-  //     const overdrag = createInstance();
-  //     const emitSpy = jest.spyOn(overdrag, "emit");
-  //     const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+    it(`should activate sensor at end of zone`, () => {
+      moveElementCursor(overdrag, {
+        x: 0,
+        y: overdrag.controlsThreshold,
+      });
 
-  //     move(overdrag, {
-  //       x: overdrag.controlsThreshold + 1,
-  //       y: -overdrag.controlsThreshold,
-  //     });
+      expect(overdrag.controls.top).toBe(true);
+    });
 
-  //     expect(overdrag.controlsActive).toBe(true);
-  //     expect(emitSpy).toHaveBeenCalledWith(
-  //       Overdrag.EVENTS.CONTROLS_ACTIVE,
-  //       overdrag
-  //     );
-  //     expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.CONTROLS, "top");
-  //     expect(document.body.style.cursor).toBe(Overdrag.CURSOR.TOP);
-  //   });
+    it(`should not activate sensor before edge`, () => {
+      moveElementCursor(overdrag, {
+        x: 0,
+        y: -1,
+      });
 
-  //   it(`should activate if mouse intersects bottom control point `, () => {
-  //     const overdrag = createInstance();
-  //     const emitSpy = jest.spyOn(overdrag, "emit");
-  //     const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+      expect(overdrag.controls.top).toBe(false);
+    });
 
-  //     move(overdrag, {
-  //       x: overdrag.controlsThreshold + 1,
-  //       y:
-  //         overdrag.position.fullBox.height -
-  //         overdrag.position.margins.top -
-  //         overdrag.position.margins.bottom +
-  //         overdrag.controlsThreshold,
-  //     });
+    it(`should not activate sensor after end of zone`, () => {
+      moveElementCursor(overdrag, {
+        x: 0,
+        y: overdrag.controlsThreshold + 1,
+      });
 
-  //     expect(overdrag.controlsActive).toBe(true);
-  //     expect(emitSpy).toHaveBeenCalledWith(
-  //       Overdrag.EVENTS.CONTROLS_ACTIVE,
-  //       overdrag
-  //     );
-  //     expect(attrSpy).toHaveBeenCalledWith(
-  //       Overdrag.ATTRIBUTES.CONTROLS,
-  //       "bottom"
-  //     );
-  //     expect(document.body.style.cursor).toBe(Overdrag.CURSOR.BOTTOM);
-  //   });
+      expect(overdrag.controls.top).toBe(false);
+    });
 
-  //   it(`should activate left-top control points`, () => {
-  //     const overdrag = createInstance();
-  //     const emitSpy = jest.spyOn(overdrag, "emit");
-  //     const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+    it(`should not activate sensor if horizontal outside of bounds`, () => {
+      moveElementCursor(overdrag, {
+        x: -1,
+        y: 0,
+      });
+      expect(overdrag.controls.top).toBe(false);
 
-  //     move(overdrag, {
-  //       x: -overdrag.controlsThreshold,
-  //       y: -overdrag.controlsThreshold,
-  //     });
+      moveElementCursor(overdrag, {
+        x: overdrag.position.visualBounds.width + 1,
+        y: 0,
+      });
+      expect(overdrag.controls.top).toBe(false);
+    });
 
-  //     expect(overdrag.controlsActive).toBe(true);
-  //     expect(emitSpy).toHaveBeenCalledWith(
-  //       Overdrag.EVENTS.CONTROLS_ACTIVE,
-  //       overdrag
-  //     );
-  //     expect(attrSpy).toHaveBeenCalledWith(
-  //       Overdrag.ATTRIBUTES.CONTROLS,
-  //       "left-top"
-  //     );
-  //     expect(document.body.style.cursor).toBe(Overdrag.CURSOR.TOP_LEFT);
-  //   });
+    it(`should set "${Overdrag.ATTRIBUTES.CONTROLS}" attribute to "top"' if only top sensor activated`, () => {
+      moveElementCursor(overdrag, {
+        x: overdrag.controlsThreshold + 1,
+        y: 0,
+      });
 
-  //   it(`should activate right-top control points`, () => {
-  //     const overdrag = createInstance();
-  //     const emitSpy = jest.spyOn(overdrag, "emit");
-  //     const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+      expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.CONTROLS, "top");
+    });
 
-  //     move(overdrag, {
-  //       x:
-  //         overdrag.position.fullBox.width -
-  //         overdrag.position.margins.left -
-  //         overdrag.position.margins.right +
-  //         overdrag.controlsThreshold,
-  //       y: -overdrag.controlsThreshold,
-  //     });
+    it(`should set "${Overdrag.ATTRIBUTES.CONTROLS}" attribute to "left-top" for both sensors activation`, () => {
+      moveElementCursor(overdrag, {
+        x: 0,
+        y: 0,
+      });
 
-  //     expect(overdrag.controlsActive).toBe(true);
-  //     expect(emitSpy).toHaveBeenCalledWith(
-  //       Overdrag.EVENTS.CONTROLS_ACTIVE,
-  //       overdrag
-  //     );
-  //     expect(attrSpy).toHaveBeenCalledWith(
-  //       Overdrag.ATTRIBUTES.CONTROLS,
-  //       "right-top"
-  //     );
-  //     expect(document.body.style.cursor).toBe(Overdrag.CURSOR.TOP_RIGHT);
-  //   });
+      expect(attrSpy).toHaveBeenCalledWith(
+        Overdrag.ATTRIBUTES.CONTROLS,
+        "left-top"
+      );
+    });
 
-  //   it(`should activate left-bottom control points`, () => {
-  //     const overdrag = createInstance();
-  //     const emitSpy = jest.spyOn(overdrag, "emit");
-  //     const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+    it(`should set "${Overdrag.ATTRIBUTES.CONTROLS}" attribute to "right-top" for both sensors activation`, () => {
+      moveElementCursor(overdrag, {
+        x: overdrag.position.visualBounds.width,
+        y: 0,
+      });
 
-  //     move(overdrag, {
-  //       x: -overdrag.controlsThreshold,
-  //       y:
-  //         overdrag.position.fullBox.height -
-  //         overdrag.position.margins.top -
-  //         overdrag.position.margins.bottom +
-  //         overdrag.controlsThreshold,
-  //     });
+      expect(attrSpy).toHaveBeenCalledWith(
+        Overdrag.ATTRIBUTES.CONTROLS,
+        "right-top"
+      );
+    });
 
-  //     expect(overdrag.controlsActive).toBe(true);
-  //     expect(emitSpy).toHaveBeenCalledWith(
-  //       Overdrag.EVENTS.CONTROLS_ACTIVE,
-  //       overdrag
-  //     );
-  //     expect(attrSpy).toHaveBeenCalledWith(
-  //       Overdrag.ATTRIBUTES.CONTROLS,
-  //       "left-bottom"
-  //     );
-  //     expect(document.body.style.cursor).toBe(Overdrag.CURSOR.BOTTOM_LEFT);
-  //   });
+    it(`should emit "${Overdrag.EVENTS.CONTROLS_ACTIVE}" event`, () => {
+      moveElementCursor(overdrag, {
+        y: 0,
+        x: overdrag.controlsThreshold + 1,
+      });
 
-  //   it(`should activate right-bottom control points`, () => {
-  //     const overdrag = createInstance();
-  //     const emitSpy = jest.spyOn(overdrag, "emit");
-  //     const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+      expect(emitSpy).toHaveBeenCalledWith(
+        Overdrag.EVENTS.CONTROLS_ACTIVE,
+        overdrag
+      );
+    });
 
-  //     move(overdrag, {
-  //       x:
-  //         overdrag.position.fullBox.width -
-  //         overdrag.position.margins.left -
-  //         overdrag.position.margins.right +
-  //         overdrag.controlsThreshold,
-  //       y:
-  //         overdrag.position.fullBox.height -
-  //         overdrag.position.margins.top -
-  //         overdrag.position.margins.bottom +
-  //         overdrag.controlsThreshold,
-  //     });
+    it(`should emit "${Overdrag.EVENTS.CONTROLS_INACTIVE}" event once top sensor is deactivated`, () => {
+      moveElementCursor(overdrag, {
+        y: 0,
+        x: overdrag.controlsThreshold + 1,
+      });
 
-  //     expect(overdrag.controlsActive).toBe(true);
-  //     expect(emitSpy).toHaveBeenCalledWith(
-  //       Overdrag.EVENTS.CONTROLS_ACTIVE,
-  //       overdrag
-  //     );
-  //     expect(attrSpy).toHaveBeenCalledWith(
-  //       Overdrag.ATTRIBUTES.CONTROLS,
-  //       "right-bottom"
-  //     );
-  //     expect(document.body.style.cursor).toBe(Overdrag.CURSOR.BOTTOM_RIGHT);
-  //   });
+      moveElementCursor(overdrag, {
+        y: -1,
+        x: overdrag.controlsThreshold + 1,
+      });
 
-  //   it(`should deactivate if mouse leaves control points`, () => {
-  //     const overdrag = createInstance();
-  //     const emitSpy = jest.spyOn(overdrag, "emit");
-  //     const attrSpy = jest.spyOn(overdrag.element, "removeAttribute");
+      expect(emitSpy).toHaveBeenCalledTimes(2);
+      expect(emitSpy).toHaveBeenCalledWith(
+        Overdrag.EVENTS.CONTROLS_INACTIVE,
+        overdrag
+      );
+    });
 
-  //     move(overdrag, {
-  //       x: overdrag.controlsThreshold,
-  //       y: overdrag.controlsThreshold,
-  //     });
+    it(`should emit "${Overdrag.EVENTS.CONTROLS_INACTIVE}" for out of bound vertical`, () => {
+      moveElementCursor(overdrag, {
+        y: 0,
+        x: overdrag.controlsThreshold + 1,
+      });
 
-  //     move(overdrag, {
-  //       x: -overdrag.controlsThreshold - 1,
-  //       y: -overdrag.controlsThreshold - 1,
-  //     });
+      moveElementCursor(overdrag, {
+        y: 0,
+        x: -1,
+      });
 
-  //     expect(overdrag.controlsActive).toBe(false);
-  //     expect(emitSpy).toHaveBeenCalledWith(
-  //       Overdrag.EVENTS.CONTROLS_INACTIVE,
-  //       overdrag
-  //     );
-  //     expect(attrSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.CONTROLS);
-  //     expect(document.body.style.cursor).toBe(Overdrag.CURSOR.DEFAULT);
-  //   });
+      expect(emitSpy).toHaveBeenCalledTimes(2);
+      expect(emitSpy).toHaveBeenCalledWith(
+        Overdrag.EVENTS.CONTROLS_INACTIVE,
+        overdrag
+      );
+    });
+
+    it(`should set element cursor to "${Overdrag.CURSOR.TOP}"`, () => {
+      moveElementCursor(overdrag, {
+        y: 0,
+        x: overdrag.controlsThreshold + 1,
+      });
+
+      expect(overdrag.element.style.cursor).toBe(Overdrag.CURSOR.TOP);
+    });
+
+    it(`should set element cursor to "${Overdrag.CURSOR.LEFT_TOP}"`, () => {
+      moveElementCursor(overdrag, {
+        x: 0,
+        y: 0,
+      });
+
+      expect(overdrag.element.style.cursor).toBe(Overdrag.CURSOR.LEFT_TOP);
+    });
+
+    it(`should set element cursor to "${Overdrag.CURSOR.RIGHT_TOP}"`, () => {
+      moveElementCursor(overdrag, {
+        y: 0,
+        x: overdrag.position.visualBounds.width,
+      });
+
+      expect(overdrag.element.style.cursor).toBe(Overdrag.CURSOR.RIGHT_TOP);
+    });
+
+    it(`should set element cursor to "${Overdrag.CURSOR.OVER}"`, () => {
+      moveElementCursor(overdrag, {
+        y: 0,
+        x: overdrag.controlsThreshold + 1,
+      });
+
+      moveElementCursor(overdrag, {
+        x: overdrag.controlsThreshold + 1,
+        y: overdrag.controlsThreshold + 1,
+      });
+
+      expect(overdrag.element.style.cursor).toBe(Overdrag.CURSOR.OVER);
+    });
+  });
 });

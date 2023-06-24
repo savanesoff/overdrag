@@ -67,7 +67,13 @@ function generateElement(
         const eventCallbacks = callbacks.get(event) || [];
         callbacks.set(event, [...eventCallbacks, callback]);
       }),
-    removeEventListener: jest.fn(),
+    removeEventListener: jest.fn((event, callback) => {
+      const eventCallbacks = callbacks.get(event) || [];
+      callbacks.set(
+        event,
+        eventCallbacks.filter((eventCallback) => eventCallback !== callback)
+      );
+    }),
     dispatchEvent: jest.fn().mockImplementation((event: MouseEvent) => {
       const eventCallbacks = callbacks.get(event.type) || [];
       eventCallbacks.forEach((callback) => callback(event));
@@ -108,19 +114,25 @@ export function createInstance(props: Partial<ControlProps> = {}) {
   return new Overdrag(mergedProps);
 }
 
-export function moveElementCursor(instance: Overdrag, { x = 0, y = 0 }) {
-  const event = {
-    type: "mousemove",
-    // @ts-ignore
-    pageX:
+export function moveElementCursor(
+  instance: Overdrag,
+  { x = 0, y = 0 },
+  windowEvent = false
+) {
+  const event = new MouseEvent("mousemove", {
+    clientX:
       instance.parentPosition.offsetLeft +
       instance.position.visualBounds.left +
       x,
-    pageY:
+    clientY:
       instance.parentPosition.offsetTop +
       instance.position.visualBounds.top +
       y,
-  } as MouseEvent;
+  });
 
-  instance.element.dispatchEvent(event);
+  if (windowEvent) {
+    window.dispatchEvent(event);
+  } else {
+    instance.element.dispatchEvent(event);
+  }
 }

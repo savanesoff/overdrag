@@ -5,14 +5,38 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch via NPM",
+      "name": "Test all",
       "request": "launch",
-      "runtimeArgs": ["test", "--watch", "--debug"],
+      "runtimeArgs": [
+        "test",
+        "--watch",
+        "--debug",
+        "--modulePathIgnorePatterns",
+        "__mocks__"
+      ],
       "runtimeExecutable": "yarn",
       "skipFiles": ["<node_internals>/**"],
       "type": "node",
       "console": "integratedTerminal",
       "internalConsoleOptions": "openOnFirstSessionStart"
+    },
+    {
+      "type": "node",
+      "request": "launch",
+      "name": "Jest: current file",
+      //"env": { "NODE_ENV": "test" },
+      "program": "${workspaceFolder}/node_modules/.bin/jest",
+      "args": [
+        "${fileBasenameNoExtension}",
+        "--config",
+        "jestconfig.json",
+        "--watch",
+        "--debug"
+      ],
+      "console": "integratedTerminal",
+      "windows": {
+        "program": "${workspaceFolder}/node_modules/jest/bin/jest"
+      }
     }
   ]
 }

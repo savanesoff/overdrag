@@ -11,8 +11,9 @@ describe("controls", () => {
     attrSpy = jest.spyOn(overdrag.element, "setAttribute");
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
   });
-  beforeEach(() => {
+  afterEach(() => {
     // Reset mock function calls
+    overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
     jest.clearAllMocks();
   });
 
@@ -109,6 +110,7 @@ describe("controls", () => {
         y: overdrag.controlsThreshold + 1,
       });
 
+      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_ACTIVE,
         overdrag
@@ -126,7 +128,6 @@ describe("controls", () => {
         y: overdrag.controlsThreshold + 1,
       });
 
-      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_INACTIVE,
         overdrag
@@ -143,8 +144,6 @@ describe("controls", () => {
         x: 0,
         y: -1,
       });
-
-      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_INACTIVE,
         overdrag
@@ -283,6 +282,7 @@ describe("controls", () => {
         x: overdrag.controlsThreshold + 1,
       });
 
+      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_ACTIVE,
         overdrag
@@ -300,7 +300,6 @@ describe("controls", () => {
         x: overdrag.controlsThreshold + 1,
       });
 
-      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_INACTIVE,
         overdrag
@@ -318,7 +317,6 @@ describe("controls", () => {
         x: -1,
       });
 
-      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_INACTIVE,
         overdrag
@@ -461,6 +459,7 @@ describe("controls", () => {
         y: overdrag.controlsThreshold + 1,
       });
 
+      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_ACTIVE,
         overdrag
@@ -478,7 +477,6 @@ describe("controls", () => {
         y: overdrag.controlsThreshold + 1,
       });
 
-      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_INACTIVE,
         overdrag
@@ -496,7 +494,6 @@ describe("controls", () => {
         y: -1,
       });
 
-      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_INACTIVE,
         overdrag
@@ -642,6 +639,7 @@ describe("controls", () => {
         x: overdrag.controlsThreshold + 1,
       });
 
+      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_ACTIVE,
         overdrag
@@ -659,7 +657,6 @@ describe("controls", () => {
         x: overdrag.controlsThreshold + 1,
       });
 
-      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_INACTIVE,
         overdrag
@@ -677,7 +674,6 @@ describe("controls", () => {
         x: -1,
       });
 
-      expect(emitSpy).toHaveBeenCalledTimes(2);
       expect(emitSpy).toHaveBeenCalledWith(
         Overdrag.EVENTS.CONTROLS_INACTIVE,
         overdrag

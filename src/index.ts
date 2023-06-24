@@ -448,8 +448,6 @@ export default class Overdrag extends EventEmitter {
     this.element.addEventListener("mousedown", this.onMouseDown);
     this.element.addEventListener("mouseenter", this.onMouseOver);
 
-    this.down = false;
-
     e.preventDefault();
     Overdrag.activeInstance = null;
     this.down = false;

@@ -123,7 +123,7 @@ export default class Overdrag extends EventEmitter {
     clickDetectionThreshold: 5,
     stack: false,
   };
-  static readonly ATTRIBUTES: { [key: string]: Attributes } = {
+  static readonly ATTRIBUTES = {
     /** Set while any control point is active with a value of active control, Ex: `data-overdrag-controls="right-left"` */
     CONTROLS: "data-overdrag-controls",
     /** Set while mouse is over the element pass the control sensors. */
@@ -135,7 +135,7 @@ export default class Overdrag extends EventEmitter {
     /**  Set while element is being resized with a value of side used to resize element. (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-resize="right"`. */
     RESIZE: "data-overdrag-resize",
   };
-  static readonly CURSOR: { [key: string]: Cursors } = {
+  static readonly CURSOR = {
     /** Set while LEFT control sensor is activated (including sensitivity area). */
     LEFT: "w-resize",
     /** Set while RIGHT control sensor is activated (including sensitivity area). */
@@ -145,13 +145,13 @@ export default class Overdrag extends EventEmitter {
     /** Set while BOTTOM control sensor is activated (including sensitivity area). */
     BOTTOM: "s-resize",
     /** Set while TOP and LEFT control sensors are activated (including sensitivity area). */
-    TOP_LEFT: "nw-resize",
+    LEFT_TOP: "nw-resize",
     /** Set while TOP and RIGHT control sensors are activated (including sensitivity area). */
-    TOP_RIGHT: "ne-resize",
+    RIGHT_TOP: "ne-resize",
     /** Set while BOTTOM and LEFT control sensors are activated (including sensitivity area). */
-    BOTTOM_LEFT: "sw-resize",
+    LEFT_BOTTOM: "sw-resize",
     /** Set while BOTTOM and RIGHT control sensors are activated (including sensitivity area). */
-    BOTTOM_RIGHT: "se-resize",
+    RIGHT_BOTTOM: "se-resize",
     /** Set while mouse is over the element pass the control sensors. */
     OVER: "grab",
     /** Set while no interactions are detected. */
@@ -573,13 +573,13 @@ export default class Overdrag extends EventEmitter {
     let cursor: null | string = null;
 
     if (this.controls.top && this.controls.left) {
-      cursor = Overdrag.CURSOR.TOP_LEFT;
+      cursor = Overdrag.CURSOR.LEFT_TOP;
     } else if (this.controls.bottom && this.controls.right) {
-      cursor = Overdrag.CURSOR.BOTTOM_RIGHT;
+      cursor = Overdrag.CURSOR.RIGHT_BOTTOM;
     } else if (this.controls.bottom && this.controls.left) {
-      cursor = Overdrag.CURSOR.BOTTOM_LEFT;
+      cursor = Overdrag.CURSOR.LEFT_BOTTOM;
     } else if (this.controls.top && this.controls.right) {
-      cursor = Overdrag.CURSOR.TOP_RIGHT;
+      cursor = Overdrag.CURSOR.RIGHT_TOP;
     } else if (this.controls.top) {
       cursor = Overdrag.CURSOR.TOP;
     } else if (this.controls.bottom) {

@@ -7,7 +7,7 @@ by `Protosus`
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![HitCount](https://hits.dwyl.com/savanesov/overdrag.svg)](https://hits.dwyl.com/{username}/{project-name})
 
-Overdrag is a library for adding draggable and resizable behavior to DOM elements that respects its parent and is recursive.
+Overdrag is a JavaScript utility for adding draggable and resizable behavior to DOM elements that respects its parent and is recursive.
 
 ## Demo
 

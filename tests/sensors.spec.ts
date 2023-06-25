@@ -1,22 +1,21 @@
 import Overdrag from "../src";
 import { createInstance, moveElementCursor } from "./__mocks__";
+let overdrag: Overdrag;
+let emitSpy: jest.SpyInstance;
+let attrSpy: jest.SpyInstance;
+beforeEach(() => {
+  overdrag = createInstance();
+  emitSpy = jest.spyOn(overdrag, "emit");
+  attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+  overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
+});
+afterEach(() => {
+  // Reset mock function calls
+  overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
+  jest.clearAllMocks();
+});
 
 describe("controls", () => {
-  let overdrag: Overdrag;
-  let emitSpy: jest.SpyInstance;
-  let attrSpy: jest.SpyInstance;
-  beforeEach(() => {
-    overdrag = createInstance();
-    emitSpy = jest.spyOn(overdrag, "emit");
-    attrSpy = jest.spyOn(overdrag.element, "setAttribute");
-    overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
-  });
-  afterEach(() => {
-    // Reset mock function calls
-    overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
-    jest.clearAllMocks();
-  });
-
   describe("When mouse is over left control sensor", () => {
     it(`should activate sensor at edge`, () => {
       moveElementCursor(overdrag, {

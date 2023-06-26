@@ -806,7 +806,7 @@ export default class Overdrag extends EventEmitter {
         : top;
 
     if (
-      this.position.visualBounds.right !== left ||
+      this.position.visualBounds.left !== left ||
       this.position.visualBounds.top !== top
     ) {
       this.assignStyle({ left, top });

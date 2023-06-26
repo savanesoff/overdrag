@@ -88,12 +88,28 @@ jest
   // element.style comes from element mocks
   .mockImplementation((element: any) => element.style as any);
 
-export function elementSetup() {
-  const parentElement = createParentElement(generateStyle(500, 500)) as any;
+export function elementSetup({
+  parentWidth = 500,
+  parentHeight = 500,
+  elementWidth = 100,
+  elementHeight = 100,
+} = {}) {
+  const parentElement = createParentElement(
+    generateStyle(parentWidth, parentHeight)
+  ) as any;
   const element = generateElement(
-    generateStyle(100, 100),
+    generateStyle(elementWidth, elementHeight),
     parentElement
   ) as any;
+  // account for parent element padding due to browser layout not accounting for it (as expected)
+  element.style.top =
+    parseInt(element.style.top) > parseInt(parentElement.style.paddingTop)
+      ? element.style.top
+      : parentElement.style.paddingTop;
+  element.style.left =
+    parseInt(element.style.left) > parseInt(parentElement.style.paddingLeft)
+      ? element.style.left
+      : parentElement.style.paddingLeft;
   return element;
 }
 

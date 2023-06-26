@@ -91,8 +91,7 @@ type Rect = {
 };
 
 type ParentPosition = {
-  box: Box;
-  paddings: Rect;
+  actionBounds: Bounds;
   offsetLeft: number;
   offsetTop: number;
 };
@@ -288,19 +287,28 @@ export default class Overdrag extends EventEmitter {
   getComputedParentPosition(): ParentPosition {
     const parentRect = this.parentElement.getBoundingClientRect();
     const computed = getComputedStyle(this.parentElement);
-    const paddings = {
-      top: this._getInt(computed.paddingTop),
-      right: this._getInt(computed.paddingRight),
-      bottom: this._getInt(computed.paddingBottom),
-      left: this._getInt(computed.paddingLeft),
-    };
+    const paddings = this.excludePadding
+      ? { top: 0, right: 0, bottom: 0, left: 0 }
+      : {
+          top: this._getInt(computed.paddingTop),
+          right: this._getInt(computed.paddingRight),
+          bottom: this._getInt(computed.paddingBottom),
+          left: this._getInt(computed.paddingLeft),
+        };
+    // computed with and height do not include padding
+    const width = this._getInt(computed.width);
+    const height = this._getInt(computed.height);
     return {
-      box: {
+      actionBounds: {
         // element action area
-        width: this._getInt(computed.width),
-        height: this._getInt(computed.height),
+        top: paddings.top,
+        left: paddings.left,
+        right: width + paddings.left,
+        bottom: height + paddings.top,
+        // include padding to expand action area
+        width: width + paddings.left + paddings.right,
+        height: height + paddings.top + paddings.bottom,
       },
-      paddings,
       offsetLeft: parentRect.left + this._getInt(computed.borderLeftWidth),
       offsetTop: parentRect.top + this._getInt(computed.borderTopWidth),
     };
@@ -469,6 +477,8 @@ export default class Overdrag extends EventEmitter {
   };
 
   onMouseMove = (e: MouseEvent) => {
+    this.parentPosition = this.getComputedParentPosition();
+    this.position = this.getComputedElementPosition();
     this.parentMouseX = e.clientX - this.parentPosition.offsetLeft;
     this.parentMouseY = e.clientY - this.parentPosition.offsetTop;
 
@@ -480,9 +490,6 @@ export default class Overdrag extends EventEmitter {
     } else {
       this.reSize();
     }
-
-    this.parentPosition = this.getComputedParentPosition();
-    this.position = this.getComputedElementPosition();
   };
 
   isClick() {
@@ -642,37 +649,16 @@ export default class Overdrag extends EventEmitter {
     // for iframe, images and canvas
     this.element.setAttribute("width", `${newStyle.width}`);
     this.element.setAttribute("height", `${newStyle.height}`);
+    this.position = this.getComputedElementPosition();
   }
 
   private movePointRight() {
-    // ensure the element full box never goes outside of the parent
-    const maxWidth =
-      this.parentPosition.box.width -
-      this.position.visualBounds.left +
-      this.parentPosition.paddings.right;
     const boxDiff = this.position.fullBounds.width - this.position.width;
-    // ensure to account for the minimum content width in the context of a full box
-    const minWidth =
-      this.minContentWidth +
-      // add difference between full box and box to account for paddings, borders and margins
-      boxDiff;
-    // ensure the element never goes below the minimum width
-    let width = Math.max(
-      minWidth,
-      Math.min(
-        // track the mouse position and set width accordingly
-        this.parentMouseX -
-          this.downPosition.visualBounds.left +
-          // add a difference of mouse position relative to the element
-          (this.downPosition.fullBounds.width - this.offsetX),
-        maxWidth
-      )
+    const width = Math.max(
+      this.minContentWidth,
+      this.calcRight() - this.downPosition.fullBounds.left - boxDiff
     );
 
-    // snap to the parent right edge if within the threshold
-    width = width >= maxWidth - this.snapThreshold ? maxWidth : width;
-    // actual width of the element
-    width = width - boxDiff;
     if (width !== this.position.width) {
       this.assignStyle({ width });
       this.emit(Overdrag.EVENTS.CONTROL_RIGHT_UPDATE, this);
@@ -682,33 +668,13 @@ export default class Overdrag extends EventEmitter {
   }
 
   private movePointBottom() {
-    // ensure the element never goes outside of the parent
-    const maxHeight =
-      this.parentPosition.box.height -
-      this.position.visualBounds.top +
-      this.parentPosition.paddings.bottom;
-    const boxDiff = this.position.fullBounds.height - this.position.height;
-    // ensure to account for the minimum content height in the context of a full box
-    const minHeight =
-      this.minContentHeight +
-      // add difference between full box and box to account for paddings, borders and margins
-      boxDiff;
-    // ensure the element never goes below the minimum width
-    let height = Math.max(
-      minHeight,
-      Math.min(
-        // track the mouse position and set width accordingly
-        this.parentMouseY -
-          this.downPosition.visualBounds.top +
-          // add a difference of mouse position relative to the element
-          (this.downPosition.fullBounds.height - this.offsetY),
-        maxHeight
-      )
+    const boxDiff =
+      this.downPosition.fullBounds.height - this.downPosition.height;
+    const height = Math.max(
+      this.minContentHeight,
+      this.calcBottom() - this.downPosition.fullBounds.top - boxDiff
     );
-    // snap to the parent right edge if within the threshold
-    height = height >= maxHeight - this.snapThreshold ? maxHeight : height;
-    // actual height of the element
-    height = height - boxDiff;
+
     if (height !== this.position.height) {
       this.assignStyle({ height });
       this.emit(Overdrag.EVENTS.CONTROL_BOTTOM_UPDATE, this);
@@ -720,23 +686,18 @@ export default class Overdrag extends EventEmitter {
   private movePointLeft() {
     const boxDiff = this.position.fullBounds.width - this.position.width;
     const minWidth = this.minContentWidth + boxDiff;
-    let left = Math.max(
-      this.parentPosition.paddings.left,
-      Math.min(
-        // track the mouse position and set left accordingly
-        this.parentMouseX - this.offsetX,
-        // max left, otherwise we'll push the element to the right
-        this.downPosition.visualBounds.right - minWidth
-      )
+
+    const left = Math.min(
+      this.calcLeft(), // this will track mouse within action bounds of the parent
+      this.downPosition.visualBounds.right - minWidth // this will restrict the element from going below the minimum width
     );
-    // snap to the parent left edge if within the threshold
-    left =
-      left < this.snapThreshold + this.parentPosition.paddings.left
-        ? this.parentPosition.paddings.left
-        : left;
-    // update width accordingly
+
+    // determine the width of the element according to the left position
     const width =
-      Math.max(minWidth, this.downPosition.visualBounds.right - left) - boxDiff;
+      this.downPosition.visualBounds.right -
+      left -
+      boxDiff +
+      this.position.margins.left;
 
     if (left !== this.position.visualBounds.left) {
       this.assignStyle({ width, left });
@@ -749,24 +710,18 @@ export default class Overdrag extends EventEmitter {
   private movePointTop() {
     const boxDiff = this.position.fullBounds.height - this.position.height;
     const minHeight = this.minContentHeight + boxDiff;
-    let top = Math.max(
-      this.parentPosition.paddings.top,
-      Math.min(
-        // track the mouse position and set top accordingly
-        this.parentMouseY - this.offsetY,
-        // max top, otherwise we'll push the element to the right
-        this.downPosition.visualBounds.bottom - minHeight
-      )
+
+    const top = Math.min(
+      this.calcTop(), // this will track mouse within action bounds of the parent
+      this.downPosition.visualBounds.bottom - minHeight // this will restrict the element from going below the minimum height
     );
-    // snap to the parent top edge if within the threshold
-    top =
-      top < this.snapThreshold + this.parentPosition.paddings.top
-        ? this.parentPosition.paddings.top
-        : top;
-    // update height accordingly
+
+    // determine the height of the element according to the top position
     const height =
-      Math.max(minHeight, this.downPosition.visualBounds.bottom - top) -
-      boxDiff;
+      this.downPosition.visualBounds.bottom -
+      top -
+      boxDiff +
+      this.position.margins.top;
 
     if (top !== this.position.visualBounds.top) {
       this.assignStyle({ height, top });
@@ -776,41 +731,95 @@ export default class Overdrag extends EventEmitter {
     return false;
   }
 
+  private calcRight(): number {
+    let right =
+      this.parentMouseX -
+      this.offsetX +
+      this.downPosition.visualBounds.width +
+      this.downPosition.margins.right;
+    // snap to the edges of the window
+    right =
+      // check left side of element snapping threshold
+      right + this.snapThreshold >= this.parentPosition.actionBounds.right
+        ? // snap to the left edge of the parent
+          this.parentPosition.actionBounds.right
+        : // check right side of element snapping threshold
+          right;
+    return right;
+  }
+
+  private calcBottom(): number {
+    let bottom =
+      this.parentMouseY -
+      this.offsetY +
+      this.downPosition.visualBounds.height +
+      this.downPosition.margins.bottom;
+    // snap to the edges of the window
+    bottom =
+      // check top side of element snapping threshold
+      bottom + this.snapThreshold >= this.parentPosition.actionBounds.bottom
+        ? // snap to the top edge of the parent
+          this.parentPosition.actionBounds.bottom
+        : // check bottom side of element snapping threshold
+          bottom;
+    return bottom;
+  }
+
+  private calcLeft(): number {
+    const x = this.parentMouseX - this.offsetX - this.position.margins.left;
+
+    // snap to the edges of the window
+    const left =
+      // check left side of element snapping threshold
+      x - this.snapThreshold <= this.parentPosition.actionBounds.left
+        ? // snap to the left edge of the parent
+          this.parentPosition.actionBounds.left
+        : // otherwise, use the current mouse position
+          x;
+
+    return left;
+  }
+
+  private calcTop(): number {
+    const y = this.parentMouseY - this.offsetY - this.position.margins.top;
+    // snap to the edges of the window
+    const top =
+      // check top side of element snapping threshold
+      y - this.snapThreshold <= this.parentPosition.actionBounds.top
+        ? // snap to the top edge of the parent
+          this.parentPosition.actionBounds.top
+        : // otherwise, use the current mouse position
+          y;
+
+    return top;
+  }
   /**
    * Move element by mouse position
    * and snap to the edges of the parent element
    * if mouse is close enough to the edge of the parent element (snapThreshold)
    */
   private drag() {
-    // edge of element relative to parent according to current mouse position (includes margins, borders and paddings )
-    let left = this.parentMouseX - this.offsetX;
-    let top = this.parentMouseY - this.offsetY;
-
-    // snap to the edges of the window
-    left =
-      left <= this.snapThreshold + this.parentPosition.paddings.left
-        ? this.parentPosition.paddings.left
-        : left + this.position.fullBounds.width >=
-          this.parentPosition.paddings.left +
-            this.parentPosition.box.width -
-            this.snapThreshold
-        ? this.parentPosition.paddings.left +
-          this.parentPosition.box.width -
-          this.position.fullBounds.width
-        : left;
-
-    // snap to the edges of the window
-    top =
-      top <= this.snapThreshold + this.parentPosition.paddings.top
-        ? this.parentPosition.paddings.top
-        : top + this.position.fullBounds.height >=
-          this.parentPosition.paddings.top +
-            this.parentPosition.box.height -
-            this.snapThreshold
-        ? this.parentPosition.paddings.top +
-          this.parentPosition.box.height -
+    const x = this.calcLeft();
+    const y = this.calcTop();
+    const top =
+      // check bottom side of element snapping threshold
+      y + this.position.fullBounds.height + this.snapThreshold >=
+      this.parentPosition.actionBounds.bottom
+        ? // snap to the bottom edge of the parent
+          this.parentPosition.actionBounds.bottom -
           this.position.fullBounds.height
-        : top;
+        : // otherwise, use the current mouse position
+          y;
+
+    const left =
+      // check right side of element snapping threshold
+      x + this.position.fullBounds.width + this.snapThreshold >=
+      this.parentPosition.actionBounds.right
+        ? // snap to the right edge of the parent
+          this.parentPosition.actionBounds.right -
+          this.position.fullBounds.width
+        : // otherwise, use the current mouse position
+          x;
 
     if (
       this.position.visualBounds.left !== left ||

@@ -478,6 +478,8 @@ export default class Overdrag extends EventEmitter {
 
   onMouseMove = (e: MouseEvent) => {
     this.parentPosition = this.getComputedParentPosition();
+    // in case CSS has changed we need to update the position
+    this.position = this.getComputedElementPosition();
     this.parentMouseX = e.clientX - this.parentPosition.offsetLeft;
     this.parentMouseY = e.clientY - this.parentPosition.offsetTop;
 

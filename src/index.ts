@@ -462,9 +462,6 @@ export default class Overdrag extends EventEmitter {
   };
 
   onMouseMove = (e: MouseEvent) => {
-    this.parentPosition = this.getComputedParentPosition();
-    this.position = this.getComputedElementPosition();
-
     this.parentMouseX = e.clientX - this.parentPosition.offsetLeft;
     this.parentMouseY = e.clientY - this.parentPosition.offsetTop;
 
@@ -476,6 +473,9 @@ export default class Overdrag extends EventEmitter {
     } else {
       this.reSize();
     }
+
+    this.parentPosition = this.getComputedParentPosition();
+    this.position = this.getComputedElementPosition();
   };
 
   isClick() {
@@ -619,33 +619,22 @@ export default class Overdrag extends EventEmitter {
     }
   }
 
-  assignPosition(position: Partial<Position>) {
-    const current = {
-      top: this.position.visualBounds.top,
-      left: this.position.visualBounds.left,
+  private assignStyle(style: Partial<Position>) {
+    const newStyle = {
+      top: this.position.fullBounds.top,
+      left: this.position.fullBounds.left,
       width: this.position.width,
       height: this.position.height,
-      ...position,
-    };
-    // enable precision to avoid deviation when resizing or dragging be reassigning the position to new state
-    this.position = {
-      ...this.position,
-      visualBounds: {
-        ...this.position.visualBounds,
-        top: current.top,
-        left: current.left,
-      },
-      width: current.width,
-      height: current.height,
+      ...style,
     };
 
-    this.element.style.left = `${current.left}px`;
-    this.element.style.top = `${current.top}px`;
-    this.element.style.width = `${current.width}px`;
-    this.element.style.height = `${current.height}px`;
+    this.element.style.left = `${newStyle.left}px`;
+    this.element.style.top = `${newStyle.top}px`;
+    this.element.style.width = `${newStyle.width}px`;
+    this.element.style.height = `${newStyle.height}px`;
     // for iframe, images and canvas
-    this.element.setAttribute("width", `${current.width}`);
-    this.element.setAttribute("height", `${current.height}`);
+    this.element.setAttribute("width", `${newStyle.width}`);
+    this.element.setAttribute("height", `${newStyle.height}`);
   }
 
   private movePointRight() {
@@ -678,7 +667,7 @@ export default class Overdrag extends EventEmitter {
     // actual width of the element
     width = width - boxDiff;
     if (width !== this.position.width) {
-      this.assignPosition({ width });
+      this.assignStyle({ width });
       this.emit(Overdrag.EVENTS.CONTROL_RIGHT_UPDATE, this);
       return true;
     }
@@ -714,7 +703,7 @@ export default class Overdrag extends EventEmitter {
     // actual height of the element
     height = height - boxDiff;
     if (height !== this.position.height) {
-      this.assignPosition({ height });
+      this.assignStyle({ height });
       this.emit(Overdrag.EVENTS.CONTROL_BOTTOM_UPDATE, this);
       return true;
     }
@@ -743,7 +732,7 @@ export default class Overdrag extends EventEmitter {
       Math.max(minWidth, this.downPosition.visualBounds.right - left) - boxDiff;
 
     if (left !== this.position.visualBounds.left) {
-      this.assignPosition({ width, left });
+      this.assignStyle({ width, left });
       this.emit(Overdrag.EVENTS.CONTROL_LEFT_UPDATE, this);
       return true;
     }
@@ -773,7 +762,7 @@ export default class Overdrag extends EventEmitter {
       boxDiff;
 
     if (top !== this.position.visualBounds.top) {
-      this.assignPosition({ height, top });
+      this.assignStyle({ height, top });
       this.emit(Overdrag.EVENTS.CONTROL_TOP_UPDATE, this);
       return true;
     }
@@ -820,7 +809,7 @@ export default class Overdrag extends EventEmitter {
       this.position.visualBounds.right !== left ||
       this.position.visualBounds.top !== top
     ) {
-      this.assignPosition({ left, top });
+      this.assignStyle({ left, top });
       this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
       this.emit(Overdrag.EVENTS.DRAG, this);
     }

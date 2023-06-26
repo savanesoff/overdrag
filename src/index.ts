@@ -19,6 +19,8 @@ export interface ControlProps {
   clickDetectionThreshold?: number;
   /** if true, "over" state of parent Overdrag will no be canceled while child overdrag is active*/
   stack?: boolean;
+  /** if true, parent padding is not treated as available space. Motion ove element will be restricted to parent paddings */
+  excludePadding?: boolean;
 }
 
 export type Defaults = Complete<Omit<ControlProps, "element">>;
@@ -122,6 +124,7 @@ export default class Overdrag extends EventEmitter {
     minContentWidth: 50,
     clickDetectionThreshold: 5,
     stack: false,
+    excludePadding: false,
   };
   static readonly ATTRIBUTES = {
     /** Set while any control point is active with a value of active control, Ex: `data-overdrag-controls="right-left"` */
@@ -223,6 +226,8 @@ export default class Overdrag extends EventEmitter {
   parentPosition: ParentPosition;
   /** Flag to opt in for stacked recursive child nodes to prevent its parent from being inactive */
   stack: boolean;
+  /** Flag to opt in for parent padding box to be included in calculations */
+  excludePadding: boolean;
   /** Control points activation status (Edge of element) */
   readonly controls: Controls = {
     left: false,
@@ -242,12 +247,14 @@ export default class Overdrag extends EventEmitter {
     controlsThreshold = Overdrag.DEFAULTS.controlsThreshold,
     clickDetectionThreshold = Overdrag.DEFAULTS.clickDetectionThreshold,
     stack = Overdrag.DEFAULTS.stack,
+    excludePadding = Overdrag.DEFAULTS.excludePadding,
   }: ControlProps) {
     super();
     this.minContentHeight = minContentHeight;
     this.minContentWidth = minContentWidth;
     this.snapThreshold = snapThreshold;
     this.controlsThreshold = controlsThreshold;
+    this.excludePadding = excludePadding;
     this.element = element;
     // ensure element is positioned
     this.element.style.position = "absolute";

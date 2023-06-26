@@ -9,9 +9,9 @@ describe("Constructor", () => {
   });
 
   it(`should throw "${Overdrag.ERROR.NO_PARENT}" if the element has no offsetParent`, () => {
-    const element = elementSetup();
-    element.offsetParent = null;
-    expect(() => createInstance({ element })).toThrow(Overdrag.ERROR.NO_PARENT);
+    expect(() =>
+      createInstance({ element: globalThis.document.createElement("div") })
+    ).toThrow(Overdrag.ERROR.NO_PARENT);
   });
 
   it(`should not throw if the element has offsetParent parent`, () => {
@@ -74,7 +74,7 @@ describe("Constructor", () => {
     expect(overdrag.dragging).toBe(false);
   });
 
-  it('should set "mouseeneter" event listener on "element"', () => {
+  it('should set "mouseenter" event listener on "element"', () => {
     const element = elementSetup();
     const spy = jest.spyOn(element, "addEventListener");
     const overdrag = createInstance({ element });

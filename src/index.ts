@@ -610,13 +610,13 @@ export default class Overdrag extends EventEmitter {
     }
 
     if (changed) {
-      this.emit(Overdrag.EVENTS.RESIZE, this);
       this.element.setAttribute(
         Overdrag.ATTRIBUTES.RESIZE,
         Object.keys(this.controls)
           .filter((key) => this.controls[key as keyof Controls])
           .join("-")
       );
+      this.emit(Overdrag.EVENTS.RESIZE, this);
     }
   }
 

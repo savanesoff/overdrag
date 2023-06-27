@@ -34,7 +34,9 @@ export const Events = {
   CLICK: "click",
   /** Triggered during dragging, on every drag motion with a mouse move. */
   DRAG: "drag",
+  /** Triggered when the mouse button is pressed down on the element, but not control points. */
   DRAG_START: "dragStart",
+  /** Triggered when the mouse button is released after dragging. */
   DRAG_END: "dragEnd",
   /**  Triggered when the mouse is over the element passed the control point sensors. */
   OVER: "over",

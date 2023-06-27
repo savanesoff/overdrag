@@ -691,17 +691,14 @@ export default class Overdrag extends EventEmitter {
 
     const left = Math.min(
       this.calcLeft(), // this will track mouse within action bounds of the parent
-      this.downPosition.visualBounds.right - minWidth // this will restrict the element from going below the minimum width
+      this.downPosition.fullBounds.right - minWidth // this will restrict the element from going below the minimum width
     );
 
     // determine the width of the element according to the left position
     const width =
-      this.downPosition.visualBounds.right -
-      left -
-      this.position.horizontalDiff +
-      this.position.margins.left;
+      this.downPosition.fullBounds.right - left - this.position.horizontalDiff;
 
-    if (left !== this.position.visualBounds.left) {
+    if (left !== this.position.fullBounds.left) {
       this.assignStyle({ width, left });
       this.emit(Overdrag.EVENTS.CONTROL_LEFT_UPDATE, this);
       return true;
@@ -714,17 +711,14 @@ export default class Overdrag extends EventEmitter {
 
     const top = Math.min(
       this.calcTop(), // this will track mouse within action bounds of the parent
-      this.downPosition.visualBounds.bottom - minHeight // this will restrict the element from going below the minimum height
+      this.downPosition.fullBounds.bottom - minHeight // this will restrict the element from going below the minimum height
     );
 
     // determine the height of the element according to the top position
     const height =
-      this.downPosition.visualBounds.bottom -
-      top -
-      this.position.verticalDiff +
-      this.position.margins.top;
+      this.downPosition.fullBounds.bottom - top - this.position.verticalDiff;
 
-    if (top !== this.position.visualBounds.top) {
+    if (top !== this.position.fullBounds.top) {
       this.assignStyle({ height, top });
       this.emit(Overdrag.EVENTS.CONTROL_TOP_UPDATE, this);
       return true;

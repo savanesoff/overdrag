@@ -139,6 +139,8 @@ type ComputedPosition = {
   margins: Rect;
   borders: Rect;
   paddings: Rect;
+  verticalDiff: number;
+  horizontalDiff: number;
 };
 
 type ControlPoints = "left" | "right" | "top" | "bottom";
@@ -338,6 +340,8 @@ export default class Overdrag extends EventEmitter {
     return {
       width,
       height,
+      verticalDiff: fullHeight - height,
+      horizontalDiff: fullWidth - width,
       visualBounds: {
         ...visualBounds,
         right: visualBounds.left + visualBounds.width,
@@ -636,10 +640,11 @@ export default class Overdrag extends EventEmitter {
   }
 
   private movePointRight() {
-    const boxDiff = this.position.fullBounds.width - this.position.width;
     const width = Math.max(
       this.minContentWidth,
-      this.calcRight() - this.downPosition.fullBounds.left - boxDiff
+      this.calcRight() -
+        this.downPosition.fullBounds.left -
+        this.position.horizontalDiff
     );
 
     if (width !== this.position.width) {
@@ -651,11 +656,11 @@ export default class Overdrag extends EventEmitter {
   }
 
   private movePointBottom() {
-    const boxDiff =
-      this.downPosition.fullBounds.height - this.downPosition.height;
     const height = Math.max(
       this.minContentHeight,
-      this.calcBottom() - this.downPosition.fullBounds.top - boxDiff
+      this.calcBottom() -
+        this.downPosition.fullBounds.top -
+        this.position.verticalDiff
     );
 
     if (height !== this.position.height) {
@@ -667,8 +672,7 @@ export default class Overdrag extends EventEmitter {
   }
 
   private movePointLeft() {
-    const boxDiff = this.position.fullBounds.width - this.position.width;
-    const minWidth = this.minContentWidth + boxDiff;
+    const minWidth = this.minContentWidth + this.position.horizontalDiff;
 
     const left = Math.min(
       this.calcLeft(), // this will track mouse within action bounds of the parent
@@ -679,7 +683,7 @@ export default class Overdrag extends EventEmitter {
     const width =
       this.downPosition.visualBounds.right -
       left -
-      boxDiff +
+      this.position.horizontalDiff +
       this.position.margins.left;
 
     if (left !== this.position.visualBounds.left) {
@@ -691,8 +695,7 @@ export default class Overdrag extends EventEmitter {
   }
 
   private movePointTop() {
-    const boxDiff = this.position.fullBounds.height - this.position.height;
-    const minHeight = this.minContentHeight + boxDiff;
+    const minHeight = this.minContentHeight + this.position.verticalDiff;
 
     const top = Math.min(
       this.calcTop(), // this will track mouse within action bounds of the parent
@@ -703,7 +706,7 @@ export default class Overdrag extends EventEmitter {
     const height =
       this.downPosition.visualBounds.bottom -
       top -
-      boxDiff +
+      this.position.verticalDiff +
       this.position.margins.top;
 
     if (top !== this.position.visualBounds.top) {

@@ -91,7 +91,10 @@ describe("While resizing without snapping", () => {
   });
 
   describe("Left control", () => {
+    let distance: number;
     beforeEach(() => {
+      // ensure to move in either direction
+      distance = getRandomValue(-overdrag.position.fullBounds.left, 50);
       // initiate resize, at this point any control point will do
       moveElementCursor(overdrag, {
         x: getRandomValue(0, overdrag.controlsThreshold), // target left only
@@ -108,12 +111,11 @@ describe("While resizing without snapping", () => {
       );
     });
 
-    it(`should emit "${Overdrag.EVENTS.RESIZE}" event while moving`, () => {
-      const left = getRandomValue(10, 50);
+    it(`should emit "${Overdrag.EVENTS.RESIZE}" event`, () => {
       moveElementCursor(
         overdrag,
         {
-          x: left,
+          x: distance,
         },
         true
       );
@@ -121,7 +123,6 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should resize element`, () => {
-      const distance = getRandomValue(10, 50);
       const width = parseInt(overdrag.element.style.width);
       moveElementCursor(
         overdrag,
@@ -131,6 +132,97 @@ describe("While resizing without snapping", () => {
         true
       );
       expect(parseInt(overdrag.element.style.width)).toBe(width - distance);
+    });
+
+    it(`should move left position`, () => {
+      const left = parseInt(overdrag.element.style.left);
+      moveElementCursor(
+        overdrag,
+        {
+          x: overdrag.position.fullBounds.left + distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.left)).toBe(left + distance);
+    });
+
+    it(`should not resize element to less than minimum width`, () => {
+      distance = 100000;
+      moveElementCursor(
+        overdrag,
+        {
+          x: overdrag.position.fullBounds.left + distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.width)).toBe(
+        overdrag.minContentWidth
+      );
+    });
+
+    it(`should not resize element to more than maximum width as constrained by parent`, () => {
+      distance = -100000;
+      const maxWidth =
+        overdrag.position.fullBounds.right - overdrag.position.horizontalDiff;
+      moveElementCursor(
+        overdrag,
+        {
+          x: overdrag.position.fullBounds.left + distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.width)).toBe(maxWidth);
+    });
+
+    it(`should not resize element to more than defined "maxContentWidth"`, () => {
+      distance = -100000;
+      overdrag.minContentWidth = getRandomValue(10, 20);
+      overdrag.maxContentWidth = getRandomValue(30, 40);
+      const maxWidth = overdrag.maxContentWidth;
+      moveElementCursor(
+        overdrag,
+        {
+          x: overdrag.position.fullBounds.left + distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.width)).toBe(maxWidth);
+    });
+
+    it("should not move right position", () => {
+      const right = parseInt(overdrag.element.style.right);
+      moveElementCursor(
+        overdrag,
+        {
+          x: overdrag.position.fullBounds.left + distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.right)).toBe(right);
+    });
+
+    it("should not move top position", () => {
+      const top = parseInt(overdrag.element.style.top);
+      moveElementCursor(
+        overdrag,
+        {
+          x: overdrag.position.fullBounds.left + distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.top)).toBe(top);
+    });
+
+    it("should not move bottom position", () => {
+      const bottom = parseInt(overdrag.element.style.bottom);
+      moveElementCursor(
+        overdrag,
+        {
+          x: overdrag.position.fullBounds.left + distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
     });
 
     it(`should remove "${Overdrag.ATTRIBUTES.RESIZE}" attribute if no resize detected`, () => {

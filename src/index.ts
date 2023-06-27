@@ -413,9 +413,9 @@ export default class Overdrag extends EventEmitter {
       paddings: { ...this.position.paddings },
       visualBounds: { ...this.position.visualBounds },
     };
-    // distance from edge of parent padding to element edge (does not include element margins)
-    this.offsetX = this.parentMouseX - this.position.visualBounds.left;
-    this.offsetY = this.parentMouseY - this.position.visualBounds.top;
+    // distance from edge of parent padding to element edge (including element margins)
+    this.offsetX = this.parentMouseX - this.position.fullBounds.left;
+    this.offsetY = this.parentMouseY - this.position.fullBounds.top;
 
     this.downMouseX = this.parentMouseX;
     this.downMouseY = this.parentMouseY;
@@ -719,10 +719,7 @@ export default class Overdrag extends EventEmitter {
 
   private calcRight(): number {
     let right =
-      this.parentMouseX -
-      this.offsetX +
-      this.downPosition.visualBounds.width +
-      this.downPosition.margins.right;
+      this.parentMouseX - this.offsetX + this.downPosition.fullBounds.width;
     // snap to the edges of the window
     right =
       // check left side of element snapping threshold
@@ -736,10 +733,7 @@ export default class Overdrag extends EventEmitter {
 
   private calcBottom(): number {
     let bottom =
-      this.parentMouseY -
-      this.offsetY +
-      this.downPosition.visualBounds.height +
-      this.downPosition.margins.bottom;
+      this.parentMouseY - this.offsetY + this.downPosition.fullBounds.height;
     // snap to the edges of the window
     bottom =
       // check top side of element snapping threshold
@@ -752,7 +746,7 @@ export default class Overdrag extends EventEmitter {
   }
 
   private calcLeft(): number {
-    const x = this.parentMouseX - this.offsetX - this.position.margins.left;
+    const x = this.parentMouseX - this.offsetX;
 
     // snap to the edges of the window
     const left =
@@ -767,7 +761,7 @@ export default class Overdrag extends EventEmitter {
   }
 
   private calcTop(): number {
-    const y = this.parentMouseY - this.offsetY - this.position.margins.top;
+    const y = this.parentMouseY - this.offsetY;
     // snap to the edges of the window
     const top =
       // check top side of element snapping threshold

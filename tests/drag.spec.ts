@@ -36,7 +36,7 @@ afterEach(() => {
   Overdrag.activeInstance = null;
   jest.clearAllMocks();
 });
-describe("WHile dragging", () => {
+describe("While dragging", () => {
   it(`should set "dragging" state to "true"`, () => {
     expect(overdrag.dragging).toBe(true);
   });

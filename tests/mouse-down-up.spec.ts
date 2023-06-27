@@ -110,7 +110,7 @@ describe("onMouseDown", () => {
     expect(overdrag.dragging).toBe(true);
   });
 
-  it(`should set "${Overdrag.ATTRIBUTES.DRAG}" attribute`, () => {
+  it(`should set "${Overdrag.ATTRIBUTES.DRAG_MODE}" attribute`, () => {
     moveElementCursor(overdrag, {
       x: overdrag.controlsThreshold + 1,
       y: overdrag.controlsThreshold + 1,
@@ -118,7 +118,7 @@ describe("onMouseDown", () => {
 
     overdrag.element.dispatchEvent(new MouseEvent("mousedown"));
     expect(attrSpy).toHaveBeenCalledWith(
-      Overdrag.ATTRIBUTES.DRAG,
+      Overdrag.ATTRIBUTES.DRAG_MODE,
       expect.anything()
     );
   });
@@ -157,8 +157,10 @@ describe("onMouseUp", () => {
     expect(removeAttributeSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DOWN);
   });
 
-  it(`should remove "${Overdrag.ATTRIBUTES.DRAG}" attribute`, () => {
-    expect(removeAttributeSpy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.DRAG);
+  it(`should remove "${Overdrag.ATTRIBUTES.DRAG_MODE}" attribute`, () => {
+    expect(removeAttributeSpy).toHaveBeenCalledWith(
+      Overdrag.ATTRIBUTES.DRAG_MODE
+    );
   });
 
   it(`should remove "${Overdrag.ATTRIBUTES.RESIZE}" attribute`, () => {

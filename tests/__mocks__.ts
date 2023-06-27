@@ -103,24 +103,24 @@ export function createInstance(props: Partial<ControlProps> = {}) {
 }
 
 export function moveElementCursor(
-  instance: Overdrag,
+  overdrag: Overdrag,
   { x = 0, y = 0 },
   windowEvent = false
 ) {
   const event = new MouseEvent("mousemove", {
     clientX:
-      instance.parentPosition.offsetLeft +
-      instance.position.visualBounds.left +
+      overdrag.parentPosition.offsetLeft +
+      (overdrag.down ? overdrag.offsetX : overdrag.position.visualBounds.left) +
       x,
     clientY:
-      instance.parentPosition.offsetTop +
-      instance.position.visualBounds.top +
+      overdrag.parentPosition.offsetTop +
+      (overdrag.down ? overdrag.offsetY : overdrag.position.visualBounds.top) +
       y,
   });
 
   if (windowEvent) {
     window.dispatchEvent(event);
   } else {
-    instance.element.dispatchEvent(event);
+    overdrag.element.dispatchEvent(event);
   }
 }

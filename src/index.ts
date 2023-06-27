@@ -25,42 +25,77 @@ export interface ControlProps {
 
 export type Defaults = Complete<Omit<ControlProps, "element">>;
 // union of all events
-export type Events =
-  | "down"
-  | "up"
-  | "click"
-  | "drag"
-  | "over"
-  | "out"
-  | "controlsActive"
-  | "controlsInactive"
-  | "controlRightUpdate"
-  | "controlLeftUpdate"
-  | "controlTopUpdate"
-  | "controlBottomUpdate"
-  | "resize"
-  | "update";
+export const Events = {
+  /** Triggered when the mouse button is pressed down on the element. */
+  DOWN: "down",
+  /**  Triggered when the mouse button is released if pressed while element was "engaged". */
+  UP: "up",
+  /** Triggered when a click action is detected. */
+  CLICK: "click",
+  /** Triggered during dragging, on every drag motion with a mouse move. */
+  DRAG: "drag",
+  DRAG_START: "dragStart",
+  DRAG_END: "dragEnd",
+  /**  Triggered when the mouse is over the element passed the control point sensors. */
+  OVER: "over",
+  /** Triggered when the mouse moves out of the visible box of element excluding control point sensors. */
+  OUT: "out",
+  /** Triggered when the control points are activated (edge of element) within control sensor area. */
+  CONTROLS_ACTIVE: "controlsActive",
+  /** Triggered when the control points are deactivated. */
+  CONTROLS_INACTIVE: "controlsInactive",
+  /** Triggered when the right control point position is updated. */
+  CONTROL_RIGHT_UPDATE: "controlRightUpdate",
+  /** Triggered when the left control point position is updated. */
+  CONTROL_LEFT_UPDATE: "controlLeftUpdate",
+  /** Triggered when the top control point position is updated. */
+  CONTROL_TOP_UPDATE: "controlTopUpdate",
+  /** Triggered when the bottom control point position is updated. */
+  CONTROL_BOTTOM_UPDATE: "controlBottomUpdate",
+  /**  Triggered during resizing on every mouse move (if size change detected). */
+  RESIZE: "resize",
+  /** Triggered on any update to the element (any emitted event will be preceded by update event). */
+  UPDATE: "update",
+} as const;
 
 // union of all cursors
-export type Cursors =
-  | "default"
-  | "grab"
-  | "w-resize"
-  | "e-resize"
-  | "n-resize"
-  | "s-resize"
-  | "nw-resize"
-  | "ne-resize"
-  | "sw-resize"
-  | "se-resize";
+export const Cursors = {
+  /** Set while LEFT control sensor is activated (including sensitivity area). */
+  LEFT: "w-resize",
+  /** Set while RIGHT control sensor is activated (including sensitivity area). */
+  RIGHT: "e-resize",
+  /** Set while TOP control sensor is activated (including sensitivity area). */
+  TOP: "n-resize",
+  /** Set while BOTTOM control sensor is activated (including sensitivity area). */
+  BOTTOM: "s-resize",
+  /** Set while TOP and LEFT control sensors are activated (including sensitivity area). */
+  LEFT_TOP: "nw-resize",
+  /** Set while TOP and RIGHT control sensors are activated (including sensitivity area). */
+  RIGHT_TOP: "ne-resize",
+  /** Set while BOTTOM and LEFT control sensors are activated (including sensitivity area). */
+  LEFT_BOTTOM: "sw-resize",
+  /** Set while BOTTOM and RIGHT control sensors are activated (including sensitivity area). */
+  RIGHT_BOTTOM: "se-resize",
+  /** Set while mouse is over the element pass the control sensors. */
+  OVER: "grab",
+  /** Set while no interactions are detected. */
+  DEFAULT: "default",
+} as const;
 
 // union of all attributes
-export type Attributes =
-  | "data-overdrag-controls"
-  | "data-overdrag-over"
-  | "data-overdrag-down"
-  | "data-overdrag-drag"
-  | "data-overdrag-resize";
+export const Attributes = {
+  /** Set while any control point is active with a value of active control, Ex: `data-overdrag-controls="right-left"` */
+  CONTROLS: "data-overdrag-controls",
+  /** Set while mouse is over the element pass the control sensors. */
+  OVER: "data-overdrag-over",
+  /** Set while mouse is down (preceded by `over` conditions). */
+  DOWN: "data-overdrag-down",
+  /**  Set while element is dragged. */
+  DRAG: "data-overdrag-drag",
+  DRAG_MODE: "data-overdrag-drag-mode",
+  /**  Set while element is being resized with a value of side used to resize element. (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-resize="right"`. */
+  RESIZE: "data-overdrag-resize",
+} as const;
 
 type Box = {
   width: number;
@@ -125,70 +160,9 @@ export default class Overdrag extends EventEmitter {
     stack: false,
     excludePadding: false,
   };
-  static readonly ATTRIBUTES = {
-    /** Set while any control point is active with a value of active control, Ex: `data-overdrag-controls="right-left"` */
-    CONTROLS: "data-overdrag-controls",
-    /** Set while mouse is over the element pass the control sensors. */
-    OVER: "data-overdrag-over",
-    /** Set while mouse is down (preceded by `over` conditions). */
-    DOWN: "data-overdrag-down",
-    /**  Set while element is dragged. */
-    DRAG: "data-overdrag-drag",
-    /**  Set while element is being resized with a value of side used to resize element. (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-resize="right"`. */
-    RESIZE: "data-overdrag-resize",
-  };
-  static readonly CURSOR = {
-    /** Set while LEFT control sensor is activated (including sensitivity area). */
-    LEFT: "w-resize",
-    /** Set while RIGHT control sensor is activated (including sensitivity area). */
-    RIGHT: "e-resize",
-    /** Set while TOP control sensor is activated (including sensitivity area). */
-    TOP: "n-resize",
-    /** Set while BOTTOM control sensor is activated (including sensitivity area). */
-    BOTTOM: "s-resize",
-    /** Set while TOP and LEFT control sensors are activated (including sensitivity area). */
-    LEFT_TOP: "nw-resize",
-    /** Set while TOP and RIGHT control sensors are activated (including sensitivity area). */
-    RIGHT_TOP: "ne-resize",
-    /** Set while BOTTOM and LEFT control sensors are activated (including sensitivity area). */
-    LEFT_BOTTOM: "sw-resize",
-    /** Set while BOTTOM and RIGHT control sensors are activated (including sensitivity area). */
-    RIGHT_BOTTOM: "se-resize",
-    /** Set while mouse is over the element pass the control sensors. */
-    OVER: "grab",
-    /** Set while no interactions are detected. */
-    DEFAULT: "default",
-  };
-  static readonly EVENTS: { [key: string]: Events } = {
-    /** Triggered when the mouse button is pressed down on the element. */
-    DOWN: "down",
-    /**  Triggered when the mouse button is released if pressed while element was "engaged". */
-    UP: "up",
-    /** Triggered when a click action is detected. */
-    CLICK: "click",
-    /** Triggered during dragging, on every drag motion with a mouse move. */
-    DRAG: "drag",
-    /**  Triggered when the mouse is over the element passed the control point sensors. */
-    OVER: "over",
-    /** Triggered when the mouse moves out of the visible box of element excluding control point sensors. */
-    OUT: "out",
-    /** Triggered when the control points are activated (edge of element) within control sensor area. */
-    CONTROLS_ACTIVE: "controlsActive",
-    /** Triggered when the control points are deactivated. */
-    CONTROLS_INACTIVE: "controlsInactive",
-    /** Triggered when the right control point position is updated. */
-    CONTROL_RIGHT_UPDATE: "controlRightUpdate",
-    /** Triggered when the left control point position is updated. */
-    CONTROL_LEFT_UPDATE: "controlLeftUpdate",
-    /** Triggered when the top control point position is updated. */
-    CONTROL_TOP_UPDATE: "controlTopUpdate",
-    /** Triggered when the bottom control point position is updated. */
-    CONTROL_BOTTOM_UPDATE: "controlBottomUpdate",
-    /**  Triggered during resizing on every mouse move (if size change detected). */
-    RESIZE: "resize",
-    /** Triggered on any update to the element (any emitted event will be preceded by update event). */
-    UPDATE: "update",
-  };
+  static readonly ATTRIBUTES = Attributes;
+  static readonly CURSOR = Cursors;
+  static readonly EVENTS = Events;
   static activeInstance: Overdrag | null = null;
   readonly window = window;
   readonly element: HTMLElement;

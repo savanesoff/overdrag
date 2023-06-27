@@ -178,7 +178,11 @@ export default class Overdrag extends EventEmitter {
   readonly element: HTMLElement;
   readonly parentElement: HTMLElement;
   snapThreshold: number;
+  controlsThreshold: number;
+  minContentHeight: number;
+  minContentWidth: number;
   maxContentWidth: number;
+  clickDetectionThreshold: number;
 
   /** Control points activation status (Edge of element) */
   controlsActive = false;
@@ -690,7 +694,7 @@ export default class Overdrag extends EventEmitter {
 
     const left = Math.min(
       Math.max(
-      this.calcLeft(), // this will track mouse within action bounds of the parent
+        this.calcLeft(), // this will track mouse within action bounds of the parent
         this.downPosition.fullBounds.right - maxWidth // this will restrict the element from going above the maximum width
       ),
       this.downPosition.fullBounds.right - minWidth // this will restrict the element from going below the minimum width

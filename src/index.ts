@@ -56,6 +56,10 @@ export const Events = {
   CONTROL_BOTTOM_UPDATE: "controlBottomUpdate",
   /**  Triggered during resizing on every mouse move (if size change detected). */
   RESIZE: "resize",
+  /** Triggered when resizing starts. */
+  RESIZE_START: "resizeStart",
+  /** Triggered when resizing ends. */
+  RESIZE_END: "resizeEnd",
   /** Triggered on any update to the element (any emitted event will be preceded by update event). */
   UPDATE: "update",
 } as const;
@@ -94,9 +98,12 @@ export const Attributes = {
   DOWN: "data-overdrag-down",
   /**  Set while element is dragged. */
   DRAG: "data-overdrag-drag",
+  /** Set while element is in a drag mode (mouse down pass control points) */
   DRAG_MODE: "data-overdrag-drag-mode",
   /**  Set while element is being resized with a value of side used to resize element. (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-resize="right"`. */
   RESIZE: "data-overdrag-resize",
+  /** Set while element is being resized. */
+  RESIZE_MODE: "data-overdrag-resize-mode",
 } as const;
 
 type Box = {
@@ -429,6 +436,9 @@ export default class Overdrag extends EventEmitter {
     if (this.dragging) {
       this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG_MODE, "");
       this.emit(Overdrag.EVENTS.DRAG_START, this);
+    } else if (this.resizing) {
+      this.element.setAttribute(Overdrag.ATTRIBUTES.RESIZE_MODE, "");
+      this.emit(Overdrag.EVENTS.RESIZE_START, this);
     }
     // add global listeners
     this.window.addEventListener("mousemove", this.onMouseMove);
@@ -452,9 +462,13 @@ export default class Overdrag extends EventEmitter {
     if (this.dragging) {
       this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG_MODE);
       this.emit(Overdrag.EVENTS.DRAG_END, this);
+    } else if (this.resizing) {
+      this.element.removeAttribute(Overdrag.ATTRIBUTES.RESIZE_MODE);
+      this.emit(Overdrag.EVENTS.RESIZE_END, this);
     }
 
     this.dragging = false;
+    this.resizing = false;
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DOWN);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
     this.element.removeAttribute(Overdrag.ATTRIBUTES.RESIZE);
@@ -612,13 +626,12 @@ export default class Overdrag extends EventEmitter {
     }
 
     if (changed) {
-      this.element.setAttribute(
-        Overdrag.ATTRIBUTES.RESIZE,
-        Object.keys(this.controls)
-          .filter((key) => this.controls[key as keyof Controls])
-          .join("-")
-      );
+      // sensor type can be derived from control points attributes currently active
+      this.element.setAttribute(Overdrag.ATTRIBUTES.RESIZE, "");
       this.emit(Overdrag.EVENTS.RESIZE, this);
+    } else {
+      // in the case when mouse moves but no resize is detected due to container restrictions
+      this.element.removeAttribute(Overdrag.ATTRIBUTES.RESIZE);
     }
   }
 
@@ -810,6 +823,9 @@ export default class Overdrag extends EventEmitter {
       this.assignStyle({ left, top });
       this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
       this.emit(Overdrag.EVENTS.DRAG, this);
+    } else {
+      // in the case when mouse moves but no dragging is detected due to container restrictions
+      this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
     }
   }
 }

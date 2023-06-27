@@ -169,7 +169,7 @@ export default class Overdrag extends EventEmitter {
   readonly window = window;
   readonly element: HTMLElement;
   readonly parentElement: HTMLElement;
-  readonly snapThreshold: number;
+  snapThreshold: number;
   readonly controlsThreshold: number;
   readonly minContentHeight: number;
   readonly minContentWidth: number;

@@ -26,6 +26,7 @@ export interface ControlProps {
 }
 
 export type Defaults = Complete<Omit<ControlProps, "element">>;
+
 // union of all events
 export const Events = {
   /** Triggered when the mouse button is pressed down on the element. */
@@ -107,11 +108,6 @@ export const Attributes = {
   /** Set while element is being resized. */
   RESIZE_MODE: "data-overdrag-resize-mode",
 } as const;
-
-type Box = {
-  width: number;
-  height: number;
-};
 
 type Bounds = {
   top: number;

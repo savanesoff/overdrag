@@ -87,12 +87,17 @@ export function elementSetup({
 export function createInstance(props: Partial<ControlProps> = {}) {
   const mergedProps = {
     ...{
-      element: elementSetup(),
-      minContentHeight: 100,
-      minContentWidth: 100,
-      snapThreshold: 10 + Math.round(Math.random() * 10),
-      controlsThreshold: 10 + Math.round(Math.random() * 10),
-      clickDetectionThreshold: 10 + Math.round(Math.random() * 10),
+      element: elementSetup({
+        parentWidth: getRandomValue(600, 900),
+        parentHeight: getRandomValue(600, 900),
+        elementWidth: getRandomValue(200, 400),
+        elementHeight: getRandomValue(200, 400),
+      }),
+      minContentHeight: getRandomValue(10, 50),
+      minContentWidth: getRandomValue(10, 50),
+      snapThreshold: getRandomValue(10, 30),
+      controlsThreshold: getRandomValue(10, 30),
+      clickDetectionThreshold: getRandomValue(10, 30),
       stack: Math.random() > 0.5,
       excludePadding: true,
     },

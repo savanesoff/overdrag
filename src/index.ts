@@ -9,6 +9,8 @@ export interface ControlProps {
   minContentHeight?: number;
   /** min width of DOM element in PX. This will prevent resizing smaller than the value. */
   minContentWidth?: number;
+  /** max height of DOM element in PX. This will prevent resizing larger than the value. */
+  maxContentWidth?: number;
   /** Distance to the edge of relative parent element (top, left, bottom, right) when the element should snap to it. */
   snapThreshold?: number;
   /** Distance to the edge of element (top, left, bottom, right) when the element should show resize cursor and activate control points */
@@ -167,6 +169,7 @@ export default class Overdrag extends EventEmitter {
     controlsThreshold: 16, //1rem
     minContentHeight: 50,
     minContentWidth: 50,
+    maxContentWidth: Infinity,
     clickDetectionThreshold: 5,
     stack: false,
     excludePadding: false,
@@ -179,10 +182,7 @@ export default class Overdrag extends EventEmitter {
   readonly element: HTMLElement;
   readonly parentElement: HTMLElement;
   snapThreshold: number;
-  readonly controlsThreshold: number;
-  readonly minContentHeight: number;
-  readonly minContentWidth: number;
-  readonly clickDetectionThreshold: number;
+  maxContentWidth: number;
 
   /** Control points activation status (Edge of element) */
   controlsActive = false;
@@ -227,6 +227,7 @@ export default class Overdrag extends EventEmitter {
     element,
     minContentHeight = Overdrag.DEFAULTS.minContentHeight,
     minContentWidth = Overdrag.DEFAULTS.minContentWidth,
+    maxContentWidth = Overdrag.DEFAULTS.maxContentWidth,
     snapThreshold = Overdrag.DEFAULTS.snapThreshold,
     controlsThreshold = Overdrag.DEFAULTS.controlsThreshold,
     clickDetectionThreshold = Overdrag.DEFAULTS.clickDetectionThreshold,
@@ -236,6 +237,7 @@ export default class Overdrag extends EventEmitter {
     super();
     this.minContentHeight = minContentHeight;
     this.minContentWidth = minContentWidth;
+    this.maxContentWidth = maxContentWidth;
     this.snapThreshold = snapThreshold;
     this.controlsThreshold = controlsThreshold;
     this.excludePadding = excludePadding;
@@ -688,9 +690,13 @@ export default class Overdrag extends EventEmitter {
 
   private movePointLeft() {
     const minWidth = this.minContentWidth + this.position.horizontalDiff;
+    const maxWidth = this.maxContentWidth + this.position.horizontalDiff;
 
     const left = Math.min(
+      Math.max(
       this.calcLeft(), // this will track mouse within action bounds of the parent
+        this.downPosition.fullBounds.right - maxWidth // this will restrict the element from going above the maximum width
+      ),
       this.downPosition.fullBounds.right - minWidth // this will restrict the element from going below the minimum width
     );
 

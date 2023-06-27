@@ -94,6 +94,7 @@ export function createInstance(props: Partial<ControlProps> = {}) {
       controlsThreshold: 10 + Math.round(Math.random() * 10),
       clickDetectionThreshold: 10 + Math.round(Math.random() * 10),
       stack: Math.random() > 0.5,
+      excludePadding: true,
     },
     ...props,
   };

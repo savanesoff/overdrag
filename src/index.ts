@@ -11,6 +11,8 @@ export interface ControlProps {
   minContentWidth?: number;
   /** max height of DOM element in PX. This will prevent resizing larger than the value. */
   maxContentWidth?: number;
+  /** max width of DOM element in PX. This will prevent resizing larger than the value. */
+  maxContentHeight?: number;
   /** Distance to the edge of relative parent element (top, left, bottom, right) when the element should snap to it. */
   snapThreshold?: number;
   /** Distance to the edge of element (top, left, bottom, right) when the element should show resize cursor and activate control points */
@@ -166,6 +168,7 @@ export default class Overdrag extends EventEmitter {
     minContentHeight: 50,
     minContentWidth: 50,
     maxContentWidth: Infinity,
+    maxContentHeight: Infinity,
     clickDetectionThreshold: 5,
     stack: false,
     excludePadding: false,
@@ -182,6 +185,7 @@ export default class Overdrag extends EventEmitter {
   minContentHeight: number;
   minContentWidth: number;
   maxContentWidth: number;
+  maxContentHeight: number;
   clickDetectionThreshold: number;
 
   /** Control points activation status (Edge of element) */
@@ -228,6 +232,7 @@ export default class Overdrag extends EventEmitter {
     minContentHeight = Overdrag.DEFAULTS.minContentHeight,
     minContentWidth = Overdrag.DEFAULTS.minContentWidth,
     maxContentWidth = Overdrag.DEFAULTS.maxContentWidth,
+    maxContentHeight = Overdrag.DEFAULTS.maxContentHeight,
     snapThreshold = Overdrag.DEFAULTS.snapThreshold,
     controlsThreshold = Overdrag.DEFAULTS.controlsThreshold,
     clickDetectionThreshold = Overdrag.DEFAULTS.clickDetectionThreshold,
@@ -238,6 +243,7 @@ export default class Overdrag extends EventEmitter {
     this.minContentHeight = minContentHeight;
     this.minContentWidth = minContentWidth;
     this.maxContentWidth = maxContentWidth;
+    this.maxContentHeight = maxContentHeight;
     this.snapThreshold = snapThreshold;
     this.controlsThreshold = controlsThreshold;
     this.excludePadding = excludePadding;
@@ -714,9 +720,13 @@ export default class Overdrag extends EventEmitter {
 
   private movePointTop() {
     const minHeight = this.minContentHeight + this.position.verticalDiff;
+    const maxHeight = this.maxContentHeight + this.position.verticalDiff;
 
     const top = Math.min(
-      this.calcTop(), // this will track mouse within action bounds of the parent
+      Math.max(
+        this.calcTop(), // this will track mouse within action bounds of the parent
+        this.downPosition.fullBounds.bottom - maxHeight // this will restrict the element from going above the maximum height
+      ),
       this.downPosition.fullBounds.bottom - minHeight // this will restrict the element from going below the minimum height
     );
 

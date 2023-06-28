@@ -208,10 +208,6 @@ describe("onMouseUp", () => {
       expect.anything()
     );
   });
-
-  it(`should emit "${Overdrag.EVENTS.RESIZE_END}" event`, () => {
-    expect(emitSpy).toHaveBeenCalledWith("IMPLEMENT THIS");
-  });
 });
 
 describe("Click", () => {
@@ -246,9 +242,13 @@ describe("Click", () => {
       overdrag,
       {
         x:
-          overdrag.controlsThreshold + 1 + overdrag.clickDetectionThreshold - 1,
+          overdrag.position.fullBounds.left +
+          overdrag.clickDetectionThreshold -
+          1,
         y:
-          overdrag.controlsThreshold + 1 - overdrag.clickDetectionThreshold + 1,
+          overdrag.position.fullBounds.top +
+          overdrag.clickDetectionThreshold -
+          1,
       },
       true
     );
@@ -271,8 +271,8 @@ describe("Click", () => {
     moveElementCursor(
       overdrag,
       {
-        x: overdrag.controlsThreshold + 1 + overdrag.clickDetectionThreshold,
-        y: overdrag.controlsThreshold + 1,
+        x: overdrag.position.fullBounds.left + overdrag.clickDetectionThreshold,
+        y: overdrag.position.fullBounds.top + overdrag.clickDetectionThreshold,
       },
       true
     );

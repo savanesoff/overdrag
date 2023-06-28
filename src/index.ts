@@ -665,9 +665,12 @@ export default class Overdrag extends EventEmitter {
   private movePointRight() {
     const width = Math.max(
       this.minContentWidth,
-      this.calcRight() -
-        this.downPosition.fullBounds.left -
-        this.position.horizontalDiff
+      Math.min(
+        this.maxContentWidth,
+        this.calcRight() -
+          this.downPosition.fullBounds.left -
+          this.position.horizontalDiff
+      )
     );
 
     if (width !== this.position.width) {
@@ -681,9 +684,12 @@ export default class Overdrag extends EventEmitter {
   private movePointBottom() {
     const height = Math.max(
       this.minContentHeight,
-      this.calcBottom() -
-        this.downPosition.fullBounds.top -
-        this.position.verticalDiff
+      Math.min(
+        this.maxContentHeight,
+        this.calcBottom() -
+          this.downPosition.fullBounds.top -
+          this.position.verticalDiff
+      )
     );
 
     if (height !== this.position.height) {

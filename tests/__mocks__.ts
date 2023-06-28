@@ -129,3 +129,30 @@ export function moveElementCursor(
     overdrag.element.dispatchEvent(event);
   }
 }
+
+export function translateCursor(
+  overdrag: Overdrag,
+  { x = 0, y = 0 },
+  windowEvent = false
+) {
+  const event = new MouseEvent("mousemove", {
+    clientX:
+      overdrag.parentPosition.offsetLeft +
+      (overdrag.down
+        ? overdrag.position.fullBounds.left + overdrag.offsetX
+        : overdrag.position.visualBounds.left) +
+      x,
+    clientY:
+      overdrag.parentPosition.offsetTop +
+      (overdrag.down
+        ? overdrag.position.fullBounds.top + overdrag.offsetY
+        : overdrag.position.visualBounds.top) +
+      y,
+  });
+
+  if (windowEvent) {
+    window.dispatchEvent(event);
+  } else {
+    overdrag.element.dispatchEvent(event);
+  }
+}

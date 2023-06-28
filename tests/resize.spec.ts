@@ -1,5 +1,10 @@
 import Overdrag from "../src";
-import { createInstance, getRandomValue, moveElementCursor } from "./__mocks__";
+import {
+  createInstance,
+  getRandomValue,
+  moveElementCursor,
+  translateCursor,
+} from "./__mocks__";
 
 let overdrag: Overdrag;
 let emitSpy: jest.SpyInstance;
@@ -12,7 +17,7 @@ let windowRemoveEventListenerSpy: jest.SpyInstance;
 
 beforeEach(() => {
   // ensure snapping doesn't interfere with tests
-  overdrag = createInstance();
+  overdrag = createInstance({ snapThreshold: 0 });
   emitSpy = jest.spyOn(overdrag, "emit");
   attrSpy = jest.spyOn(overdrag.element, "setAttribute");
   removeAttributeSpy = jest.spyOn(overdrag.element, "removeAttribute");
@@ -85,7 +90,7 @@ describe("When resizing ends", () => {
   });
 });
 
-describe("While resizing without snapping", () => {
+describe("While resizing", () => {
   beforeEach(() => {
     overdrag.snapThreshold = 0;
   });
@@ -112,7 +117,7 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should emit "${Overdrag.EVENTS.RESIZE}" event`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
           x: distance,
@@ -124,10 +129,10 @@ describe("While resizing without snapping", () => {
 
     it(`should resize element`, () => {
       const width = parseInt(overdrag.element.style.width);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: distance,
         },
         true
       );
@@ -136,22 +141,21 @@ describe("While resizing without snapping", () => {
 
     it(`should move left position`, () => {
       const left = parseInt(overdrag.element.style.left);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: distance,
         },
         true
       );
       expect(parseInt(overdrag.element.style.left)).toBe(left + distance);
     });
 
-    it(`should not resize element to less than minimum width`, () => {
-      distance = 100000;
-      moveElementCursor(
+    it(`should not resize element to less than "minContentWith"`, () => {
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: 100000,
         },
         true
       );
@@ -161,13 +165,12 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should not resize element to more than maximum width as constrained by parent`, () => {
-      distance = -100000;
       const maxWidth =
         overdrag.position.fullBounds.right - overdrag.position.horizontalDiff;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: -100000,
         },
         true
       );
@@ -175,14 +178,13 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should not resize element to more than defined "maxContentWidth"`, () => {
-      distance = -100000;
       overdrag.minContentWidth = getRandomValue(10, 20);
       overdrag.maxContentWidth = getRandomValue(30, 40);
       const maxWidth = overdrag.maxContentWidth;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: -100000,
         },
         true
       );
@@ -191,10 +193,10 @@ describe("While resizing without snapping", () => {
 
     it("should not move right position", () => {
       const right = parseInt(overdrag.element.style.right);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: distance,
         },
         true
       );
@@ -203,10 +205,10 @@ describe("While resizing without snapping", () => {
 
     it("should not move top position", () => {
       const top = parseInt(overdrag.element.style.top);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: distance,
         },
         true
       );
@@ -215,14 +217,42 @@ describe("While resizing without snapping", () => {
 
     it("should not move bottom position", () => {
       const bottom = parseInt(overdrag.element.style.bottom);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: distance,
         },
         true
       );
       expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
+    });
+
+    it(`should snap if within "snapThreshold" value`, () => {
+      overdrag.snapThreshold = getRandomValue(10, 20);
+      const distance =
+        -overdrag.position.fullBounds.left + overdrag.snapThreshold;
+      translateCursor(
+        overdrag,
+        {
+          x: distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.left)).toBe(0);
+    });
+
+    it(`should not snap if over the "snapThreshold" value`, () => {
+      overdrag.snapThreshold = getRandomValue(10, 20);
+      const offset = overdrag.snapThreshold + 1;
+      const distance = -overdrag.position.fullBounds.left + offset;
+      translateCursor(
+        overdrag,
+        {
+          x: distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.left)).toBe(offset);
     });
   });
 
@@ -245,7 +275,7 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should emit "${Overdrag.EVENTS.RESIZE}" event`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
           y: distance,
@@ -257,10 +287,10 @@ describe("While resizing without snapping", () => {
 
     it(`should resize element`, () => {
       const height = parseInt(overdrag.element.style.height);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: distance,
         },
         true
       );
@@ -269,22 +299,21 @@ describe("While resizing without snapping", () => {
 
     it(`should move top position`, () => {
       const top = parseInt(overdrag.element.style.top);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: distance,
         },
         true
       );
       expect(parseInt(overdrag.element.style.top)).toBe(top + distance);
     });
 
-    it(`should not resize element to less than minimum height`, () => {
-      distance = 100000;
-      moveElementCursor(
+    it(`should not resize element to less than "minContentHeight"`, () => {
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: 100000,
         },
         true
       );
@@ -294,13 +323,12 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should not resize element to more than maximum height as constrained by parent`, () => {
-      distance = -100000;
       const maxHeight =
         overdrag.position.fullBounds.bottom - overdrag.position.verticalDiff;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: -100000,
         },
         true
       );
@@ -308,14 +336,13 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should not resize element to more than defined "maxContentHeight"`, () => {
-      distance = -100000;
       overdrag.minContentHeight = getRandomValue(10, 20);
       overdrag.maxContentHeight = getRandomValue(30, 40);
       const maxHeight = overdrag.maxContentHeight;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: -100000,
         },
         true
       );
@@ -324,38 +351,69 @@ describe("While resizing without snapping", () => {
 
     it("should not move right position", () => {
       const right = parseInt(overdrag.element.style.right);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: distance,
         },
         true
       );
+      expect(right).not.toBeNaN();
       expect(parseInt(overdrag.element.style.right)).toBe(right);
     });
 
     it("should not move left position", () => {
       const left = parseInt(overdrag.element.style.left);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.left + distance,
+          y: distance,
         },
         true
       );
+      expect(left).not.toBeNaN();
       expect(parseInt(overdrag.element.style.left)).toBe(left);
     });
 
     it("should not move bottom position", () => {
       const bottom = parseInt(overdrag.element.style.bottom);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: distance,
         },
         true
       );
+      expect(bottom).not.toBeNaN();
       expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
+    });
+
+    it(`should snap if within "snapThreshold" value`, () => {
+      overdrag.snapThreshold = getRandomValue(10, 20);
+      const distance =
+        -overdrag.position.fullBounds.top + overdrag.snapThreshold;
+      translateCursor(
+        overdrag,
+        {
+          y: distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.top)).toBe(0);
+    });
+
+    it(`should not snap if over the "snapThreshold" value`, () => {
+      overdrag.snapThreshold = getRandomValue(10, 20);
+      const offset = overdrag.snapThreshold + 1;
+      const distance = -overdrag.position.fullBounds.top + offset;
+      translateCursor(
+        overdrag,
+        {
+          y: distance,
+        },
+        true
+      );
+      expect(parseInt(overdrag.element.style.top)).toBe(offset);
     });
   });
 
@@ -387,7 +445,7 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should emit "${Overdrag.EVENTS.RESIZE}" event`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
           y: distance,
@@ -399,34 +457,35 @@ describe("While resizing without snapping", () => {
 
     it(`should resize element`, () => {
       const height = parseInt(overdrag.element.style.height);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: distance,
         },
         true
       );
+      expect(height).not.toBeNaN();
       expect(parseInt(overdrag.element.style.height)).toBe(height + distance);
     });
 
     it(`should move bottom position`, () => {
       const bottom = parseInt(overdrag.element.style.bottom);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: distance,
         },
         true
       );
-      expect(parseInt(overdrag.element.style.bottom)).toBe(bottom + distance);
+      expect(bottom).not.toBeNaN();
+      expect(parseInt(overdrag.element.style.bottom)).toBe(bottom - distance);
     });
 
     it(`should not resize element to less than minimum height`, () => {
-      distance = -100000;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: -100000,
         },
         true
       );
@@ -436,15 +495,14 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should not resize element to more than maximum height as constrained by parent`, () => {
-      distance = 100000;
       const maxHeight =
         overdrag.parentPosition.actionBounds.bottom -
         overdrag.position.fullBounds.top -
         overdrag.position.verticalDiff;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: 100000,
         },
         true
       );
@@ -452,14 +510,13 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should not resize element to more than defined "maxContentHeight"`, () => {
-      distance = 100000;
       overdrag.minContentHeight = getRandomValue(10, 20);
       overdrag.maxContentHeight = getRandomValue(30, 40);
       const maxHeight = overdrag.maxContentHeight;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: 100000,
         },
         true
       );
@@ -468,38 +525,78 @@ describe("While resizing without snapping", () => {
 
     it("should not move right position", () => {
       const right = parseInt(overdrag.element.style.right);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: distance,
         },
         true
       );
+      expect(right).not.toBeNaN();
       expect(parseInt(overdrag.element.style.right)).toBe(right);
     });
 
     it("should not move left position", () => {
       const left = parseInt(overdrag.element.style.left);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.left + distance,
+          y: distance,
         },
         true
       );
+      expect(left).not.toBeNaN();
       expect(parseInt(overdrag.element.style.left)).toBe(left);
     });
 
     it("should not move top position", () => {
       const top = parseInt(overdrag.element.style.top);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: overdrag.position.fullBounds.top + distance,
+          y: distance,
         },
         true
       );
+      expect(top).not.toBeNaN();
       expect(parseInt(overdrag.element.style.top)).toBe(top);
+    });
+
+    it(`should snap if within "snapThreshold" value`, () => {
+      overdrag.snapThreshold = getRandomValue(10, 20);
+      // distance between bottom control and parent bottom edge
+      const distance =
+        overdrag.parentPosition.actionBounds.bottom -
+        overdrag.position.fullBounds.bottom -
+        overdrag.snapThreshold;
+      translateCursor(
+        overdrag,
+        {
+          y: distance,
+        },
+        true
+      );
+
+      expect(parseInt(overdrag.element.style.bottom)).toBe(0);
+    });
+
+    it(`should not snap if over the "snapThreshold" value`, () => {
+      overdrag.snapThreshold = getRandomValue(10, 20);
+      const offset = overdrag.snapThreshold + 1; // to avoid triggering snap
+      // distance between right control and parent right edge
+      const distance =
+        overdrag.parentPosition.actionBounds.bottom -
+        overdrag.position.fullBounds.bottom -
+        offset;
+      translateCursor(
+        overdrag,
+        {
+          y: distance,
+        },
+        true
+      );
+
+      expect(parseInt(overdrag.element.style.bottom)).toBe(offset);
     });
   });
 
@@ -531,7 +628,7 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should emit "${Overdrag.EVENTS.RESIZE}" event`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
           x: distance,
@@ -543,10 +640,10 @@ describe("While resizing without snapping", () => {
 
     it(`should resize element`, () => {
       const width = parseInt(overdrag.element.style.width);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: distance,
         },
         true
       );
@@ -555,22 +652,22 @@ describe("While resizing without snapping", () => {
 
     it(`should move right position`, () => {
       const right = parseInt(overdrag.element.style.right);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: distance,
         },
         true
       );
-      expect(parseInt(overdrag.element.style.right)).toBe(right + distance);
+      expect(right).not.toBeNaN();
+      expect(parseInt(overdrag.element.style.right)).toBe(right - distance);
     });
 
     it(`should not resize element to less than minimum width`, () => {
-      distance = -100000;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: -100000,
         },
         true
       );
@@ -580,15 +677,14 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should not resize element to more than maximum width as constrained by parent`, () => {
-      distance = 100000;
       const maxWidth =
         overdrag.parentPosition.actionBounds.right -
         overdrag.position.fullBounds.left -
         overdrag.position.horizontalDiff;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: 100000,
         },
         true
       );
@@ -596,14 +692,13 @@ describe("While resizing without snapping", () => {
     });
 
     it(`should not resize element to more than defined "maxContentWidth"`, () => {
-      distance = 100000;
       overdrag.minContentWidth = getRandomValue(10, 20);
       overdrag.maxContentWidth = getRandomValue(30, 40);
       const maxWidth = overdrag.maxContentWidth;
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: 100000,
         },
         true
       );
@@ -612,31 +707,33 @@ describe("While resizing without snapping", () => {
 
     it("should not move bottom position", () => {
       const bottom = parseInt(overdrag.element.style.bottom);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: distance,
         },
         true
       );
+      expect(bottom).not.toBeNaN();
       expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
     });
 
     it("should not move top position", () => {
       const top = parseInt(overdrag.element.style.top);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: overdrag.position.fullBounds.left + distance,
+          x: distance,
         },
         true
       );
+      expect(top).not.toBeNaN();
       expect(parseInt(overdrag.element.style.top)).toBe(top);
     });
 
     it("should not move left position", () => {
       const left = parseInt(overdrag.element.style.left);
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
           x: overdrag.position.fullBounds.left + distance,
@@ -644,6 +741,43 @@ describe("While resizing without snapping", () => {
         true
       );
       expect(parseInt(overdrag.element.style.left)).toBe(left);
+    });
+
+    it(`should snap if within "snapThreshold" value`, () => {
+      overdrag.snapThreshold = getRandomValue(10, 20);
+      // distance between right control and parent right edge
+      const distance =
+        overdrag.parentPosition.actionBounds.right -
+        overdrag.position.fullBounds.right -
+        overdrag.snapThreshold;
+      translateCursor(
+        overdrag,
+        {
+          x: distance,
+        },
+        true
+      );
+
+      expect(parseInt(overdrag.element.style.right)).toBe(0);
+    });
+
+    it(`should not snap if over the "snapThreshold" value`, () => {
+      overdrag.snapThreshold = getRandomValue(10, 20);
+      const offset = overdrag.snapThreshold + 1; // to avoid triggering snap
+      // distance between right control and parent right edge
+      const distance =
+        overdrag.parentPosition.actionBounds.right -
+        overdrag.position.fullBounds.right -
+        offset;
+      translateCursor(
+        overdrag,
+        {
+          x: distance,
+        },
+        true
+      );
+
+      expect(parseInt(overdrag.element.style.right)).toBe(offset);
     });
   });
 });

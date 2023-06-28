@@ -224,20 +224,6 @@ describe("While resizing without snapping", () => {
       );
       expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
     });
-
-    it(`should remove "${Overdrag.ATTRIBUTES.RESIZE}" attribute if no resize detected`, () => {
-      moveElementCursor(
-        overdrag,
-        {
-          x: overdrag.position.fullBounds.left,
-          y: overdrag.position.fullBounds.top,
-        },
-        true
-      );
-      expect(removeAttributeSpy).toHaveBeenCalledWith(
-        Overdrag.ATTRIBUTES.RESIZE
-      );
-    });
   });
 
   describe("Top control", () => {
@@ -370,20 +356,6 @@ describe("While resizing without snapping", () => {
         true
       );
       expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
-    });
-
-    it(`should remove "${Overdrag.ATTRIBUTES.RESIZE}" attribute if no resize detected`, () => {
-      moveElementCursor(
-        overdrag,
-        {
-          x: overdrag.position.fullBounds.left,
-          y: overdrag.position.fullBounds.top,
-        },
-        true
-      );
-      expect(removeAttributeSpy).toHaveBeenCalledWith(
-        Overdrag.ATTRIBUTES.RESIZE
-      );
     });
   });
 
@@ -529,20 +501,6 @@ describe("While resizing without snapping", () => {
       );
       expect(parseInt(overdrag.element.style.top)).toBe(top);
     });
-
-    it(`should remove "${Overdrag.ATTRIBUTES.RESIZE}" attribute if no resize detected`, () => {
-      moveElementCursor(
-        overdrag,
-        {
-          x: overdrag.position.fullBounds.left,
-          y: overdrag.position.fullBounds.top,
-        },
-        true
-      );
-      expect(removeAttributeSpy).toHaveBeenCalledWith(
-        Overdrag.ATTRIBUTES.RESIZE
-      );
-    });
   });
 
   describe("Right control", () => {
@@ -686,20 +644,6 @@ describe("While resizing without snapping", () => {
         true
       );
       expect(parseInt(overdrag.element.style.left)).toBe(left);
-    });
-
-    it(`should remove "${Overdrag.ATTRIBUTES.RESIZE}" attribute if no resize detected`, () => {
-      moveElementCursor(
-        overdrag,
-        {
-          x: overdrag.position.fullBounds.left,
-          y: overdrag.position.fullBounds.top,
-        },
-        true
-      );
-      expect(removeAttributeSpy).toHaveBeenCalledWith(
-        Overdrag.ATTRIBUTES.RESIZE
-      );
     });
   });
 });

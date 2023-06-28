@@ -208,6 +208,10 @@ describe("onMouseUp", () => {
       expect.anything()
     );
   });
+
+  it(`should emit "${Overdrag.EVENTS.RESIZE_END}" event`, () => {
+    expect(emitSpy).toHaveBeenCalledWith("IMPLEMENT THIS");
+  });
 });
 
 describe("Click", () => {

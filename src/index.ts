@@ -266,6 +266,21 @@ export default class Overdrag extends EventEmitter {
     this.position = this.getComputedElementPosition();
     this.downPosition = this.position;
     // TODO ensure the min width and height is respected
+
+    // set all element parameters
+    this.element.style.left = `${this.position.fullBounds.left}px`;
+    this.element.style.top = `${this.position.fullBounds.top}px`;
+    this.element.style.width = `${this.position.width}px`;
+    this.element.style.height = `${this.position.height}px`;
+    this.element.style.right = `${
+      this.parentPosition.actionBounds.right - this.position.fullBounds.right
+    }px`;
+    this.element.style.bottom = `${
+      this.parentPosition.actionBounds.bottom - this.position.fullBounds.bottom
+    }px`;
+    // for iframe, images and canvas
+    this.element.setAttribute("width", `${this.position.width}`);
+    this.element.setAttribute("height", `${this.position.height}`);
   }
 
   private _getInt(value: string | null): number {
@@ -657,6 +672,13 @@ export default class Overdrag extends EventEmitter {
     this.element.setAttribute("width", `${newStyle.width}`);
     this.element.setAttribute("height", `${newStyle.height}`);
     this.position = this.getComputedElementPosition();
+
+    this.element.style.right = `${
+      this.parentPosition.actionBounds.right - this.position.fullBounds.right
+    }px`;
+    this.element.style.bottom = `${
+      this.parentPosition.actionBounds.bottom - this.position.fullBounds.bottom
+    }px`;
   }
 
   private movePointRight() {

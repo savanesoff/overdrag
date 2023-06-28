@@ -637,9 +637,6 @@ export default class Overdrag extends EventEmitter {
       // sensor type can be derived from control points attributes currently active
       this.element.setAttribute(Overdrag.ATTRIBUTES.RESIZE, "");
       this.emit(Overdrag.EVENTS.RESIZE, this);
-    } else {
-      // in the case when mouse moves but no resize is detected due to container restrictions
-      this.element.removeAttribute(Overdrag.ATTRIBUTES.RESIZE);
     }
   }
 
@@ -839,9 +836,6 @@ export default class Overdrag extends EventEmitter {
       this.assignStyle({ left, top });
       this.element.setAttribute(Overdrag.ATTRIBUTES.DRAG, "");
       this.emit(Overdrag.EVENTS.DRAG, this);
-    } else {
-      // in the case when mouse moves but no dragging is detected due to container restrictions
-      this.element.removeAttribute(Overdrag.ATTRIBUTES.DRAG);
     }
   }
 }

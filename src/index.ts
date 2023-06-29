@@ -105,9 +105,9 @@ export const Attributes = {
   DRAG: "data-overdrag-dragging",
   /** Set while element is in a drag mode (mouse down pass control points) */
   DRAG_MODE: "data-overdrag-drag-mode",
-  /**  Set while element is being resized with a value of side used to resize element. (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-resize="right"`. */
+  /**  Set while element is being resized. */
   RESIZE: "data-overdrag-resizing",
-  /** Set while element is being resized. */
+  /** Set when resize mode initiated. */
   RESIZE_MODE: "data-overdrag-resize-mode",
 } as const;
 

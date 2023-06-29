@@ -531,16 +531,6 @@ export default class Overdrag extends EventEmitter {
     );
   }
 
-  isControlPointActive() {
-    return (
-      this.over &&
-      (this.controls.left ||
-        this.controls.right ||
-        this.controls.top ||
-        this.controls.bottom)
-    );
-  }
-
   setOverState(over: boolean) {
     this.over = over;
     if (over) {

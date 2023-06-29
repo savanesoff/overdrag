@@ -1,5 +1,10 @@
 import Overdrag from "../src";
-import { createInstance, getRandomValue, moveElementCursor } from "./__mocks__";
+import {
+  createInstance,
+  getRandomValue,
+  moveElementCursor,
+  translateCursor,
+} from "./__mocks__";
 
 let overdrag: Overdrag;
 let emitSpy: jest.SpyInstance;
@@ -53,26 +58,39 @@ describe("While dragging", () => {
     beforeEach(() => {
       overdrag.snapThreshold = 0;
     });
+
     it(`should move element by the same amount as mouse `, () => {
-      const top = getRandomValue(10, 50);
-      const left = getRandomValue(10, 50);
-      moveElementCursor(
+      const topDistance = getRandomValue(-10, 50);
+      const leftDistance = getRandomValue(-10, 50);
+      const top = parseInt(overdrag.element.style.top);
+      const left = parseInt(overdrag.element.style.left);
+      translateCursor(
         overdrag,
         {
-          x: left,
-          y: top,
+          x: leftDistance,
+          y: topDistance,
         },
         true
       );
-      expect(parseInt(overdrag.element.style.top)).toBe(top);
-      expect(parseInt(overdrag.element.style.left)).toBe(left);
+      expect(parseInt(overdrag.element.style.top)).toBe(top + topDistance);
+      expect(parseInt(overdrag.element.style.left)).toBe(left + leftDistance);
     });
 
-    it(`should emit "${Overdrag.EVENTS.DRAG}" event`, () => {
-      moveElementCursor(
+    it(`should emit "${Overdrag.EVENTS.DRAG}" event on horizontal motion`, () => {
+      translateCursor(
         overdrag,
         {
           x: getRandomValue(10, 50),
+        },
+        true
+      );
+      expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.DRAG, overdrag);
+    });
+
+    it(`should emit "${Overdrag.EVENTS.DRAG}" event on vertical motion`, () => {
+      translateCursor(
+        overdrag,
+        {
           y: getRandomValue(10, 50),
         },
         true
@@ -80,12 +98,24 @@ describe("While dragging", () => {
       expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.DRAG, overdrag);
     });
 
-    it(`should not emit "${Overdrag.EVENTS.DRAG}" event if mouse position didn't change`, () => {
-      moveElementCursor(
+    it(`should emit "${Overdrag.EVENTS.DRAG}" event on all axis motion`, () => {
+      translateCursor(
         overdrag,
         {
-          x: parseInt(overdrag.element.style.left),
-          y: parseInt(overdrag.element.style.top),
+          y: getRandomValue(10, 50),
+          x: getRandomValue(10, 50),
+        },
+        true
+      );
+      expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.DRAG, overdrag);
+    });
+
+    it(`should not emit "${Overdrag.EVENTS.DRAG}" event if mouse position didn't change`, () => {
+      translateCursor(
+        overdrag,
+        {
+          x: 0,
+          y: 0,
         },
         true
       );
@@ -93,7 +123,7 @@ describe("While dragging", () => {
     });
 
     it(`should not move element passed the parent's top edge`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
           y: -10000,
@@ -104,7 +134,7 @@ describe("While dragging", () => {
     });
 
     it(`should not move element passed the parent's left edge`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
           x: -10000,
@@ -115,31 +145,26 @@ describe("While dragging", () => {
     });
 
     it(`should not move element passed the parent's bottom edge`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
           y: 10000,
         },
         true
       );
-      const top =
-        overdrag.parentPosition.actionBounds.height -
-        overdrag.position.fullBounds.height;
-      expect(parseInt(overdrag.element.style.top)).toBe(top);
+
+      expect(parseInt(overdrag.element.style.bottom)).toBe(0);
     });
 
     it(`should not move element passed the parent's right edge`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
           x: 10000,
         },
         true
       );
-      const left =
-        overdrag.parentPosition.actionBounds.width -
-        overdrag.position.fullBounds.width;
-      expect(parseInt(overdrag.element.style.left)).toBe(left);
+      expect(parseInt(overdrag.element.style.right)).toBe(0);
     });
   });
 
@@ -148,18 +173,12 @@ describe("While dragging", () => {
     beforeEach(() => {
       overdrag.snapThreshold = snapThreshold;
     });
+
     it(`should snap element to the parent's top edge`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: 1000,
-        },
-        true
-      );
-      moveElementCursor(
-        overdrag,
-        {
-          y: snapThreshold,
+          y: -overdrag.position.fullBounds.top + snapThreshold,
         },
         true
       );
@@ -167,17 +186,10 @@ describe("While dragging", () => {
     });
 
     it(`should not snap element to the parent's top edge if one px away from snap value`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: 1000,
-        },
-        true
-      );
-      moveElementCursor(
-        overdrag,
-        {
-          y: snapThreshold + 1,
+          y: -overdrag.position.fullBounds.top + snapThreshold + 1,
         },
         true
       );
@@ -185,18 +197,10 @@ describe("While dragging", () => {
     });
 
     it(`should snap element to the parent's left edge`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: 1000,
-        },
-        true
-      );
-
-      moveElementCursor(
-        overdrag,
-        {
-          x: snapThreshold,
+          x: -overdrag.position.fullBounds.left + snapThreshold,
         },
         true
       );
@@ -204,113 +208,94 @@ describe("While dragging", () => {
     });
 
     it(`should not snap element to the parent's left edge if one px away from snap value`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: 1000,
+          x: -overdrag.position.fullBounds.left + snapThreshold + 1,
         },
         true
       );
 
-      moveElementCursor(
-        overdrag,
-        {
-          x: snapThreshold + 1,
-        },
-        true
-      );
       expect(parseInt(overdrag.element.style.left)).toBe(snapThreshold + 1);
     });
 
     it(`should snap element to the parent's right edge`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: 0,
+          x:
+            overdrag.parentPosition.actionBounds.right -
+            overdrag.position.fullBounds.right -
+            snapThreshold,
         },
         true
       );
-      const left =
-        overdrag.parentPosition.actionBounds.width -
-        overdrag.position.fullBounds.width;
 
-      moveElementCursor(
-        overdrag,
-        {
-          x: left - snapThreshold,
-        },
-        true
+      expect(parseInt(overdrag.element.style.right)).toBe(0);
+      expect(parseInt(overdrag.element.style.left)).toBe(
+        overdrag.parentPosition.actionBounds.right -
+          overdrag.position.fullBounds.width
       );
-      expect(parseInt(overdrag.element.style.left)).toBe(left);
     });
 
     it(`should not snap element to the parent's right edge if one px away from snap value`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          x: 0,
+          x:
+            overdrag.parentPosition.actionBounds.right -
+            overdrag.position.fullBounds.right -
+            snapThreshold -
+            1,
         },
         true
       );
-
-      const left =
-        overdrag.parentPosition.actionBounds.width -
-        overdrag.position.fullBounds.width;
-      moveElementCursor(
-        overdrag,
-        {
-          x: left - snapThreshold - 1,
-        },
-        true
-      );
+      expect(parseInt(overdrag.element.style.right)).toBe(snapThreshold + 1);
       expect(parseInt(overdrag.element.style.left)).toBe(
-        left - snapThreshold - 1
+        overdrag.parentPosition.actionBounds.right -
+          overdrag.position.fullBounds.width -
+          snapThreshold -
+          1
       );
     });
 
     it(`should snap element to the parent's bottom edge`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: 0,
+          y:
+            overdrag.parentPosition.actionBounds.bottom -
+            overdrag.position.fullBounds.bottom -
+            snapThreshold,
         },
         true
       );
-      const top =
-        overdrag.parentPosition.actionBounds.height -
-        overdrag.position.fullBounds.height;
 
-      moveElementCursor(
-        overdrag,
-        {
-          y: top - snapThreshold,
-        },
-        true
+      expect(parseInt(overdrag.element.style.bottom)).toBe(0);
+      expect(parseInt(overdrag.element.style.top)).toBe(
+        overdrag.parentPosition.actionBounds.bottom -
+          overdrag.position.fullBounds.height
       );
-      expect(parseInt(overdrag.element.style.top)).toBe(top);
     });
 
     it(`should not snap element to the parent's bottom edge if one px away from snap value`, () => {
-      moveElementCursor(
+      translateCursor(
         overdrag,
         {
-          y: 0,
+          y:
+            overdrag.parentPosition.actionBounds.bottom -
+            overdrag.position.fullBounds.bottom -
+            snapThreshold -
+            1,
         },
         true
       );
-
-      const top =
-        overdrag.parentPosition.actionBounds.height -
-        overdrag.position.fullBounds.height;
-      moveElementCursor(
-        overdrag,
-        {
-          y: top - snapThreshold - 1,
-        },
-        true
-      );
+      expect(parseInt(overdrag.element.style.bottom)).toBe(snapThreshold + 1);
       expect(parseInt(overdrag.element.style.top)).toBe(
-        top - snapThreshold - 1
+        overdrag.parentPosition.actionBounds.bottom -
+          overdrag.position.fullBounds.height -
+          snapThreshold -
+          1
       );
     });
   });

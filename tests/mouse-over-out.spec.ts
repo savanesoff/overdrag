@@ -79,6 +79,20 @@ describe("onMouseOver", () => {
       expect.anything()
     );
   });
+
+  it(`should not attach events if already in over state`, () => {
+    const overdrag = createInstance();
+
+    overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
+    const addEventListenerSpy = jest.spyOn(
+      overdrag.element,
+      "addEventListener"
+    );
+
+    overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
+
+    expect(addEventListenerSpy).toHaveBeenCalledTimes(0);
+  });
 });
 
 describe("onMouseOut", () => {
@@ -119,6 +133,16 @@ describe("onMouseOut", () => {
     const spy = jest.spyOn(overdrag.element, "removeEventListener");
     overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
     expect(spy).toHaveBeenCalledWith("mousedown", expect.anything());
+  });
+
+  it(`should not attach events if not in over state`, () => {
+    overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
+    const spy = jest.spyOn(overdrag.element, "removeEventListener");
+
+    overdrag.element.addEventListener("mouseleave", overdrag.onMouseOut);
+    overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
+
+    expect(spy).toHaveBeenCalledTimes(0);
   });
 });
 

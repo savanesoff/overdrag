@@ -167,6 +167,15 @@ describe("While resizing", () => {
       expect(parseInt(overdrag.element.style.width)).toBe(maxWidth);
     });
 
+    it("should not move position if no motion detected", () => {
+      const left = parseInt(overdrag.element.style.left);
+      translateCursor(overdrag, {
+        x: 0,
+      });
+      expect(left).not.toBeNaN();
+      expect(parseInt(overdrag.element.style.left)).toBe(left);
+    });
+
     it("should not move right position", () => {
       const right = parseInt(overdrag.element.style.right);
       translateCursor(overdrag, {
@@ -251,6 +260,15 @@ describe("While resizing", () => {
         y: distance,
       });
       expect(parseInt(overdrag.element.style.top)).toBe(top + distance);
+    });
+
+    it("should not move position if no motion detected", () => {
+      const top = parseInt(overdrag.element.style.top);
+      translateCursor(overdrag, {
+        y: 0,
+      });
+      expect(top).not.toBeNaN();
+      expect(parseInt(overdrag.element.style.top)).toBe(top);
     });
 
     it(`should not resize element to less than "minContentHeight"`, () => {
@@ -411,6 +429,15 @@ describe("While resizing", () => {
       expect(parseInt(overdrag.element.style.height)).toBe(maxHeight);
     });
 
+    it("should not move position if no motion detected", () => {
+      const bottom = parseInt(overdrag.element.style.bottom);
+      translateCursor(overdrag, {
+        y: 0,
+      });
+      expect(bottom).not.toBeNaN();
+      expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
+    });
+
     it("should not move right position", () => {
       const right = parseInt(overdrag.element.style.right);
       translateCursor(overdrag, {
@@ -547,6 +574,15 @@ describe("While resizing", () => {
         x: 100000,
       });
       expect(parseInt(overdrag.element.style.width)).toBe(maxWidth);
+    });
+
+    it("should not move position if no motion detected", () => {
+      const right = parseInt(overdrag.element.style.right);
+      translateCursor(overdrag, {
+        x: 0,
+      });
+      expect(right).not.toBeNaN();
+      expect(parseInt(overdrag.element.style.right)).toBe(right);
     });
 
     it("should not move bottom position", () => {

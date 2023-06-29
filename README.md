@@ -53,23 +53,23 @@ import Overdrag from "overdrag";
 
 The Overdrag class constructor accepts an object with the following properties:
 
-> - **`element`** (required): The DOM element to control.
+- **`element`** (required): The DOM element to control.
 
-> - **`minContentHeight`** (default: `Overdrag.DEFAULTS.minContentHeight`): The minimum height of the DOM element (CSS height) in pixels. This prevents resizing smaller than the specified value.
+- **`minContentHeight`** (default: `Overdrag.DEFAULTS.minContentHeight`): The minimum height of the DOM element (CSS height) in pixels. This prevents resizing smaller than the specified value.
 
-> - **`minContentWidth`** (default: `Overdrag.DEFAULTS.minContentWidth`): The minimum width of the DOM element (CSS width) in pixels. This prevents resizing smaller than the specified value.
+- **`minContentWidth`** (default: `Overdrag.DEFAULTS.minContentWidth`): The minimum width of the DOM element (CSS width) in pixels. This prevents resizing smaller than the specified value.
 
-> - **`maxContentHeight`** (default: `Overdrag.DEFAULTS.maxContentHeight: Infinity`): The max height of the DOM element (CSS height) in pixels. This prevents resizing bigger than the specified value.
+- **`maxContentHeight`** (default: `Overdrag.DEFAULTS.maxContentHeight: Infinity`): The max height of the DOM element (CSS height) in pixels. This prevents resizing bigger than the specified value.
 
-> - **`maxContentWidth`** (default: `Overdrag.DEFAULTS.maxContentWidth: Infinity`): The max width of the DOM element (CSS width) in pixels. This prevents resizing bigger than the specified value.
+- **`maxContentWidth`** (default: `Overdrag.DEFAULTS.maxContentWidth: Infinity`): The max width of the DOM element (CSS width) in pixels. This prevents resizing bigger than the specified value.
 
-> - **`snapThreshold`** (default: `Overdrag.DEFAULTS.snapThreshold`): The distance to the edge of the relative parent element (top, left, bottom, right) when the element should snap to it.
+- **`snapThreshold`** (default: `Overdrag.DEFAULTS.snapThreshold`): The distance to the edge of the relative parent element (top, left, bottom, right) when the element should snap to it.
 
-> - **`controlsThreshold`** (default: `Overdrag.DEFAULTS.controlsThreshold`): The distance to the edge of the element (top, left, bottom, right) when the element should show resize cursor and activate control points.
+- **`controlsThreshold`** (default: `Overdrag.DEFAULTS.controlsThreshold`): The distance to the edge of the element (top, left, bottom, right) when the element should show resize cursor and activate control points.
 
-> - **`clickDetectionThreshold`** (default: `Overdrag.DEFAULTS.clickDetectionThreshold`): The threshold distance to detect a click event. If you've started dragging the element, mouse up event will not trigger `click` event.
+- **`clickDetectionThreshold`** (default: `Overdrag.DEFAULTS.clickDetectionThreshold`): The threshold distance to detect a click event. If you've started dragging the element, mouse up event will not trigger `click` event.
 
-> - **`stack`** (default: `false`): If true, an `Overdrag` parent element that has a recursively embedded `Overdrag` elements as a child will retain `over` state while the child is active. Else, the parent element will be set to `out` state (inactive)
+- **`stack`** (default: `false`): If true, an `Overdrag` parent element that has a recursively embedded `Overdrag` elements as a child will retain `over` state while the child is active. Else, the parent element will be set to `out` state (inactive)
 
 ## Example
 
@@ -142,41 +142,41 @@ overdrag.on(Overdrag.EVENTS.DOWN, (instance) => {
 
 The available events are:
 
-> - **`down`**: Triggered when the mouse button is pressed down on the element.
+- **`down`**: Triggered when the mouse button is pressed down on the element.
 
-> - **`up`**: Triggered when the mouse button is released if pressed while element was "engaged".
+- **`up`**: Triggered when the mouse button is released if pressed while element was "engaged".
 
-> - **`click`**: Triggered when a click action is detected.
+- **`click`**: Triggered when a click action is detected.
 
-> - **`drag`**: Triggered during dragging, on every drag motion with a mouse move.
+- **`drag`**: Triggered during dragging, on every drag motion with a mouse move.
 
-> - **`dragStart`**: Triggered when the mouse button is pressed down on the element, but not control points.
+- **`dragStart`**: Triggered when the mouse button is pressed down on the element, but not control points.
 
-> - **`dragEnd`**: Triggered when the mouse button is released after dragging.
+- **`dragEnd`**: Triggered when the mouse button is released after dragging.
 
-> - **`over`**: Triggered when the mouse is over the element passed the control point sensors.
+- **`over`**: Triggered when the mouse is over the element passed the control point sensors.
 
-> - **`out`**: Triggered when the mouse moves out of the visible box of element excluding control point sensors.
+- **`out`**: Triggered when the mouse moves out of the visible box of element excluding control point sensors.
 
-> - **`controlsActive`**: Triggered when any control point is activated (edge of element) within control sensor area.
+- **`controlsActive`**: Triggered when any control point is activated (edge of element) within control sensor area.
 
-> - **`controlsInactive`**: Triggered when the control points are deactivated.
+- **`controlsInactive`**: Triggered when the control points are deactivated.
 
-> - **`controlRightUpdate`**: Triggered when the right control point position is updated.
+- **`controlRightUpdate`**: Triggered when the right control point position is updated.
 
-> - **`controlLeftUpdate`**: Triggered when the left control point position is updated.
+- **`controlLeftUpdate`**: Triggered when the left control point position is updated.
 
-> - **`controlTopUpdate`**: Triggered when the top control point position is updated.
+- **`controlTopUpdate`**: Triggered when the top control point position is updated.
 
-> - **`controlBottomUpdate`**: Triggered when the bottom control point position is updated.
+- **`controlBottomUpdate`**: Triggered when the bottom control point position is updated.
 
-> - **`resize`**: Triggered during resizing on every mouse move (if size change detected).
+- **`resize`**: Triggered during resizing on every mouse move (if size change detected).
 
-> - **`resizeStart`**: Triggered when resizing starts on mouse down.
+- **`resizeStart`**: Triggered when resizing starts on mouse down.
 
-> - **`resizeEnd`**: Triggered when resizing ends on mouse up.
+- **`resizeEnd`**: Triggered when resizing ends on mouse up.
 
-> - **`update`**: Triggered before any other event is dispatched.
+- **`update`**: Triggered before any other event is dispatched.
 
 ## Element Action Attributes ⚙️
 
@@ -195,19 +195,19 @@ Say you want your element to change background color while its engaged, here is 
 
 ### Available Action attributes
 
-> - **`data-overdrag-controls`**: Set while any control point is active with a value of active control type (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-controls="right-left"`
+- **`data-overdrag-controls`**: Set while any control point is active with a value of active control type (`left`, `right`, `top`, `bottom`), Ex: `data-overdrag-controls="right-left"`
 
-> - **`data-overdrag-over`**: Set while mouse is over the element pass the control sensors
+- **`data-overdrag-over`**: Set while mouse is over the element pass the control sensors
 
-> - **`data-overdrag-down`**: Set while mouse is down (preceded by `over` conditions).
+- **`data-overdrag-down`**: Set while mouse is down (preceded by `over` conditions).
 
-> - **`data-overdrag-dragging`**: Set while element is dragged.
+- **`data-overdrag-dragging`**: Set while element is dragged.
 
-> - **`data-overdrag-drag-mode`**: Set when entering drag mode.
+- **`data-overdrag-drag-mode`**: Set when entering drag mode.
 
-> - **`data-overdrag-resizing`**: Set while element is being resized, if resizing is detected
+- **`data-overdrag-resizing`**: Set while element is being resized, if resizing is detected
 
-> - **`data-overdrag-resize-mode`**: Set when entering resize mode
+- **`data-overdrag-resize-mode`**: Set when entering resize mode
 
 ## Cursor 👆
 
@@ -216,25 +216,25 @@ At every point of interaction with a controlled element, mouse cursor style is s
 > **_NOTE_**
 > Mouse cursor is set as an element pointer style which should not interfere with a global cursor state. Moreover, the child DOM overrides are performed by default.
 
-> - <span style="cursor:w-resize">**`w-resize`**</span>: Set while LEFT control sensor is activated (including sensitivity area)
+- <span style="cursor:w-resize">**`w-resize`**</span>: Set while LEFT control sensor is activated (including sensitivity area)
 
-> - <span style="cursor:e-resize">**`e-resize`**:</span> Set while RIGHT control sensor is activated (including sensitivity area).
+- <span style="cursor:e-resize">**`e-resize`**:</span> Set while RIGHT control sensor is activated (including sensitivity area).
 
-> - <span style="cursor:n-resize">**`n-resize`**</span>: Set while TOP control sensor is activated (including sensitivity area).
+- <span style="cursor:n-resize">**`n-resize`**</span>: Set while TOP control sensor is activated (including sensitivity area).
 
-> - <span style="cursor:s-resize">**`s-resize`**:</span> Set while BOTTOM control sensor is activated (including sensitivity area).
+- <span style="cursor:s-resize">**`s-resize`**:</span> Set while BOTTOM control sensor is activated (including sensitivity area).
 
-> - <span style="cursor:nw-resize">**`nw-resize`**:</span> Set while TOP and LEFT control sensors are activated (including sensitivity area).
+- <span style="cursor:nw-resize">**`nw-resize`**:</span> Set while TOP and LEFT control sensors are activated (including sensitivity area).
 
-> - <span style="cursor:ne-resize">**`ne-resize`**</span>: Set while TOP and RIGHT control sensors are activated (including sensitivity area).
+- <span style="cursor:ne-resize">**`ne-resize`**</span>: Set while TOP and RIGHT control sensors are activated (including sensitivity area).
 
-> - <span style="cursor:sw-resize">**`sw-resize`**</span>: Set while BOTTOM and LEFT control sensors are activated (including sensitivity area).
+- <span style="cursor:sw-resize">**`sw-resize`**</span>: Set while BOTTOM and LEFT control sensors are activated (including sensitivity area).
 
-> - <span style="cursor:se-resize">**`se-resize`**</span>: Set while BOTTOM and RIGHT control sensors are activated (including sensitivity area).
+- <span style="cursor:se-resize">**`se-resize`**</span>: Set while BOTTOM and RIGHT control sensors are activated (including sensitivity area).
 
-> - <span style="cursor:grab">**`grab`**</span>: Set while mouse is over the element pass the control sensors.
+- <span style="cursor:grab">**`grab`**</span>: Set while mouse is over the element pass the control sensors.
 
-> - <span style="cursor:pointer">**`default`**:</span> Set while no interactions are detected.
+- <span style="cursor:pointer">**`default`**:</span> Set while no interactions are detected.
 
 ## Future plans
 

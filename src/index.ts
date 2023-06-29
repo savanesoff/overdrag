@@ -268,6 +268,10 @@ export default class Overdrag extends EventEmitter {
     // TODO ensure the min width and height is respected
 
     // set all element parameters
+    this.assignInitialStyles();
+  }
+
+  private assignInitialStyles() {
     this.element.style.left = `${this.position.fullBounds.left}px`;
     this.element.style.top = `${this.position.fullBounds.top}px`;
     this.element.style.width = `${this.position.width}px`;

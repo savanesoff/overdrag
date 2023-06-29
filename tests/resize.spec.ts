@@ -117,48 +117,32 @@ describe("While resizing", () => {
     });
 
     it(`should emit "${Overdrag.EVENTS.RESIZE}" event`, () => {
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.RESIZE, overdrag);
     });
 
     it(`should resize element`, () => {
       const width = parseInt(overdrag.element.style.width);
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(parseInt(overdrag.element.style.width)).toBe(width - distance);
     });
 
     it(`should move left position`, () => {
       const left = parseInt(overdrag.element.style.left);
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(parseInt(overdrag.element.style.left)).toBe(left + distance);
     });
 
     it(`should not resize element to less than "minContentWith"`, () => {
-      translateCursor(
-        overdrag,
-        {
-          x: 100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: 100000,
+      });
       expect(parseInt(overdrag.element.style.width)).toBe(
         overdrag.minContentWidth
       );
@@ -167,13 +151,9 @@ describe("While resizing", () => {
     it(`should not resize element to more than maximum width as constrained by parent`, () => {
       const maxWidth =
         overdrag.position.fullBounds.right - overdrag.position.horizontalDiff;
-      translateCursor(
-        overdrag,
-        {
-          x: -100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: -100000,
+      });
       expect(parseInt(overdrag.element.style.width)).toBe(maxWidth);
     });
 
@@ -181,49 +161,33 @@ describe("While resizing", () => {
       overdrag.minContentWidth = getRandomValue(10, 20);
       overdrag.maxContentWidth = getRandomValue(30, 40);
       const maxWidth = overdrag.maxContentWidth;
-      translateCursor(
-        overdrag,
-        {
-          x: -100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: -100000,
+      });
       expect(parseInt(overdrag.element.style.width)).toBe(maxWidth);
     });
 
     it("should not move right position", () => {
       const right = parseInt(overdrag.element.style.right);
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(parseInt(overdrag.element.style.right)).toBe(right);
     });
 
     it("should not move top position", () => {
       const top = parseInt(overdrag.element.style.top);
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(parseInt(overdrag.element.style.top)).toBe(top);
     });
 
     it("should not move bottom position", () => {
       const bottom = parseInt(overdrag.element.style.bottom);
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
     });
 
@@ -231,13 +195,9 @@ describe("While resizing", () => {
       overdrag.snapThreshold = getRandomValue(10, 20);
       const distance =
         -overdrag.position.fullBounds.left + overdrag.snapThreshold;
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(parseInt(overdrag.element.style.left)).toBe(0);
     });
 
@@ -245,13 +205,9 @@ describe("While resizing", () => {
       overdrag.snapThreshold = getRandomValue(10, 20);
       const offset = overdrag.snapThreshold + 1;
       const distance = -overdrag.position.fullBounds.left + offset;
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(parseInt(overdrag.element.style.left)).toBe(offset);
     });
   });
@@ -275,48 +231,32 @@ describe("While resizing", () => {
     });
 
     it(`should emit "${Overdrag.EVENTS.RESIZE}" event`, () => {
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.RESIZE, overdrag);
     });
 
     it(`should resize element`, () => {
       const height = parseInt(overdrag.element.style.height);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(parseInt(overdrag.element.style.height)).toBe(height - distance);
     });
 
     it(`should move top position`, () => {
       const top = parseInt(overdrag.element.style.top);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(parseInt(overdrag.element.style.top)).toBe(top + distance);
     });
 
     it(`should not resize element to less than "minContentHeight"`, () => {
-      translateCursor(
-        overdrag,
-        {
-          y: 100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: 100000,
+      });
       expect(parseInt(overdrag.element.style.height)).toBe(
         overdrag.minContentHeight
       );
@@ -325,13 +265,9 @@ describe("While resizing", () => {
     it(`should not resize element to more than maximum height as constrained by parent`, () => {
       const maxHeight =
         overdrag.position.fullBounds.bottom - overdrag.position.verticalDiff;
-      translateCursor(
-        overdrag,
-        {
-          y: -100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: -100000,
+      });
       expect(parseInt(overdrag.element.style.height)).toBe(maxHeight);
     });
 
@@ -339,51 +275,35 @@ describe("While resizing", () => {
       overdrag.minContentHeight = getRandomValue(10, 20);
       overdrag.maxContentHeight = getRandomValue(30, 40);
       const maxHeight = overdrag.maxContentHeight;
-      translateCursor(
-        overdrag,
-        {
-          y: -100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: -100000,
+      });
       expect(parseInt(overdrag.element.style.height)).toBe(maxHeight);
     });
 
     it("should not move right position", () => {
       const right = parseInt(overdrag.element.style.right);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(right).not.toBeNaN();
       expect(parseInt(overdrag.element.style.right)).toBe(right);
     });
 
     it("should not move left position", () => {
       const left = parseInt(overdrag.element.style.left);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(left).not.toBeNaN();
       expect(parseInt(overdrag.element.style.left)).toBe(left);
     });
 
     it("should not move bottom position", () => {
       const bottom = parseInt(overdrag.element.style.bottom);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(bottom).not.toBeNaN();
       expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
     });
@@ -392,13 +312,9 @@ describe("While resizing", () => {
       overdrag.snapThreshold = getRandomValue(10, 20);
       const distance =
         -overdrag.position.fullBounds.top + overdrag.snapThreshold;
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(parseInt(overdrag.element.style.top)).toBe(0);
     });
 
@@ -406,13 +322,9 @@ describe("While resizing", () => {
       overdrag.snapThreshold = getRandomValue(10, 20);
       const offset = overdrag.snapThreshold + 1;
       const distance = -overdrag.position.fullBounds.top + offset;
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(parseInt(overdrag.element.style.top)).toBe(offset);
     });
   });
@@ -445,50 +357,34 @@ describe("While resizing", () => {
     });
 
     it(`should emit "${Overdrag.EVENTS.RESIZE}" event`, () => {
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.RESIZE, overdrag);
     });
 
     it(`should resize element`, () => {
       const height = parseInt(overdrag.element.style.height);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(height).not.toBeNaN();
       expect(parseInt(overdrag.element.style.height)).toBe(height + distance);
     });
 
     it(`should move bottom position`, () => {
       const bottom = parseInt(overdrag.element.style.bottom);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(bottom).not.toBeNaN();
       expect(parseInt(overdrag.element.style.bottom)).toBe(bottom - distance);
     });
 
     it(`should not resize element to less than minimum height`, () => {
-      translateCursor(
-        overdrag,
-        {
-          y: -100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: -100000,
+      });
       expect(parseInt(overdrag.element.style.height)).toBe(
         overdrag.minContentHeight
       );
@@ -499,13 +395,9 @@ describe("While resizing", () => {
         overdrag.parentPosition.actionBounds.bottom -
         overdrag.position.fullBounds.top -
         overdrag.position.verticalDiff;
-      translateCursor(
-        overdrag,
-        {
-          y: 100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: 100000,
+      });
       expect(parseInt(overdrag.element.style.height)).toBe(maxHeight);
     });
 
@@ -513,51 +405,35 @@ describe("While resizing", () => {
       overdrag.minContentHeight = getRandomValue(10, 20);
       overdrag.maxContentHeight = getRandomValue(30, 40);
       const maxHeight = overdrag.maxContentHeight;
-      translateCursor(
-        overdrag,
-        {
-          y: 100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: 100000,
+      });
       expect(parseInt(overdrag.element.style.height)).toBe(maxHeight);
     });
 
     it("should not move right position", () => {
       const right = parseInt(overdrag.element.style.right);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(right).not.toBeNaN();
       expect(parseInt(overdrag.element.style.right)).toBe(right);
     });
 
     it("should not move left position", () => {
       const left = parseInt(overdrag.element.style.left);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(left).not.toBeNaN();
       expect(parseInt(overdrag.element.style.left)).toBe(left);
     });
 
     it("should not move top position", () => {
       const top = parseInt(overdrag.element.style.top);
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
       expect(top).not.toBeNaN();
       expect(parseInt(overdrag.element.style.top)).toBe(top);
     });
@@ -569,13 +445,9 @@ describe("While resizing", () => {
         overdrag.parentPosition.actionBounds.bottom -
         overdrag.position.fullBounds.bottom -
         overdrag.snapThreshold;
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
 
       expect(parseInt(overdrag.element.style.bottom)).toBe(0);
     });
@@ -588,13 +460,9 @@ describe("While resizing", () => {
         overdrag.parentPosition.actionBounds.bottom -
         overdrag.position.fullBounds.bottom -
         offset;
-      translateCursor(
-        overdrag,
-        {
-          y: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        y: distance,
+      });
 
       expect(parseInt(overdrag.element.style.bottom)).toBe(offset);
     });
@@ -628,49 +496,33 @@ describe("While resizing", () => {
     });
 
     it(`should emit "${Overdrag.EVENTS.RESIZE}" event`, () => {
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(emitSpy).toHaveBeenCalledWith(Overdrag.EVENTS.RESIZE, overdrag);
     });
 
     it(`should resize element`, () => {
       const width = parseInt(overdrag.element.style.width);
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(parseInt(overdrag.element.style.width)).toBe(width + distance);
     });
 
     it(`should move right position`, () => {
       const right = parseInt(overdrag.element.style.right);
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(right).not.toBeNaN();
       expect(parseInt(overdrag.element.style.right)).toBe(right - distance);
     });
 
     it(`should not resize element to less than minimum width`, () => {
-      translateCursor(
-        overdrag,
-        {
-          x: -100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: -100000,
+      });
       expect(parseInt(overdrag.element.style.width)).toBe(
         overdrag.minContentWidth
       );
@@ -681,13 +533,9 @@ describe("While resizing", () => {
         overdrag.parentPosition.actionBounds.right -
         overdrag.position.fullBounds.left -
         overdrag.position.horizontalDiff;
-      translateCursor(
-        overdrag,
-        {
-          x: 100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: 100000,
+      });
       expect(parseInt(overdrag.element.style.width)).toBe(maxWidth);
     });
 
@@ -695,51 +543,35 @@ describe("While resizing", () => {
       overdrag.minContentWidth = getRandomValue(10, 20);
       overdrag.maxContentWidth = getRandomValue(30, 40);
       const maxWidth = overdrag.maxContentWidth;
-      translateCursor(
-        overdrag,
-        {
-          x: 100000,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: 100000,
+      });
       expect(parseInt(overdrag.element.style.width)).toBe(maxWidth);
     });
 
     it("should not move bottom position", () => {
       const bottom = parseInt(overdrag.element.style.bottom);
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(bottom).not.toBeNaN();
       expect(parseInt(overdrag.element.style.bottom)).toBe(bottom);
     });
 
     it("should not move top position", () => {
       const top = parseInt(overdrag.element.style.top);
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
       expect(top).not.toBeNaN();
       expect(parseInt(overdrag.element.style.top)).toBe(top);
     });
 
     it("should not move left position", () => {
       const left = parseInt(overdrag.element.style.left);
-      translateCursor(
-        overdrag,
-        {
-          x: overdrag.position.fullBounds.left + distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: overdrag.position.fullBounds.left + distance,
+      });
       expect(parseInt(overdrag.element.style.left)).toBe(left);
     });
 
@@ -750,13 +582,9 @@ describe("While resizing", () => {
         overdrag.parentPosition.actionBounds.right -
         overdrag.position.fullBounds.right -
         overdrag.snapThreshold;
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
 
       expect(parseInt(overdrag.element.style.right)).toBe(0);
     });
@@ -769,13 +597,9 @@ describe("While resizing", () => {
         overdrag.parentPosition.actionBounds.right -
         overdrag.position.fullBounds.right -
         offset;
-      translateCursor(
-        overdrag,
-        {
-          x: distance,
-        },
-        true
-      );
+      translateCursor(overdrag, {
+        x: distance,
+      });
 
       expect(parseInt(overdrag.element.style.right)).toBe(offset);
     });

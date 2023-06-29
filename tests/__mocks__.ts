@@ -107,52 +107,33 @@ export function createInstance(props: Partial<ControlProps> = {}) {
   return new Overdrag(mergedProps);
 }
 
-export function moveElementCursor(
-  overdrag: Overdrag,
-  { x = 0, y = 0 },
-  windowEvent = false
-) {
+export function moveElementCursor(overdrag: Overdrag, { x = 0, y = 0 }) {
   const event = new MouseEvent("mousemove", {
     clientX:
       overdrag.parentPosition.offsetLeft +
-      (overdrag.down ? overdrag.offsetX : overdrag.position.visualBounds.left) +
+      overdrag.position.visualBounds.left +
       x,
     clientY:
       overdrag.parentPosition.offsetTop +
-      (overdrag.down ? overdrag.offsetY : overdrag.position.visualBounds.top) +
+      overdrag.position.visualBounds.top +
       y,
   });
 
-  if (windowEvent) {
-    window.dispatchEvent(event);
-  } else {
-    overdrag.element.dispatchEvent(event);
-  }
+  overdrag.element.dispatchEvent(event);
 }
 
-export function translateCursor(
-  overdrag: Overdrag,
-  { x = 0, y = 0 },
-  windowEvent = false
-) {
+export function translateCursor(overdrag: Overdrag, { x = 0, y = 0 }) {
   const event = new MouseEvent("mousemove", {
     clientX:
       overdrag.parentPosition.offsetLeft +
-      (overdrag.down
-        ? overdrag.position.fullBounds.left + overdrag.offsetX
-        : overdrag.position.visualBounds.left) +
+      overdrag.position.fullBounds.left +
+      overdrag.offsetX +
       x,
     clientY:
       overdrag.parentPosition.offsetTop +
-      (overdrag.down
-        ? overdrag.position.fullBounds.top + overdrag.offsetY
-        : overdrag.position.visualBounds.top) +
+      overdrag.position.fullBounds.top +
+      overdrag.offsetY +
       y,
   });
-
-  if (windowEvent) {
-    window.dispatchEvent(event);
-  } else {
-    overdrag.element.dispatchEvent(event);
-  }
+  window.dispatchEvent(event);
 }

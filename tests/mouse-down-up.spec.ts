@@ -1,5 +1,9 @@
 import Overdrag from "../src";
-import { createInstance, moveElementCursor } from "./__mocks__";
+import {
+  createInstance,
+  moveElementCursor,
+  translateCursor,
+} from "./__mocks__";
 
 let overdrag: Overdrag;
 let emitSpy: jest.SpyInstance;
@@ -238,20 +242,10 @@ describe("Click", () => {
     expect(overdrag.dragging).toBe(true);
 
     // move window cursor
-    moveElementCursor(
-      overdrag,
-      {
-        x:
-          overdrag.position.fullBounds.left +
-          overdrag.clickDetectionThreshold -
-          1,
-        y:
-          overdrag.position.fullBounds.top +
-          overdrag.clickDetectionThreshold -
-          1,
-      },
-      true
-    );
+    translateCursor(overdrag, {
+      x: overdrag.clickDetectionThreshold - 1,
+      y: overdrag.clickDetectionThreshold - 1,
+    });
 
     window.dispatchEvent(new MouseEvent("mouseup"));
 
@@ -268,14 +262,10 @@ describe("Click", () => {
     expect(overdrag.dragging).toBe(true);
 
     // move window cursor
-    moveElementCursor(
-      overdrag,
-      {
-        x: overdrag.position.fullBounds.left + overdrag.clickDetectionThreshold,
-        y: overdrag.position.fullBounds.top + overdrag.clickDetectionThreshold,
-      },
-      true
-    );
+    translateCursor(overdrag, {
+      x: overdrag.clickDetectionThreshold,
+      y: overdrag.clickDetectionThreshold,
+    });
 
     window.dispatchEvent(new MouseEvent("mouseup"));
 

@@ -7,5 +7,6 @@
   "moduleFileExtensions": ["ts", "tsx", "js", "jsx", "json"],
   "testEnvironment": "jsdom",
   "coverageDirectory": "./coverage/",
+  "collectCoverageFrom": ["src/**/*.ts"],
   "collectCoverage": true
 }

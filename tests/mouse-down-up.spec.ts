@@ -1,11 +1,6 @@
 import Overdrag from "../src";
-import {
-  createInstance,
-  moveElementCursor,
-  translateCursor,
-} from "./setup";
+import { createInstance, moveElementCursor, translateCursor } from "./setup";
 
- 
 let overdrag: Overdrag;
 // @ts-ignore
 let emitSpy: vi.spyOn;

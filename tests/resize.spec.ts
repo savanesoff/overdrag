@@ -12,7 +12,7 @@ let emitSpy: vi.spyOn;
 // @ts-ignore
 let attrSpy: vi.spyOn;
 // @ts-ignore
-let removeAttributeSpy: vi.spyOn; 
+let removeAttributeSpy: vi.spyOn;
 
 beforeEach(() => {
   // ensure snapping doesn't interfere with tests
@@ -20,7 +20,7 @@ beforeEach(() => {
   emitSpy = vi.spyOn(overdrag, "emit");
   attrSpy = vi.spyOn(overdrag.element, "setAttribute");
   removeAttributeSpy = vi.spyOn(overdrag.element, "removeAttribute");
-  
+
   overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 });
 

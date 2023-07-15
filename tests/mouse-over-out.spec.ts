@@ -37,10 +37,7 @@ describe("onMouseOver", () => {
 
   it(`should attach 'mousemove' event listener`, () => {
     const overdrag = createInstance();
-    const addEventListenerSpy = vi.spyOn(
-      overdrag.element,
-      "addEventListener"
-    );
+    const addEventListenerSpy = vi.spyOn(overdrag.element, "addEventListener");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -52,10 +49,7 @@ describe("onMouseOver", () => {
 
   it(`should attach "mousemove" event listener`, () => {
     const overdrag = createInstance();
-    const addEventListenerSpy = vi.spyOn(
-      overdrag.element,
-      "addEventListener"
-    );
+    const addEventListenerSpy = vi.spyOn(overdrag.element, "addEventListener");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -67,10 +61,7 @@ describe("onMouseOver", () => {
 
   it(`should attach "mousedown" event listener`, () => {
     const overdrag = createInstance();
-    const addEventListenerSpy = vi.spyOn(
-      overdrag.element,
-      "addEventListener"
-    );
+    const addEventListenerSpy = vi.spyOn(overdrag.element, "addEventListener");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -84,10 +75,7 @@ describe("onMouseOver", () => {
     const overdrag = createInstance();
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
-    const addEventListenerSpy = vi.spyOn(
-      overdrag.element,
-      "addEventListener"
-    );
+    const addEventListenerSpy = vi.spyOn(overdrag.element, "addEventListener");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -175,7 +163,8 @@ describe("stack", () => {
 
       const onMouseOverSpy = vi.spyOn(overdrag, "onMouseOver");
       const onMouseOverSpy2 = vi.spyOn(overdrag2, "onMouseOver");
-      overdrag2.onMouseOut({} as any);
+
+      overdrag2.onMouseOut({} as MouseEvent);
 
       expect(onMouseOverSpy2).not.toHaveBeenCalled();
       expect(onMouseOverSpy).toHaveBeenCalled();

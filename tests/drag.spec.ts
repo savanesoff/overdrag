@@ -10,14 +10,13 @@ let overdrag: Overdrag;
 // @ts-ignore
 let emitSpy: vi.spyOn;
 // @ts-ignore
-let attrSpy:  vi.spyOn;
- 
+let attrSpy: vi.spyOn;
 
 beforeEach(() => {
   // ensure snapping doesn't interfere with tests
   overdrag = createInstance();
   emitSpy = vi.spyOn(overdrag, "emit");
-  attrSpy = vi.spyOn(overdrag.element, "setAttribute"); 
+  attrSpy = vi.spyOn(overdrag.element, "setAttribute");
   overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
   // initiate drag
   moveElementCursor(overdrag, {

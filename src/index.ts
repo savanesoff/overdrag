@@ -174,7 +174,7 @@ export default class Overdrag extends EventEmitter {
     excludePadding: false,
   };
   static readonly ATTRIBUTES = Attributes;
-  static readonly CURSOR = Cursors;
+  static CURSOR = Cursors;
   static readonly EVENTS = Events;
   static activeInstance: Overdrag | null = null;
   readonly window = window;
@@ -199,13 +199,13 @@ export default class Overdrag extends EventEmitter {
   /** Mouse Down status */
   down = false;
   /** current mouse position relative to parent */
-  parentMouseX: number = 0;
+  parentMouseX = 0;
   /** current mouse position relative to parent */
-  parentMouseY: number = 0;
+  parentMouseY = 0;
   /** coordinate at mouse Down event */
-  offsetX: number = 0;
+  offsetX = 0;
   /** coordinate at mouse Down event */
-  offsetY: number = 0;
+  offsetY = 0;
   /** Element rect on last mouse move event */
   position: ComputedPosition;
   /** Element rect on last mouse down event */
@@ -224,8 +224,8 @@ export default class Overdrag extends EventEmitter {
     bottom: false,
   };
 
-  downMouseX: number = 0;
-  downMouseY: number = 0;
+  downMouseX = 0;
+  downMouseY = 0;
 
   constructor({
     element,
@@ -291,7 +291,7 @@ export default class Overdrag extends EventEmitter {
     return parseInt(value || "0");
   }
 
-  emit(eventName: string | symbol, ...args: any[]): boolean {
+  emit(eventName: string | symbol, ...args: unknown[]): boolean {
     super.emit.apply(this, [Overdrag.EVENTS.UPDATE, this]);
     return super.emit.apply(this, [eventName, ...args]);
   }
@@ -604,23 +604,23 @@ export default class Overdrag extends EventEmitter {
   updateCursorStyle() {
     let cursor: null | string = null;
 
-    if (this.controls.top && this.controls.left) {
+    if (Overdrag.CURSOR.LEFT_TOP && this.controls.top && this.controls.left) {
       cursor = Overdrag.CURSOR.LEFT_TOP;
-    } else if (this.controls.bottom && this.controls.right) {
+    } else if (Overdrag.CURSOR.RIGHT_BOTTOM && this.controls.bottom && this.controls.right) {
       cursor = Overdrag.CURSOR.RIGHT_BOTTOM;
-    } else if (this.controls.bottom && this.controls.left) {
+    } else if (Overdrag.CURSOR.LEFT_BOTTOM && this.controls.bottom && this.controls.left) {
       cursor = Overdrag.CURSOR.LEFT_BOTTOM;
-    } else if (this.controls.top && this.controls.right) {
+    } else if ( Overdrag.CURSOR.RIGHT_TOP && this.controls.top && this.controls.right) {
       cursor = Overdrag.CURSOR.RIGHT_TOP;
-    } else if (this.controls.top) {
+    } else if ( Overdrag.CURSOR.TOP && this.controls.top) {
       cursor = Overdrag.CURSOR.TOP;
-    } else if (this.controls.bottom) {
+    } else if (Overdrag.CURSOR.BOTTOM && this.controls.bottom) {
       cursor = Overdrag.CURSOR.BOTTOM;
-    } else if (this.controls.left) {
+    } else if (Overdrag.CURSOR.LEFT && this.controls.left) {
       cursor = Overdrag.CURSOR.LEFT;
-    } else if (this.controls.right) {
+    } else if (Overdrag.CURSOR.RIGHT && this.controls.right) {
       cursor = Overdrag.CURSOR.RIGHT;
-    } else if (this.over) {
+    } else if (Overdrag.CURSOR.OVER && this.over) {
       cursor = Overdrag.CURSOR.OVER;
     }
 

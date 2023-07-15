@@ -1,18 +1,20 @@
 import Overdrag from "../src";
-import { createInstance, moveElementCursor } from "./__mocks__";
+import { createInstance, moveElementCursor } from "./setup";
 let overdrag: Overdrag;
-let emitSpy: jest.SpyInstance;
-let attrSpy: jest.SpyInstance;
+// @ts-ignore
+let emitSpy: vi.spyOn;
+// @ts-ignore
+let attrSpy: vi.spyOn;
 beforeEach(() => {
   overdrag = createInstance();
-  emitSpy = jest.spyOn(overdrag, "emit");
-  attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+  emitSpy = vi.spyOn(overdrag, "emit");
+  attrSpy = vi.spyOn(overdrag.element, "setAttribute");
   overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 });
 afterEach(() => {
   // Reset mock function calls
   overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("controls", () => {

@@ -3,33 +3,42 @@ import {
   createInstance,
   moveElementCursor,
   translateCursor,
-} from "./__mocks__";
+} from "./setup";
 
+ 
 let overdrag: Overdrag;
-let emitSpy: jest.SpyInstance;
-let attrSpy: jest.SpyInstance;
-let removeAttributeSpy: jest.SpyInstance;
-let removeEventListenerSpy: jest.SpyInstance;
-let addEventListenerSpy: jest.SpyInstance;
-let windowAddEventListenerSpy: jest.SpyInstance;
-let windowRemoveEventListenerSpy: jest.SpyInstance;
+// @ts-ignore
+let emitSpy: vi.spyOn;
+// @ts-ignore
+let attrSpy: vi.spyOn;
+// @ts-ignore
+let removeAttributeSpy: vi.spyOn;
+// @ts-ignore
+let removeEventListenerSpy: vi.spyOn;
+// @ts-ignore
+let addEventListenerSpy: vi.spyOn;
+// @ts-ignore
+let windowAddEventListenerSpy: vi.spyOn;
+// @ts-ignore
+let windowRemoveEventListenerSpy: vi.spyOn;
 //@ts-ignore
 beforeEach(() => {
   overdrag = createInstance();
-  emitSpy = jest.spyOn(overdrag, "emit");
-  attrSpy = jest.spyOn(overdrag.element, "setAttribute");
-  removeAttributeSpy = jest.spyOn(overdrag.element, "removeAttribute");
-  removeEventListenerSpy = jest.spyOn(overdrag.element, "removeEventListener");
-  addEventListenerSpy = jest.spyOn(overdrag.element, "addEventListener");
-  windowAddEventListenerSpy = jest.spyOn(window, "addEventListener");
-  windowRemoveEventListenerSpy = jest.spyOn(window, "removeEventListener");
+  emitSpy = vi.spyOn(overdrag, "emit");
+  attrSpy = vi.spyOn(overdrag.element, "setAttribute");
+  removeAttributeSpy = vi.spyOn(overdrag.element, "removeAttribute");
+  removeEventListenerSpy = vi.spyOn(overdrag.element, "removeEventListener");
+  addEventListenerSpy = vi.spyOn(overdrag.element, "addEventListener");
+  windowAddEventListenerSpy = vi.spyOn(window, "addEventListener");
+  windowRemoveEventListenerSpy = vi.spyOn(window, "removeEventListener");
   overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 });
+
 afterEach(() => {
   // Reset mock function calls
   // window.dispatchEvent(new MouseEvent("mouseup"));
   // overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
-  jest.clearAllMocks();
+  vi.clearAllMocks();
 });
 
 describe("onMouseDown", () => {

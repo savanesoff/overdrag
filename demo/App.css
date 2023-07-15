@@ -1,6 +1,187 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  /* text-align: center; */
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1;
+  font-weight: 400;
+
+  color-scheme: light dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #242424;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  -webkit-text-size-adjust: 100%;
+  --ctrl-size: 3rem;
+  --border-size: 1rem;
+  --margin-size: 1rem;
+  --padding-size: 1rem;
+  --padding-size-container: 1rem;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  /* height: 100vh; */
+}
+
+#app {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: stretch;
+  align-items: stretch;
+  text-align: center;
+}
+
+.overdrag-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 68vh;
+  width: calc(100%);
+  position: relative;
+  background-color: #242424;
+  outline: 1px solid #646cff;
+  outline-offset: -1px;
+  --lines: #4c4c4c;
+  background-size: 1rem 1rem;
+  background-image: linear-gradient(to right, var(--lines) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--lines) 1px, transparent 1px);
+  background-color: #333333;
+}
+
+[data-overdrag-controls]:after {
+  content: "";
+  display: none;
+  pointer-events: none;
+  z-index: 999;
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ff46fc;
+  color: #ffffff;
+  font-size: 1.4rem;
+  font-weight: 400;
+}
+
+[data-overdrag-controls~="right"]:after {
+  content: "resize ↕";
+  writing-mode: vertical-rl;
+  width: var(--ctrl-size);
+  height: calc(100% + 2rem);
+  right: 0rem;
+  top: 0rem;
+}
+
+[data-overdrag-controls~="left"]:after {
+  content: "resize ↕";
+  writing-mode: vertical-rl;
+  height: calc(100% + 2rem);
+  width: var(--ctrl-size);
+  left: 0rem;
+  top: 0rem;
+}
+
+[data-overdrag-controls~="top"]:after {
+  content: "resize ↕";
+  height: var(--ctrl-size);
+  width: calc(100% + 2rem);
+  left: 0rem;
+  top: 0rem;
+}
+
+[data-overdrag-controls~="bottom"]:after {
+  content: "resize ↕";
+  height: var(--ctrl-size);
+  width: calc(100% + 2rem);
+  left: 0rem;
+  bottom: 0rem;
+}
+
+[data-overdrag-controls~="right-top"]:after {
+  content: "↗";
+  width: var(--ctrl-size);
+  height: var(--ctrl-size);
+  right: 0rem;
+  top: 0rem;
+}
+
+[data-overdrag-controls~="left-top"]:after {
+  content: "↖";
+  width: var(--ctrl-size);
+  height: var(--ctrl-size);
+  left: 0rem;
+  top: 0rem;
+}
+
+[data-overdrag-controls~="right-bottom"]:after {
+  content: "↘";
+  width: var(--ctrl-size);
+  height: var(--ctrl-size);
+  right: 0rem;
+  bottom: 0rem;
+}
+
+[data-overdrag-controls~="left-bottom"]:after {
+  content: "↙";
+  width: var(--ctrl-size);
+  height: var(--ctrl-size);
+  left: 0rem;
+  bottom: 0rem;
+}
+
+[overdrag-down="true"] {
+  background-color: #ff6cff !important;
+}
+
+.overdrag {
+  --lines: #4c4c4c;
+  opacity: 0.9;
+  background-size: 1rem 1rem;
+  background-image: linear-gradient(to right, var(--lines) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--lines) 1px, transparent 1px);
+  background-color: #333333;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  color: #ffffff;
+  border: var(--border-size) solid #00ffae;
+  padding: var(--padding-size);
+  margin: var(--margin-size);
+  width: 200px;
+  height: 200px;
+  position: relative;
+  position: absolute;
+  font-size: 1rem;
+  box-shadow: 0.5rem 0.5rem 1rem 0.5rem rgba(0, 0, 0, 0.5);
+  overflow: hidden;
+  .data {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-gap: 0.3rem;
+    font-size: 0.8rem;
+    > div {
+      padding: 0.1rem;
+      display: flex;
+      align-items: center;
+      justify-content: left;
+    }
+  }
+}
+
+[data-overdrag-over] {
+  --lines: #cb8258;
+  background-image: linear-gradient(to right, var(--lines) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--lines) 1px, transparent 1px);
+  background-color: #ff9a2e;
+  color: #ffffff;
+}
+
+[data-overdrag-drag] {
+  background-color: #ff6cff;
+  color: #ffffff;
 }

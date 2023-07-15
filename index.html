@@ -2,12 +2,24 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="https://raw.githubusercontent.com/savanesoff/protosus/main/public/icons/favicon.png" />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="https://raw.githubusercontent.com/savanesoff/protosus/main/public/icons/favicon.png"
+    />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Overdrag Demo by Protosus</title>
+    <meta
+      name="description"
+      content="NPM Overdrag Demo - Interact with Overdrag elements to drag and resize."
+    />
   </head>
   <body>
     <div id="root"></div>
+    <div class="overdrag" style="left: calc(50vw - 150px); top: 24rem">
+      <p>My parent is "Body"</p>
+      <div class="data"></div>
+    </div>
     <script type="module" src="/demo/main.tsx"></script>
   </body>
 </html>

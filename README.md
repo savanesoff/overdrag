@@ -1,19 +1,42 @@
-by `Protosus`
+[![by Protosus](https://raw.githubusercontent.com/savanesoff/protosus/main/public/icons/by-protosus.svg)](https://github.com/savanesoff/overdrag)
 
-# Overdrag
 
-[![npm version](https://badge.fury.io/js/overdrag.svg)](https://badge.fury.io/js/overdrag)
+# overdrag
+
+[![Github](https://badgen.net/badge/Protosus/overdrag?color=purple&icon=github)](https://github.com/savanesoff/overdrag)
 [![Build Status](https://github.com/savanesoff/overdrag/actions/workflows/test.yaml/badge.svg?branch=main&event=push)](https://github.com/savanesoff/overdrag/actions/workflows/test.yaml)
+[![npm version](https://badge.fury.io/js/overdrag.svg)](https://badge.fury.io/js/overdrag)
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![HitCount](https://hits.dwyl.com/savanesov/overdrag.svg)](https://hits.dwyl.com/{username}/{project-name})
+[![Li](https://badgen.net/badge/savanesoff/LI?color=blue)](https://www.linkedin.com/in/samvel-avanesov)
 
-Overdrag is a JavaScript utility for adding draggable and resizable behavior to DOM elements within offset parent and is recursive (one inside the other).
+Overdrag is a JavaScript utility for adding `draggable` and resizable `behavior` to DOM elements respecting an offset parent boundaries.
 
 ## Demo
 
-You can view a live demo [here](https://savanesoff.github.io/overdrag-vanilla-demo/)
+You can view a live demo [here](https://savanesoff.github.io/overdrag)
 
-![Validator](https://savanesoff.github.io/overdrag-vanilla-demo/assets/overdrag-npm-demo-animation-take1-63e16fc8.gif)
+[![Validator](https://raw.githubusercontent.com/savanesoff/devtools-chopper/main/public/overdrag-demo.gif)](https://savanesoff.github.io/overdrag)
+
+## Installation
+
+
+[![NPM](https://nodei.co/npm/overdrag.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/overdrag/)
+
+To install Overdrag:
+- using `npm`
+```shell
+npm install overdrag
+```
+- using `yarn`
+
+```shell
+yarn add overdrag
+```
+- using `pnpm`
+
+```shell
+pnpm add overdrag
+```
 
 ## React
 
@@ -21,27 +44,11 @@ Want a `React` component? Checkout `React` version of this utility [NPM](https:/
 
 [![NPM](https://nodei.co/npm/overdrag-react.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/overdrag-react/)
 
-## Installation
-
-To install Overdrag, use npm or yarn:
-
-```shell
-npm install overdrag
-```
-
-or
-
-```shell
-yarn add overdrag
-```
-
-or
-
-[![NPM](https://nodei.co/npm/overdrag.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/overdrag/)
 
 ## Usage
 
-> **_NOTE_** Yes, `TS` is fully supported out of the box! No need for installing `@types`.
+> **_NOTE_**  
+Yes, `TS` is fully supported out of the box! No need for installing `@types`.
 
 To use Overdrag, import the Overdrag class from the package:
 
@@ -96,20 +103,20 @@ overdrag.on(Overdrag.EVENTS.CONTROLS_ACTIVE, (instance) => console.log('active s
 
 Controlled element is bound by its parent bounds and requires parent element to have `position:relative` CSS property for the controlled element absolute position be relative to its `offsetParent`.
 
-> **_NOTE_**
-> Absolute position of the target element is enforced during construction of class instance, so don't feel bad if you've forgotten to assign it.
+> **_NOTE_**  
+Absolute position of the target element is enforced during construction of class instance, so don't feel bad if you've forgotten to assign it.
 
 ### Resizing
 
 While hovering near and/or over the edge of controlled element (left, right, top, bottom), that includes border sizes, a corresponding sensor will be activated. Pressing mouse down and initiating a drag will move corresponding edge of the element, thereby resizing it.
 
-> **_NOTE_**
-> Two adjacent sensors can be activated at once, ex: top-right, in which case dragging mouse around will resize both: width and height of controlled element.
+> **_NOTE_**  
+Two adjacent sensors can be activated at once, ex: top-right, in which case dragging mouse around will resize both: width and height of controlled element.
 
 Maximum size is determined by the size of the offset parent, however, a margin values of controlled element are respected, so if controlled element has a right-margin value of `10` the max width of the element will be no larger than `offsetParent.width - 10px`
 
-> **_NOTE_**
-> See `maxContentWidth/Height` values
+> **_NOTE_**  
+ See `maxContentWidth/Height` values
 
 ### Dragging
 
@@ -123,8 +130,8 @@ In both cases, `drag` and `resize` the edge of controlled element will snap to t
 
 Sensitivity of control points is determined by the `controlsThreshold` value, where control point is activated if mouse cursor distance to the control point of element is equal to of less than `controlsThreshold` value.
 
-> **_NOTE_**
-> This allows for a better control precision of when control points become active, preventing edge hunting to activate controls
+> **_NOTE_**  
+This allows for a better control precision of when control points become active, preventing edge hunting to activate controls
 
 ## Events 📻
 
@@ -150,13 +157,17 @@ The available events are:
 
 - **`drag`**: Triggered during dragging, on every drag motion with a mouse move.
 
-- **`dragStart`**: Triggered when the mouse button is pressed down on the element, but not control points.
-
-- **`dragEnd`**: Triggered when the mouse button is released after dragging.
-
 - **`over`**: Triggered when the mouse is over the element passed the control point sensors.
 
 - **`out`**: Triggered when the mouse moves out of the visible box of element excluding control point sensors.
+
+- ...
+<details>
+<summary>click to see more events...</summary>
+
+- **`dragStart`**: Triggered when the mouse button is pressed down on the element, but not control points.
+
+- **`dragEnd`**: Triggered when the mouse button is released after dragging.
 
 - **`controlsActive`**: Triggered when any control point is activated (edge of element) within control sensor area.
 
@@ -177,6 +188,7 @@ The available events are:
 - **`resizeEnd`**: Triggered when resizing ends on mouse up.
 
 - **`update`**: Triggered before any other event is dispatched.
+</details>
 
 ## Element Action Attributes ⚙️
 
@@ -216,6 +228,8 @@ At every point of interaction with a controlled element, mouse cursor style is s
 > **_NOTE_**
 > Mouse cursor is set as an element pointer style which should not interfere with a global cursor state. Moreover, the child DOM overrides are performed by default.
 
+<details>
+<summary>click to see all cursor states</summary>
 - <span style="cursor:w-resize">**`w-resize`**</span>: Set while LEFT control sensor is activated (including sensitivity area)
 
 - <span style="cursor:e-resize">**`e-resize`**:</span> Set while RIGHT control sensor is activated (including sensitivity area).
@@ -236,12 +250,15 @@ At every point of interaction with a controlled element, mouse cursor style is s
 
 - <span style="cursor:pointer">**`default`**:</span> Set while no interactions are detected.
 
+</details>
+
 ## Future plans
 
-- Create Angular support
+- Angular support
+
 
 # PS
 
-Hit me up on [Li](https://www.linkedin.com/in/samvel-avanesov/)
+[![Li](https://badgen.net/badge/Hit%20me%20up%20on/LI?color=blue)](https://www.linkedin.com/in/samvel-avanesov)
 
 Enjoy! 🎉🎉🎉

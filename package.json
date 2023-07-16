@@ -1,7 +1,7 @@
 {
   "name": "overdrag",
   "private": false,
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "Adds drag and resize capabilities to a DOM element. Enables a fine control of appearance and event handling for various aspects of target interaction, with control points, events and more...",
   "license": "MIT",
   "bugs": {

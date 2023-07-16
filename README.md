@@ -1,6 +1,5 @@
 [![by Protosus](https://raw.githubusercontent.com/savanesoff/protosus/main/public/icons/by-protosus.svg)](https://github.com/savanesoff/overdrag)
 
-
 # overdrag
 
 [![Github](https://badgen.net/badge/Protosus/overdrag?color=purple&icon=github)](https://github.com/savanesoff/overdrag)
@@ -15,23 +14,26 @@ Overdrag is a JavaScript utility for adding `draggable` and resizable `behavior`
 
 You can view a live demo [here](https://savanesoff.github.io/overdrag)
 
-[![Validator](https://raw.githubusercontent.com/savanesoff/devtools-chopper/main/public/overdrag-demo.gif)](https://savanesoff.github.io/overdrag)
+[![Validator](https://raw.githubusercontent.com/savanesoff/overdrag/main/public/overdrag-demo.gif)](https://savanesoff.github.io/overdrag)
 
 ## Installation
-
 
 [![NPM](https://nodei.co/npm/overdrag.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/overdrag/)
 
 To install Overdrag:
+
 - using `npm`
+
 ```shell
 npm install overdrag
 ```
+
 - using `yarn`
 
 ```shell
 yarn add overdrag
 ```
+
 - using `pnpm`
 
 ```shell
@@ -44,11 +46,10 @@ Want a `React` component? Checkout `React` version of this utility [NPM](https:/
 
 [![NPM](https://nodei.co/npm/overdrag-react.png?downloads=true&downloadRank=true&stars=true)](https://nodei.co/npm/overdrag-react/)
 
-
 ## Usage
 
 > **_NOTE_**  
-Yes, `TS` is fully supported out of the box! No need for installing `@types`.
+> Yes, `TS` is fully supported out of the box! No need for installing `@types`.
 
 To use Overdrag, import the Overdrag class from the package:
 
@@ -104,19 +105,19 @@ overdrag.on(Overdrag.EVENTS.CONTROLS_ACTIVE, (instance) => console.log('active s
 Controlled element is bound by its parent bounds and requires parent element to have `position:relative` CSS property for the controlled element absolute position be relative to its `offsetParent`.
 
 > **_NOTE_**  
-Absolute position of the target element is enforced during construction of class instance, so don't feel bad if you've forgotten to assign it.
+> Absolute position of the target element is enforced during construction of class instance, so don't feel bad if you've forgotten to assign it.
 
 ### Resizing
 
 While hovering near and/or over the edge of controlled element (left, right, top, bottom), that includes border sizes, a corresponding sensor will be activated. Pressing mouse down and initiating a drag will move corresponding edge of the element, thereby resizing it.
 
 > **_NOTE_**  
-Two adjacent sensors can be activated at once, ex: top-right, in which case dragging mouse around will resize both: width and height of controlled element.
+> Two adjacent sensors can be activated at once, ex: top-right, in which case dragging mouse around will resize both: width and height of controlled element.
 
 Maximum size is determined by the size of the offset parent, however, a margin values of controlled element are respected, so if controlled element has a right-margin value of `10` the max width of the element will be no larger than `offsetParent.width - 10px`
 
 > **_NOTE_**  
- See `maxContentWidth/Height` values
+>  See `maxContentWidth/Height` values
 
 ### Dragging
 
@@ -131,7 +132,7 @@ In both cases, `drag` and `resize` the edge of controlled element will snap to t
 Sensitivity of control points is determined by the `controlsThreshold` value, where control point is activated if mouse cursor distance to the control point of element is equal to of less than `controlsThreshold` value.
 
 > **_NOTE_**  
-This allows for a better control precision of when control points become active, preventing edge hunting to activate controls
+> This allows for a better control precision of when control points become active, preventing edge hunting to activate controls
 
 ## Events 📻
 
@@ -255,7 +256,6 @@ At every point of interaction with a controlled element, mouse cursor style is s
 ## Future plans
 
 - Angular support
-
 
 # PS
 

@@ -9,7 +9,6 @@
     "moduleResolution": "bundler",
     "outDir": "dist-demo",
     "resolveJsonModule": true,
-    "jsx": "react-jsx",
 
     /* Linting */
     "strict": true,
@@ -18,5 +17,5 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "."
   },
-  "files": ["demo/main.tsx"]
+  "files": ["demo/main.ts"]
 }

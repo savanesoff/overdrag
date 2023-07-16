@@ -1,5 +1,11 @@
 # overdrag
 
+## 1.1.2
+
+### Patch Changes
+
+- Favicon demo path set to Protosus official repo
+
 ## 1.1.1
 
 ### Patch Changes

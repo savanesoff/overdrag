@@ -159,18 +159,20 @@ body {
   font-size: 1rem;
   box-shadow: 0.5rem 0.5rem 1rem 0.5rem rgba(0, 0, 0, 0.5);
   overflow: hidden;
-  .data {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    grid-gap: 0.3rem;
-    font-size: 0.8rem;
-    > div {
-      padding: 0.1rem;
-      display: flex;
-      align-items: center;
-      justify-content: left;
-    }
-  }
+}
+
+.overdrag .data {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  grid-gap: 0.3rem;
+  font-size: 0.8rem;
+}
+
+.overdrag .data > div {
+  padding: 0.1rem;
+  display: flex;
+  align-items: center;
+  justify-content: left;
 }
 
 [data-overdrag-over] {

@@ -163,8 +163,8 @@ export default class Overdrag extends EventEmitter {
     NO_PARENT: "Element must have an offset parent with position relative)",
   };
   static readonly DEFAULTS: Defaults = {
-    snapThreshold: 16, // 1rem
-    controlsThreshold: 16, //1rem
+    snapThreshold: 16,
+    controlsThreshold: 16,
     minContentHeight: 50,
     minContentWidth: 50,
     maxContentWidth: Infinity,
@@ -415,6 +415,12 @@ export default class Overdrag extends EventEmitter {
     if (!this.over) {
       return;
     }
+
+    const stacked = Overdrag.__ENGAGED_STACK__.at(-1);
+    if (!skipStack && stacked && stacked !== this) {
+      return;
+    }
+
     // remove listeners, controls and positions
     this.element.removeEventListener("mouseleave", this.onMouseOut);
     this.element.removeEventListener("mousemove", this.onMouseMove);
@@ -432,6 +438,11 @@ export default class Overdrag extends EventEmitter {
 
   onMouseDown = (e: MouseEvent) => {
     e.preventDefault();
+    const stacked = Overdrag.__ENGAGED_STACK__.at(-1);
+    if (stacked && stacked !== this) {
+      return;
+    }
+
     // remove all listeners,
     this.element.removeEventListener("mouseleave", this.onMouseOut);
     this.element.removeEventListener("mousemove", this.onMouseMove);
@@ -606,13 +617,25 @@ export default class Overdrag extends EventEmitter {
 
     if (Overdrag.CURSOR.LEFT_TOP && this.controls.top && this.controls.left) {
       cursor = Overdrag.CURSOR.LEFT_TOP;
-    } else if (Overdrag.CURSOR.RIGHT_BOTTOM && this.controls.bottom && this.controls.right) {
+    } else if (
+      Overdrag.CURSOR.RIGHT_BOTTOM &&
+      this.controls.bottom &&
+      this.controls.right
+    ) {
       cursor = Overdrag.CURSOR.RIGHT_BOTTOM;
-    } else if (Overdrag.CURSOR.LEFT_BOTTOM && this.controls.bottom && this.controls.left) {
+    } else if (
+      Overdrag.CURSOR.LEFT_BOTTOM &&
+      this.controls.bottom &&
+      this.controls.left
+    ) {
       cursor = Overdrag.CURSOR.LEFT_BOTTOM;
-    } else if ( Overdrag.CURSOR.RIGHT_TOP && this.controls.top && this.controls.right) {
+    } else if (
+      Overdrag.CURSOR.RIGHT_TOP &&
+      this.controls.top &&
+      this.controls.right
+    ) {
       cursor = Overdrag.CURSOR.RIGHT_TOP;
-    } else if ( Overdrag.CURSOR.TOP && this.controls.top) {
+    } else if (Overdrag.CURSOR.TOP && this.controls.top) {
       cursor = Overdrag.CURSOR.TOP;
     } else if (Overdrag.CURSOR.BOTTOM && this.controls.bottom) {
       cursor = Overdrag.CURSOR.BOTTOM;

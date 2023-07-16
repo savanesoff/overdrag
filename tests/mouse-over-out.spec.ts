@@ -1,11 +1,11 @@
 // @ts-ignore-file
 import Overdrag from "../src";
-import { createInstance } from "./__mocks__";
+import { createInstance } from "./setup";
 
 describe("onMouseOver", () => {
   afterEach(() => {
     // Reset mock function calls
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should set "over" state to "true"`, () => {
@@ -16,7 +16,7 @@ describe("onMouseOver", () => {
 
   it(`should emit "${Overdrag.EVENTS.OVER}" event`, () => {
     const overdrag = createInstance();
-    const emitSpy = jest.spyOn(overdrag, "emit");
+    const emitSpy = vi.spyOn(overdrag, "emit");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -25,7 +25,7 @@ describe("onMouseOver", () => {
 
   it(`should set "${Overdrag.ATTRIBUTES.OVER}" attribute`, () => {
     const overdrag = createInstance();
-    const attrSpy = jest.spyOn(overdrag.element, "setAttribute");
+    const attrSpy = vi.spyOn(overdrag.element, "setAttribute");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -37,10 +37,7 @@ describe("onMouseOver", () => {
 
   it(`should attach 'mousemove' event listener`, () => {
     const overdrag = createInstance();
-    const addEventListenerSpy = jest.spyOn(
-      overdrag.element,
-      "addEventListener"
-    );
+    const addEventListenerSpy = vi.spyOn(overdrag.element, "addEventListener");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -52,10 +49,7 @@ describe("onMouseOver", () => {
 
   it(`should attach "mousemove" event listener`, () => {
     const overdrag = createInstance();
-    const addEventListenerSpy = jest.spyOn(
-      overdrag.element,
-      "addEventListener"
-    );
+    const addEventListenerSpy = vi.spyOn(overdrag.element, "addEventListener");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -67,10 +61,7 @@ describe("onMouseOver", () => {
 
   it(`should attach "mousedown" event listener`, () => {
     const overdrag = createInstance();
-    const addEventListenerSpy = jest.spyOn(
-      overdrag.element,
-      "addEventListener"
-    );
+    const addEventListenerSpy = vi.spyOn(overdrag.element, "addEventListener");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -84,10 +75,7 @@ describe("onMouseOver", () => {
     const overdrag = createInstance();
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
-    const addEventListenerSpy = jest.spyOn(
-      overdrag.element,
-      "addEventListener"
-    );
+    const addEventListenerSpy = vi.spyOn(overdrag.element, "addEventListener");
 
     overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
 
@@ -103,7 +91,7 @@ describe("onMouseOut", () => {
   });
   afterEach(() => {
     // Reset mock function calls
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should set "over" state to "false"`, () => {
@@ -112,32 +100,32 @@ describe("onMouseOut", () => {
   });
 
   it(`should emit "${Overdrag.EVENTS.OUT}" event`, () => {
-    const spy = jest.spyOn(overdrag, "emit");
+    const spy = vi.spyOn(overdrag, "emit");
     overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
     expect(spy).toHaveBeenCalledWith(Overdrag.EVENTS.OUT, overdrag);
   });
 
   it(`should remove "${Overdrag.ATTRIBUTES.OVER}" attribute`, () => {
-    const spy = jest.spyOn(overdrag.element, "removeAttribute");
+    const spy = vi.spyOn(overdrag.element, "removeAttribute");
     overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
     expect(spy).toHaveBeenCalledWith(Overdrag.ATTRIBUTES.OVER);
   });
 
   it(`should remove "mousemove" event listener`, () => {
-    const spy = jest.spyOn(overdrag.element, "removeEventListener");
+    const spy = vi.spyOn(overdrag.element, "removeEventListener");
     overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
     expect(spy).toHaveBeenCalledWith("mousemove", expect.anything());
   });
 
   it(`should remove "mousedown" event listener`, () => {
-    const spy = jest.spyOn(overdrag.element, "removeEventListener");
+    const spy = vi.spyOn(overdrag.element, "removeEventListener");
     overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
     expect(spy).toHaveBeenCalledWith("mousedown", expect.anything());
   });
 
   it(`should not attach events if not in over state`, () => {
     overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
-    const spy = jest.spyOn(overdrag.element, "removeEventListener");
+    const spy = vi.spyOn(overdrag.element, "removeEventListener");
 
     overdrag.element.addEventListener("mouseleave", overdrag.onMouseOut);
     overdrag.element.dispatchEvent(new MouseEvent("mouseleave"));
@@ -150,14 +138,14 @@ describe("stack", () => {
   describe(":false", () => {
     afterEach(() => {
       // Reset mock function calls
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it(`should call "onMouseOut" for stacked instances`, () => {
       const overdrag = createInstance({ stack: false });
       const overdrag2 = createInstance({ stack: false });
-      const onMouseOutSpy = jest.spyOn(overdrag, "onMouseOut");
-      const onMouseOutSpy2 = jest.spyOn(overdrag2, "onMouseOut");
+      const onMouseOutSpy = vi.spyOn(overdrag, "onMouseOut");
+      const onMouseOutSpy2 = vi.spyOn(overdrag2, "onMouseOut");
 
       overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
       overdrag2.element.dispatchEvent(new MouseEvent("mouseenter"));
@@ -173,9 +161,10 @@ describe("stack", () => {
       overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
       overdrag2.element.dispatchEvent(new MouseEvent("mouseenter"));
 
-      const onMouseOverSpy = jest.spyOn(overdrag, "onMouseOver");
-      const onMouseOverSpy2 = jest.spyOn(overdrag2, "onMouseOver");
-      overdrag2.onMouseOut({} as any);
+      const onMouseOverSpy = vi.spyOn(overdrag, "onMouseOver");
+      const onMouseOverSpy2 = vi.spyOn(overdrag2, "onMouseOver");
+
+      overdrag2.onMouseOut({} as MouseEvent);
 
       expect(onMouseOverSpy2).not.toHaveBeenCalled();
       expect(onMouseOverSpy).toHaveBeenCalled();
@@ -185,14 +174,14 @@ describe("stack", () => {
   describe(":true", () => {
     afterEach(() => {
       // Reset mock function calls
-      jest.clearAllMocks();
+      vi.clearAllMocks();
     });
 
     it(`should not call "onMouseOut" for stacked instances`, () => {
       const overdrag = createInstance({ stack: true });
       const overdrag2 = createInstance({ stack: true });
-      const onMouseOutSpy = jest.spyOn(overdrag, "onMouseOut");
-      const onMouseOutSpy2 = jest.spyOn(overdrag2, "onMouseOut");
+      const onMouseOutSpy = vi.spyOn(overdrag, "onMouseOut");
+      const onMouseOutSpy2 = vi.spyOn(overdrag2, "onMouseOut");
 
       overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
       overdrag2.element.dispatchEvent(new MouseEvent("mouseenter"));
@@ -208,8 +197,8 @@ describe("stack", () => {
       overdrag.element.dispatchEvent(new MouseEvent("mouseenter"));
       overdrag2.element.dispatchEvent(new MouseEvent("mouseenter"));
 
-      const onMouseOverSpy = jest.spyOn(overdrag, "onMouseOver");
-      const onMouseOverSpy2 = jest.spyOn(overdrag2, "onMouseOver");
+      const onMouseOverSpy = vi.spyOn(overdrag, "onMouseOver");
+      const onMouseOverSpy2 = vi.spyOn(overdrag2, "onMouseOver");
       overdrag2.element.dispatchEvent(new MouseEvent("mouseleave"));
 
       expect(onMouseOverSpy2).not.toHaveBeenCalled();

@@ -1,11 +1,11 @@
 // @ts-ignore-file
 import Overdrag from "../src";
-import { createInstance, elementSetup, getRandomValue } from "./__mocks__";
+import { createInstance, elementSetup, getRandomValue } from "./setup";
 
 describe("Constructor", () => {
   afterEach(() => {
     // Reset mock function calls
-    jest.clearAllMocks();
+    vi.clearAllMocks();
   });
 
   it(`should throw "${Overdrag.ERROR.NO_PARENT}" if the element has no offsetParent`, () => {
@@ -152,7 +152,7 @@ describe("Constructor", () => {
 
   it('should set "mouseenter" event listener on "element"', () => {
     const element = elementSetup();
-    const spy = jest.spyOn(element, "addEventListener");
+    const spy = vi.spyOn(element, "addEventListener");
     const overdrag = createInstance({ element });
     expect(spy).toHaveBeenCalledWith("mouseenter", overdrag.onMouseOver);
   });

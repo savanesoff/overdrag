@@ -1,18 +1,29 @@
 {
   "compilerOptions": {
-    "lib": ["ES2022", "DOM"],
     "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
+    "skipLibCheck": true,
+
+    /* Bundler mode */
     "moduleResolution": "bundler",
-    "outDir": "./dist",
-    "declarationDir": "./dist/types",
+    "outDir": "dist-demo",
+    "resolveJsonModule": true,
+    "isolatedModules": false,
+    // because this is a demo config
+    "declaration": false,
+    "declarationMap": false,
+
+    /* Linting */
     "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
     "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": false,
-    "declaration": true,
-    "declarationMap": true,
-    "allowSyntheticDefaultImports": true
+    "baseUrl": ".",
+    "types": ["vitest/globals"]
   },
-  "files": ["./src/index.ts"]
+  "include": ["src", "demo", "tests"],
+  "references": [{ "path": "tsconfig.node.json" }]
 }

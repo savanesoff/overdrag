@@ -180,6 +180,7 @@ export default class Overdrag extends EventEmitter {
   readonly window = window;
   readonly element: HTMLElement;
   readonly parentElement: HTMLElement;
+  readonly noBoundsCache = { top: 0, right: 0, bottom: 0, left: 0 };
   snapThreshold: number;
   controlsThreshold: number;
   minContentHeight: number;
@@ -328,25 +329,31 @@ export default class Overdrag extends EventEmitter {
 
   getComputedElementPosition(): ComputedPosition {
     const computed = getComputedStyle(this.element);
-
+    // support for MUI and other frameworks that use transform
+    const fullBoxSizing = computed.boxSizing === "border-box";
     const margins = {
       top: this._getInt(computed.marginTop),
       right: this._getInt(computed.marginRight),
       bottom: this._getInt(computed.marginBottom),
       left: this._getInt(computed.marginLeft),
     };
-    const borders = {
-      top: this._getInt(computed.borderTopWidth),
-      right: this._getInt(computed.borderRightWidth),
-      bottom: this._getInt(computed.borderBottomWidth),
-      left: this._getInt(computed.borderLeftWidth),
-    };
-    const paddings = {
-      top: this._getInt(computed.paddingTop),
-      right: this._getInt(computed.paddingRight),
-      bottom: this._getInt(computed.paddingBottom),
-      left: this._getInt(computed.paddingLeft),
-    };
+    const borders = fullBoxSizing
+      ? this.noBoundsCache
+      : {
+          top: this._getInt(computed.borderTopWidth),
+          right: this._getInt(computed.borderRightWidth),
+          bottom: this._getInt(computed.borderBottomWidth),
+          left: this._getInt(computed.borderLeftWidth),
+        };
+    const paddings = fullBoxSizing
+      ? this.noBoundsCache
+      : {
+          top: this._getInt(computed.paddingTop),
+          right: this._getInt(computed.paddingRight),
+          bottom: this._getInt(computed.paddingBottom),
+          left: this._getInt(computed.paddingLeft),
+        };
+
     const top = this._getInt(computed.top); // edge of visual bounds (including margins)
     const left = this._getInt(computed.left); // edge of visual bounds (including margins)
     const width = this._getInt(computed.width); // content width
@@ -354,9 +361,15 @@ export default class Overdrag extends EventEmitter {
 
     const visualBounds = {
       width:
-        width + borders.right + borders.left + paddings.right + paddings.left,
+        width +
+        (fullBoxSizing
+          ? 0
+          : borders.right + borders.left + paddings.right + paddings.left),
       height:
-        height + borders.top + borders.bottom + paddings.top + paddings.bottom,
+        height +
+        (fullBoxSizing
+          ? 0
+          : borders.top + borders.bottom + paddings.top + paddings.bottom),
       left: left + margins.left,
       top: top + margins.top,
     };

@@ -52,10 +52,10 @@ describe("While dragging", () => {
     });
 
     it(`should move element by the same amount as mouse `, () => {
-      const topDistance = getRandomValue(-10, 50);
-      const leftDistance = getRandomValue(-10, 50);
       const top = parseInt(overdrag.element.style.top);
       const left = parseInt(overdrag.element.style.left);
+      const topDistance = getRandomValue(-top, 50);
+      const leftDistance = getRandomValue(-left, 50);
       translateCursor(overdrag, {
         x: leftDistance,
         y: topDistance,

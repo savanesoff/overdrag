@@ -1,5 +1,11 @@
 # overdrag
 
+## 1.1.3
+
+### Patch Changes
+
+- Box sizing bounds fix for MUI and other 'border-box' sizing tranforms
+
 ## 1.1.2
 
 ### Patch Changes

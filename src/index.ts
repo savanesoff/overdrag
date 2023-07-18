@@ -140,7 +140,7 @@ type ParentPosition = {
   offsetTop: number;
 };
 
-type ComputedPosition = {
+export type ComputedPosition = {
   visualBounds: Bounds;
   fullBounds: Bounds;
   width: number;
@@ -252,7 +252,7 @@ export default class Overdrag extends EventEmitter {
     // ensure element is positioned
     this.element.style.position = "absolute";
     this.stack = stack;
-    // @ts-ignore
+
     this.element.__overdrag = this;
     this.clickDetectionThreshold = clickDetectionThreshold;
 
@@ -401,6 +401,16 @@ export default class Overdrag extends EventEmitter {
       borders,
       paddings,
     };
+  }
+
+  destroy() {
+    this.element.removeEventListener("mouseenter", this.onMouseOver);
+    this.element.removeEventListener("mouseleave", this.onMouseOut);
+    this.element.removeEventListener("mousemove", this.onMouseMove);
+    this.element.removeEventListener("mousedown", this.onMouseDown);
+    this.element.removeEventListener("mouseup", this.onMouseUp);
+    this.removeAllListeners();
+    this.element.__overdrag = undefined;
   }
 
   onMouseOver = (e: MouseEvent, skipStack = false) => {

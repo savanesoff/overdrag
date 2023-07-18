@@ -403,6 +403,16 @@ export default class Overdrag extends EventEmitter {
     };
   }
 
+  destroy() {
+    this.element.removeEventListener("mouseenter", this.onMouseOver);
+    this.element.removeEventListener("mouseleave", this.onMouseOut);
+    this.element.removeEventListener("mousemove", this.onMouseMove);
+    this.element.removeEventListener("mousedown", this.onMouseDown);
+    this.element.removeEventListener("mouseup", this.onMouseUp);
+    this.removeAllListeners();
+    this.element.__overdrag = undefined;
+  }
+
   onMouseOver = (e: MouseEvent, skipStack = false) => {
     if (
       this.over ||

@@ -140,7 +140,7 @@ type ParentPosition = {
   offsetTop: number;
 };
 
-type ComputedPosition = {
+export type ComputedPosition = {
   visualBounds: Bounds;
   fullBounds: Bounds;
   width: number;

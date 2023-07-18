@@ -1,5 +1,11 @@
 # overdrag
 
+## 1.2.1
+
+### Patch Changes
+
+- Fixes build ts declarations
+
 ## 1.2.0
 
 ### Minor Changes

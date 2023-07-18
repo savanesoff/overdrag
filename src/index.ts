@@ -252,7 +252,7 @@ export default class Overdrag extends EventEmitter {
     // ensure element is positioned
     this.element.style.position = "absolute";
     this.stack = stack;
-    // @ts-ignore
+
     this.element.__overdrag = this;
     this.clickDetectionThreshold = clickDetectionThreshold;
 

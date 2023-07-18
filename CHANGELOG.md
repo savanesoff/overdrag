@@ -1,5 +1,11 @@
 # overdrag
 
+## 1.2.2
+
+### Patch Changes
+
+- Fixing demo ts config
+
 ## 1.2.1
 
 ### Patch Changes

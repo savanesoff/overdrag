@@ -17,5 +17,5 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": "."
   },
-  "files": ["demo/main.ts"]
+  "include": ["./demo", "./src"]
 }
